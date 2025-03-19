@@ -1,32 +1,49 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
+import { useState } from 'react';
+import ReCAPTCHA from 'react-google-recaptcha';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
+
 const LoginPage = () => {
+  const [captchaValue, setCaptchaValue] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   return (
 
     
-      <div className="flex justify-center items-center min-h-screen pt-10 pb-10 bg-[#f7f7fa]">
+      <div className="flex justify-center items-center min-h-screen pt-30 pb-10 bg-[#f7f7fa]">
         <div className="bg-white p-8 px-10  w-[600px]  p-0 bg-white border border-[#D5D2E5] border-opacity-80 rounded-[5px] shadow-[0_0px_30px_5px_rgba(32,23,73,0.05)]">
-          <div className="text-center mb-4">
+          <div className="text-center mb-4 pt-6">
           <div className="flex justify-center mb-4">
-          <svg
-            width="80"
-            height="80"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#5C3D90"  // Adjust color if needed
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="w-20 h-20"
-          >
-            <circle cx="12" cy="8" r="4" />
-            <path d="M4 20v-2a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v2" />
-            <rect x="8" y="14" width="8" height="2" rx="1" />
-          </svg>
-        </div>
-            <h2 className="text-2xl font-semibold">Sign in</h2>
-            <p className="text-sm text-gray-600">Please check that you are visiting the correct URL</p>
-            <div className="border border-[#D5D2E5] rounded-full inline-block">
-  <p className="text-green-600 font-semibold m-0 p-2">
+  <div className="relative flex items-center justify-center w-24 h-24 bg-gray-100 rounded-full ">
+    <svg
+      width="80"
+      height="80"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="#ADD8E6"  
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="absolute w-20 h-20 z-20 top-3"
+    >
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4 20v-2a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v2" />
+      <rect x="8" y="14" width="8" height="2" rx="1" />
+    </svg>
+  </div>
+</div>
+            <h2 className="font-sans text-[#201749] text-[42px] leading-[1.3] m-0 font-light">Sign in</h2>
+            <hr className="border-t border-[#D5D2E5] my-4" />
+
+
+            <p className="text-sm text-gray-600 mb-4 pt-7">Please check that you are visiting the correct URL</p>
+            <div className="border border-[#D5D2E5] rounded-full inline-block mb-4">
+  <p className="text-blue-300 font-semibold m-0 p-2">
     https://app.quidax.io/signin
   </p>
 </div>
@@ -34,29 +51,47 @@ const LoginPage = () => {
           </div>
 
           <form>
-            <label className="font-sans text-base font-medium block mb-2">E-mail Address *</label>
+            <label className="font-sans text-base text-sm font-medium block mb-2">E-mail Address *</label>
             <input
               type="email"
-              className="w-full p-3 border border-[#D5D2E5] border-opacity-80 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-purple-600"
+              className="w-full h-[50px] p-3 border text-sm border-[#D5D2E5] border-opacity-80 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-purple-600"
               placeholder="E-mail Address"
             />
 
-            <label className="block mb-2 font-medium">Password *</label>
-            <input
-              type="password"
-              className="w-full p-3 border border-[#D5D2E5] border-opacity-80 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-purple-600"
-              placeholder="Password"
-            />
+<div className="relative mb-4">
+      <label className="block mb-2 text-sm font-medium">Password *</label>
+      <input
+        type={showPassword ? 'text' : 'password'}
+        className="w-full p-3 h-[50px] text-sm border border-[#D5D2E5] border-opacity-80 rounded-lg pr-10 focus:outline-none focus:ring-2 focus:ring-purple-600"
+        placeholder="Password"
+      />
+      <span
+        className="absolute inset-y-0 top-7 right-10  flex items-center   cursor-pointer border-l border-[#D5D2E5]"
+        onClick={togglePasswordVisibility}
+      >
+        {showPassword ? (
+          <FaEyeSlash className="text-gray-500 relative left-4" />
+        ) : (
+          <FaEye className="text-gray-500  relative left-4" />
+        )}
+      </span>
+    </div>
 
-       
+<div className="mb-4">
+        <ReCAPTCHA
+          sitekey="6LdsiPkqAAAAAKTQ0AsrTskmsAePkAUM_ZKDr1ym" // Replace with your site key
+          onChange={(value) => setCaptchaValue(value)}
+        />
+      </div>
 
-            <button className="w-full bg-green-600 text-white p-3 rounded-lg font-semibold">Sign In</button>
+
+            <button className="w-full bg-blue-400 text-white p-3 rounded-lg font-semibold">Sign In</button>
           </form>
 
           <div className="text-center flex justify-between mt-4">
-            <a href="#" className="text-red-600">Forgot Password?</a>
+            <a href="#" className="text-blue-900">Forgot Password?</a>
             <p className="mt-2">
-              Not signed up yet? <a href="#" className="text-purple-600">Create Account</a>
+              Not signed up yet? <a href="#" className="text-blue-300">Create Account</a>
             </p>
           </div>
         </div>
