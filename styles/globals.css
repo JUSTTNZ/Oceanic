@@ -4,9 +4,13 @@
 
 
 
+:root {
+  --font-inter: 'Inter', sans-serif;
+}
 
 
 body {
   
-  font-family: Arial, Helvetica, sans-serif;
+  
+  font-family: var(--font-inter);
 }
