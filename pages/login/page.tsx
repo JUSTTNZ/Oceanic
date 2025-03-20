@@ -16,7 +16,7 @@ const LoginPage = () => {
 
     
       <div className="flex justify-center items-center min-h-screen pt-30 pb-10 bg-[#f7f7fa]">
-        <div className="bg-white p-8 px-10  w-[600px]  p-0 bg-white border border-[#D5D2E5] border-opacity-80 rounded-[5px] shadow-[0_0px_30px_5px_rgba(32,23,73,0.05)]">
+        <div className="bg-white lg:p-8 p-10 px-10 md:w-[400px] w-[480px] lg:w-[600px]  p-0 bg-white border border-[#D5D2E5] border-opacity-80 rounded-[5px] shadow-[0_0px_30px_5px_rgba(32,23,73,0.05)]">
           <div className="text-center mb-4 pt-6">
           <div className="flex justify-center mb-4">
   <div className="relative flex items-center justify-center w-24 h-24 bg-gray-100 rounded-full ">
@@ -88,9 +88,9 @@ const LoginPage = () => {
             <button className="w-full bg-blue-400 text-white p-3 rounded-lg font-semibold">Sign In</button>
           </form>
 
-          <div className="text-center flex justify-between mt-4">
+          <div className="text-center text-sm lg:items-center items-start lg:flex-row flex flex-col lg:justify-between mt-4">
             <a href="#" className="text-blue-900">Forgot Password?</a>
-            <p className="mt-2">
+            <p className="mt-2 md:mt-0">
               Not signed up yet? <a href="#" className="text-blue-300">Create Account</a>
             </p>
           </div>
