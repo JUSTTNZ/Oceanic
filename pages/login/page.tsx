@@ -5,7 +5,7 @@ import ReCAPTCHA from 'react-google-recaptcha';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 const LoginPage = () => {
-  const [captchaValue, setCaptchaValue] = useState(null);
+  const [captchaValue, setCaptchaValue] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
   const togglePasswordVisibility = () => {
@@ -15,8 +15,9 @@ const LoginPage = () => {
   return (
 
     
-      <div className="flex justify-center items-center min-h-screen pt-30 pb-10 bg-[#f7f7fa]">
-        <div className="bg-white lg:p-8 p-10 px-10 md:w-[400px] w-[480px] lg:w-[600px]  p-0 bg-white border border-[#D5D2E5] border-opacity-80 rounded-[5px] shadow-[0_0px_30px_5px_rgba(32,23,73,0.05)]">
+      <div className="flex justify-center items-center min-h-screen pt-20 lg:pt-30 pb-10 bg-[#f7f7fa] font-maven p-4">
+<div className="bg-white lg:p-8 p-6 px-8 w-full max-w-md lg:max-w-xl border border-[#D5D2E5] border-opacity-80 rounded-[5px] shadow-[0_0px_30px_5px_rgba(32,23,73,0.05)]">
+
           <div className="text-center mb-4 pt-6">
           <div className="flex justify-center mb-4">
   <div className="relative flex items-center justify-center w-24 h-24 bg-gray-100 rounded-full ">
@@ -37,24 +38,24 @@ const LoginPage = () => {
     </svg>
   </div>
 </div>
-            <h2 className="font-sans text-[#201749] text-[42px] leading-[1.3] m-0 font-light">Sign in</h2>
+            <h2 className=" text-[#201749] text-[42px] leading-[1.3] m-0 font-light">Sign in</h2>
             <hr className="border-t border-[#D5D2E5] my-4" />
 
 
             <p className="text-sm text-gray-600 mb-4 pt-7">Please check that you are visiting the correct URL</p>
             <div className="border border-[#D5D2E5] rounded-full inline-block mb-4">
-  <p className="text-blue-300 font-semibold m-0 p-2">
-    https://app.quidax.io/signin
+  <p className="text-blue-300  m-0 p-2">
+    https://app.oceanic.io/signin
   </p>
 </div>
          
           </div>
 
           <form>
-            <label className="font-sans text-base text-sm font-medium block mb-2">E-mail Address *</label>
+            <label className="  text-sm font-medium block mb-2">E-mail Address *</label>
             <input
               type="email"
-              className="w-full h-[50px] p-3 border text-sm border-[#D5D2E5] border-opacity-80 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-purple-600"
+              className="w-full h-[50px] p-3 border text-sm border-[#D5D2E5] border-opacity-80 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
               placeholder="E-mail Address"
             />
 
@@ -62,7 +63,7 @@ const LoginPage = () => {
       <label className="block mb-2 text-sm font-medium">Password *</label>
       <input
         type={showPassword ? 'text' : 'password'}
-        className="w-full p-3 h-[50px] text-sm border border-[#D5D2E5] border-opacity-80 rounded-lg pr-10 focus:outline-none focus:ring-2 focus:ring-purple-600"
+        className="w-full p-3 h-[50px] text-sm border border-[#D5D2E5] border-opacity-80 rounded-lg pr-10 focus:outline-none focus:ring-2 focus:ring-blue-400"
         placeholder="Password"
       />
       <span
@@ -78,20 +79,21 @@ const LoginPage = () => {
     </div>
 
 <div className="mb-4">
-        <ReCAPTCHA
+<ReCAPTCHA
           sitekey="6LdsiPkqAAAAAKTQ0AsrTskmsAePkAUM_ZKDr1ym" // Replace with your site key
           onChange={(value) => setCaptchaValue(value)}
         />
+        
       </div>
 
 
-            <button className="w-full bg-blue-400 text-white p-3 rounded-lg font-semibold">Sign In</button>
+            <button className="w-full bg-blue-400 text-white p-3 rounded-lg font-semibold text-sm">Sign In</button>
           </form>
 
           <div className="text-center text-sm lg:items-center items-start lg:flex-row flex flex-col lg:justify-between mt-4">
-            <a href="#" className="text-blue-900">Forgot Password?</a>
+            <a href="#" className="text-blue-900 ">Forgot Password?</a>
             <p className="mt-2 md:mt-0">
-              Not signed up yet? <a href="#" className="text-blue-300">Create Account</a>
+              Not signed up yet? <a href="#" className="text-blue-300  ">Create Account</a>
             </p>
           </div>
         </div>
