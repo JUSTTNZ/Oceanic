@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
-import Link from 'next/link';
 import { useState } from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
-export default function LoginPage  ()  {
+ export default function ResetPage () {
   const [captchaValue, setCaptchaValue] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -39,45 +38,24 @@ export default function LoginPage  ()  {
     </svg>
   </div>
 </div>
-            <h2 className=" text-[#201749] text-md lg:text-[42px] leading-[1.3] m-0 font-light">Sign in</h2>
+            <h2 className=" text-[#201749] text-[25px] lg:text-[42px] leading-[1.3] m-0 font-light">Recover my password </h2>
             <hr className="border-t border-[#D5D2E5] my-4" />
 
 
-            <p className="text-sm text-gray-600 mb-4 pt-7">Please check that you are visiting the correct URL</p>
-            <div className="border border-[#D5D2E5] rounded-full inline-block mb-4">
-  <p className="text-blue-300  m-0 p-2">
-    https://app.oceanic.io/signin
-  </p>
-</div>
+            <p className="text-sm text-gray-600 mb-4 pb-7">Enter the email address for your Oceanic account and we will send a reset link to your inbox. Follow the link to reset your password</p>
+
          
           </div>
 
           <form>
-            <label className="  text-sm font-medium block mb-2">E-mail Address *</label>
+            <label className="  text-sm font-medium block mb-2">Email Address *</label>
             <input
               type="email"
               className="w-full h-[50px] p-3 border text-sm border-[#D5D2E5] border-opacity-80 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
-              placeholder="E-mail Address"
+              placeholder="name@example.com"
             />
 
-<div className="relative mb-4">
-      <label className="block mb-2 text-sm font-medium">Password *</label>
-      <input
-        type={showPassword ? 'text' : 'password'}
-        className="w-full p-3 h-[50px] text-sm border border-[#D5D2E5] border-opacity-80 rounded-lg pr-10 focus:outline-none focus:ring-2 focus:ring-blue-400"
-        placeholder="Password"
-      />
-      <span
-        className="absolute inset-y-0 top-7 right-10  flex items-center   cursor-pointer border-l border-[#D5D2E5]"
-        onClick={togglePasswordVisibility}
-      >
-        {showPassword ? (
-          <FaEyeSlash className="text-gray-500 relative left-4" />
-        ) : (
-          <FaEye className="text-gray-500  relative left-4" />
-        )}
-      </span>
-    </div>
+
 
 <div className="mb-4">
 <ReCAPTCHA
@@ -88,19 +66,25 @@ export default function LoginPage  ()  {
       </div>
 
 
-            <button className="w-full bg-blue-400 text-white p-3 rounded-lg font-semibold text-sm">Sign In</button>
+      <div className="flex flex-col items-center justify-between flex-cols lg:flex-row mb-4 gap-4 pt-3">
+<div className='lg:w-90 w-full order-1 lg:order-1'>
+<button className="w-full text-blue-400 font-semibold text-sm border border-[#D5D2E5] rounded-lg p-3">
+    Cancel
+  </button>
+</div>
+<div className='w-full pt-1 order-2 lg:order-2'>
+<button className="w-full bg-blue-400 text-white p-3 rounded-lg font-semibold text-sm mb-2 ">
+    Recover My Password
+  </button>
+</div>
+
+</div>
           </form>
 
-          <div className="text-center text-sm lg:items-center items-start lg:flex-row flex flex-col lg:justify-between mt-4">
-            <Link href="/resetpassword" className="text-blue-900 ">Forgot Password?</Link>
-            <p className="mt-2 md:mt-0">
-              Not signed up yet? <a href="#" className="text-blue-300  ">Create Account</a>
-            </p>
-          </div>
+      
         </div>
       </div>
  
   );
 };
-
 
