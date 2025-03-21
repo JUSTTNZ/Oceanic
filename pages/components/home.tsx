@@ -35,12 +35,11 @@ export default function Navbar() {
   const [loading, setLoading] = useState(false);
 
 
-  const fetchAllCoins = async (pageNumber = 1) => {
-    const res = await fetch(`/api/coin?page=${pageNumber}`); 
-    const data = await res.json();
+  const fetchAllCoins = async () => {
+    const res = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false`)
+    const data = await res.json()
     return data;
-  };
-  
+  }
 
   useEffect(() => {
     const getCoins = async () => {
@@ -228,12 +227,12 @@ export default function Navbar() {
         <div className="relative">
           <Image src="/Images/hero.webp" alt="Phone Mockup" width={400} height={700} className="mx-auto" />
           {/* Floating 3D shapes */}
-          {/* <div className="absolute top-0 left-0">
+          <div className="absolute top-0 left-0">
             <Image src="/abstract-blue-shape.png" alt="shape" width={64} height={64} className="animate-float" />
           </div>
           <div className="absolute bottom-0 right-0">
             <Image src="/abstract-ring.png" alt="ring" width={96} height={96} className="animate-spin-slow" />
-          </div> */}
+          </div> 
         </div>
       </div>
     </section>
