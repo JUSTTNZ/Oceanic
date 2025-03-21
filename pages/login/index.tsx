@@ -1,6 +1,6 @@
-import Footer from "./login/footer";
-import Header from "./login/header";
-import LoginPage from "./login/page";
+import Footer from "./footer";
+import Header from "./header";
+import LoginPage from "./page";
 
 
 export default function Login(){
