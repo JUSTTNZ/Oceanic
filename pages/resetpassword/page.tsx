@@ -6,11 +6,8 @@ import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
  export default function ResetPage () {
   const [captchaValue, setCaptchaValue] = useState<string | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
+
 
   return (
 
