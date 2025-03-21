@@ -42,7 +42,7 @@ const SignupSurvey: React.FC = () => {
           ))}
         </div>
         <button
-          className="w-full mt-4 py-3 bg-blue-400 text-white rounded-lg  transition-colors duration-200"
+          className="w-full mt-4 py-3 bg-blue-600 text-white rounded-lg  transition-colors duration-200"
           disabled={!selectedOption}
         >
           Submit
