@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+
+
+
+
+:root {
+  --font-inter: 'Inter', sans-serif;
+}
+
+
+/* body {
+  
+  
+  font-family: var(--font-inter);
+} */
+@layer base {
+  @font-face {
+    font-family: 'Poppins';
+    src: url('/fonts/Poppins-Regular.ttf') format('truetype');
+    font-weight: 900;
+    font-style: normal;
+  }
+}
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/Inter_28pt-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Maven Pro';
+  src: url('/fonts/MavenPro-Regular.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+}
+
+
+body {
+  font-family: 'Poppins', sans-serif;
+}
+.font-poppins {
+  font-family: 'Poppins', sans-serif;
+  /* font-weight: bolder; */
+}
+.font-maven {
+  font-family: 'Maven Pro', sans-serif;
+}
+
+.font-inter {
+  font-family: 'Inter', sans-serif;
+}
