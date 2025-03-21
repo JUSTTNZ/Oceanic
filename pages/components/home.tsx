@@ -2,7 +2,26 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { Chart } from "chart.js/auto";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
 import { Line } from "react-chartjs-2";
 import {
   ChevronDownIcon,
@@ -261,7 +280,12 @@ export default function Navbar() {
               <div key={coin.id} className="p-4 border rounded-lg shadow-md bg-white">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center space-x-2">
-                    <Image src={coin.image} alt={coin.name} className="w-6 h-6" />
+                    <Image 
+                    src={coin.image} 
+                    alt={coin.name} 
+                    width={32} // Set an appropriate width
+                    height={32} // Set an appropriate height 
+                    className="w-6 h-6" />
                     <h2 className="font-bold">{coin.name} ({coin.symbol.toUpperCase()})</h2>
                   </div>
                   <span className={`text-sm px-2 py-1 rounded ${trendUp ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
