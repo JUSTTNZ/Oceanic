@@ -153,7 +153,7 @@ export default function Navbar() {
       <div className="flex justify-between items-center px-6 py-6 font-bold relative  ">
         {/* Logo */}
         <h1 className="text-5xl">
-          Oceanic <span className="text-[#007BFF]">Charts</span>
+          Oceanic <span className="text-[#0047AB]">Charts</span>
         </h1>
 
         {/* Nav */}
@@ -165,11 +165,11 @@ export default function Navbar() {
               onMouseLeave={() => setHoverItem(null)}
               className="relative"
             >
-              <p className={`flex items-center cursor-pointer ${hoverItem === menu ? "text-[#007BFF]" : ""}`}>
+              <p className={`flex items-center cursor-pointer ${hoverItem === menu ? "text-[#0047AB]" : ""}`}>
                 {menu}
                 <ChevronDownIcon
                   className={`w-4 h-4 ml-1 transition-transform duration-300 ${
-                    hoverItem === menu ? "rotate-180 text-[#007BFF]" : ""
+                    hoverItem === menu ? "rotate-180 text-[#0047AB]" : ""
                   }`}
                 />
               </p>
@@ -183,14 +183,14 @@ export default function Navbar() {
                 >
                   {megaMenus[menu].map((item, idx) => (
                     <div key={idx} className="flex-1 min-w-[200px] group cursor-pointer">
-                      <item.icon className="h-10 w-10 text-[#007BFF] mb-3" />
-                      <h3 className="text-lg font-semibold group-hover:text-[#007BFF]">{item.title}</h3>
+                      <item.icon className="h-10 w-10 text-[#0047AB] mb-3" />
+                      <h3 className="text-lg font-semibold group-hover:text-[#0047AB]">{item.title}</h3>
                       <p className="text-sm text-gray-600">{item.desc}</p>
                     </div>
                   ))}
                   <div className="flex flex-col justify-end">
                     <Link href="/all">
-                      <p className="text-[#007BFF] font-semibold hover:underline">See All {menu}</p>
+                      <p className="text-[#0047AB] font-semibold hover:underline">See All {menu}</p>
                     </Link>
                   </div>
                 </div>
@@ -201,8 +201,8 @@ export default function Navbar() {
 
         {/* CTA Buttons */}
         <div className="hidden md:flex space-x-8 items-center">
-          <p className="text-[#007BFF] text-lg cursor-pointer">Sign in</p>
-          <p className="text-white bg-[#007BFF] px-6 py-2 text-lg rounded-md hover:bg-[#459af5] cursor-pointer">
+          <p className="text-[#0047AB] text-lg cursor-pointer">Sign in</p>
+          <p className="text-white bg-[#0047AB] px-6 py-2 text-lg rounded-md hover:bg-[#459af5] cursor-pointer">
             Get Started
           </p>
         </div>
