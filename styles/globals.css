@@ -9,11 +9,6 @@
 }
 
 
-/* body {
-  
-  
-  font-family: var(--font-inter);
-} */
 @layer base {
   @font-face {
     font-family: 'Poppins';
