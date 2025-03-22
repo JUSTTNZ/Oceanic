@@ -29,7 +29,7 @@ export default function RegistePage  ()  {
   const [selectedCountry, setSelectedCountry] = useState(countries[0]);
   const [phone, setPhone] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
- const [selectedType, setSelectedType] = useState("individual")
+  const [accountType, setAccountType] = useState<'individual' | 'business'>('individual');
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -68,17 +68,17 @@ export default function RegistePage  ()  {
                     <ul className="flex border-b border-gray-300">
   <li
     className={`px-4 py-2 cursor-pointer ${
-      selectedType === "individual" ? "border-b-2 border-blue-600 font-semibold" : "text-gray-500"
+      accountType === "individual" ? "border-b-2 border-blue-600 font-semibold" : "text-gray-500"
     }`}
-    onClick={() => setSelectedType("individual")}
+    onClick={() => setAccountType("individual")}
   >
     Individual
   </li>
   <li
     className={`px-4 py-2 cursor-pointer ${
-      selectedType === "business" ? "border-b-2 border-blue-600 font-semibold" : "text-gray-500"
+      accountType === "business" ? "border-b-2 border-blue-600 font-semibold" : "text-gray-500"
     }`}
-    onClick={() => setSelectedType("business")}
+    onClick={() => setAccountType("business")}
   >
     Business
   </li>
@@ -115,7 +115,16 @@ export default function RegistePage  ()  {
           O will be added as the first letter of the username you have provided (example: Ojohn)
         </p>
       </div>
-
+      {accountType === 'business' && (
+            <>
+              <label className="text-sm font-medium block mb-2">Business Name *</label>
+              <input
+                type="text"
+                className="w-full h-[50px] p-3 border text-sm border-[#D5D2E5] border-opacity-80 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                placeholder="Business Name"
+              />
+            </>
+          )}
           <div className='w-full flex justify-between space-x-3'>
           <div className='w-full'>
             <label className="w-full  text-sm font-medium block mb-2">First name *</label>
