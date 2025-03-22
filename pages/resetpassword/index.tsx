@@ -1,7 +1,7 @@
-import Footer from "./login/footer";
-import Header from "./login/header";
+import Footer from "../login/footer";
+import Header from "../login/header";
 
-import ResetPage from "./resetpassword/page";
+import ResetPage from "./page";
 
 
 export default function ResetPassword(){
