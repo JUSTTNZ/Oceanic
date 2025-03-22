@@ -83,8 +83,8 @@ export default function CoinLive({ coins }: CoinLiveProps) {
         </div>
 
         {visibleCoins.map((coin, index) => {
-          const trendUp = coin.sparkline_in_7d.price.at(-1) >= coin.sparkline_in_7d.price[0];
-          const change = ((coin.sparkline_in_7d.price.at(-1) - coin.sparkline_in_7d.price[0]) / coin.sparkline_in_7d.price[0]) * 100;
+          const trendUp = (coin.sparkline_in_7d.price.at(-1) ?? 0) >= (coin.sparkline_in_7d.price[0] ?? 0);
+          const change = (((coin.sparkline_in_7d.price.at(-1) ?? 0) - (coin.sparkline_in_7d.price[0] ?? 0)) / (coin.sparkline_in_7d.price[0] ?? 1)) * 100;
 
           return (
             <div key={coin.id} className="grid grid-cols-7 py-4 items-center border-b border-gray-700 text-sm">
@@ -118,8 +118,8 @@ export default function CoinLive({ coins }: CoinLiveProps) {
       {/* Small Screen Card */}
       <div className="block md:hidden space-y-3">
         {visibleCoins.map((coin) => {
-          const trendUp = coin.sparkline_in_7d.price.at(-1) >= coin.sparkline_in_7d.price[0];
-          const change = ((coin.sparkline_in_7d.price.at(-1) - coin.sparkline_in_7d.price[0]) / coin.sparkline_in_7d.price[0]) * 100;
+          const trendUp = (coin.sparkline_in_7d.price.at(-1) ?? 0) >= (coin.sparkline_in_7d.price[0] ?? 0);
+          // Removed unused 'change' variable
 
           return (
             <div key={coin.id} className="flex justify-between items-center border rounded-lg p-3 bg-white text-black">

@@ -1,7 +1,34 @@
 "use client";
 import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
+
 
 export default function Hero() {
+
+  const imageRef = useRef<HTMLDivElement>(null);
+  const [inView, setInView] = useState(false);
+
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.intersectionRatio >= 0.33) {
+          setInView(true);
+        }
+      },
+      { threshold: 0.33 }
+    );
+
+    if (imageRef.current) {
+      observer.observe(imageRef.current);
+    }
+
+    return () => {
+      if (imageRef.current) {
+        observer.unobserve(imageRef.current);
+      }
+    };
+  }, []);
   return (
     <section className="bg-white relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 py-24 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
@@ -14,9 +41,15 @@ export default function Hero() {
           </div>
         </div>
         
-        {/* Image hidden on mobile */}
-        <div className="relative hidden md:block">
-          <Image src="/Images/hero.webp" alt="Phone Mockup" width={400} height={700} className="mx-auto" />
+        <div ref={imageRef} className="relative hidden md:block">
+          <Image
+            src="/Images/hero.webp"
+            alt="Phone Mockup"
+            width={400}
+            height={700}
+            className="mx-auto animate-bounce-infinite"
+          />
+
         </div>
       </div>
     </section>

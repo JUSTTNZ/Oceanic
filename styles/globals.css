@@ -46,3 +46,17 @@ body {
 .font-inter {
   font-family: 'Inter', sans-serif;
 }
+
+@keyframes bounce-loop {
+  0%   { transform: translateY(0); }
+  20%  { transform: translateY(-70px); }
+  40%  { transform: translateY(0); }
+  60%  { transform: translateY(-50px); }
+  80%  { transform: translateY(0); }
+  90%  { transform: translateY(-20px); }
+  100% { transform: translateY(0); }
+}
+
+.animate-bounce-infinite {
+  animation: bounce-loop 5s ease-out infinite;
+}
