@@ -10,25 +10,27 @@ export default function Hero() {
 
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.intersectionRatio >= 0.33) {
-          setInView(true);
-        }
-      },
-      { threshold: 0.33 }
-    );
+  const node = imageRef.current;
 
-    if (imageRef.current) {
-      observer.observe(imageRef.current);
-    }
-
-    return () => {
-      if (imageRef.current) {
-        observer.unobserve(imageRef.current);
+  const observer = new IntersectionObserver(
+    ([entry]) => {
+      if (entry.intersectionRatio >= 0.33) {
+        setInView(true);
       }
-    };
-  }, []);
+    },
+    { threshold: 0.33 }
+  );
+
+  if (node) {
+    observer.observe(node);
+  }
+
+  return () => {
+    if (node) {
+      observer.unobserve(node);
+    }
+  };
+}, []);
   return (
     <section className="bg-white relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 py-24 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
