@@ -47,7 +47,7 @@ export default function Hero() {
             alt="Phone Mockup"
             width={400}
             height={700}
-            className="mx-auto animate-bounce-infinite"
+            className={`mx-auto ${inView ? "animate-bounce-once" : ""}`}
           />
 
         </div>
