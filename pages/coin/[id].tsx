@@ -112,7 +112,7 @@ export default function CoinDetailPage() {
                             plugins: {
                                 tooltip: {
                                     callbacks: {
-                                        label: (context) => `$${context.raw.toFixed(2)}`
+                                        label: (context) => `$${(context.raw as number).toFixed(2)}`
                                     }
                                 },
                                 legend: { display: false }
