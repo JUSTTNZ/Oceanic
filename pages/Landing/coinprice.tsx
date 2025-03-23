@@ -97,7 +97,7 @@ export default function CoinLive({ coins }: CoinLiveProps) {
               <div className={trendUp ? "text-green-400" : "text-red-400"}>{change.toFixed(2)}%</div>
               <div>
                 <Image
-                  src={trendUp ? "/images/greentrend.png" : "/images/redtrend.png"}
+                  src={trendUp ? "/Images/greentrend.png" : "/Images/redtrend.png"}
                   alt="trend"
                   width={60}
                   height={20}
