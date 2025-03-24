@@ -1,8 +1,9 @@
-import AboutUs from '../about/page.tsx'
-export default function About() {
-    return (
-        <div>
-            <AboutUs />
-        </div>
+import AboutPage from "./page";
+
+export default function About (){
+    return(
+     <div>
+        <AboutPage />
+     </div>
     )
 }
