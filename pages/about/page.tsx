@@ -16,12 +16,12 @@ export default function AboutPage() {
               <ArrowTrendingUpIcon className="h-9 w-9 text-green-500" />
             </div>
             <p className="text-gray-600 mb-4 text-sm">
-              Sales in July 2021 with 5 star ratings and happy clients.
+              Sales in April 2025 with 5 star ratings and happy clients.
             </p>
             <hr className="border-t-2 border-[#0047AB] my-2" />
             <div className="flex flex-col items-start gap-2 flex-wrap">
               <Image src="/images/users.png" alt="users" width={160} height={160} />
-              <Image src="/images/users.png" alt="users" width={160} height={160} />
+              <Image src="/images/users.png" alt="users" width={200} height={200} />
             </div>
           </div>
 
@@ -53,7 +53,7 @@ export default function AboutPage() {
           </p>
           <Link
             href="/"
-            className="inline-block bg-[#0047AB] text-white px-6 py-3 rounded-md shadow hover:bg-[#0047AB]"
+            className="inline-block bg-[#0047AB] text-white px-8 py-4 rounded-md shadow hover:bg-[#f75d3f] font-semibold tracking-wide shadow-lg hover:shadow-xl transition-all duration-300"
           >
             Explore More
           </Link>
