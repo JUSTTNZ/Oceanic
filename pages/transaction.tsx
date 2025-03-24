@@ -1,6 +1,19 @@
 import { useState } from "react";
 import { FaDownload, FaSortUp, FaSortDown } from "react-icons/fa";
-
+import Footer from "./login/footer";
+import Header from "./login/header";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Paper,
+    Checkbox,
+    IconButton,
+    TableSortLabel,
+  } from "@mui/material";
 const transactions = [
   { id: "011", date: "June 25, 2026", status: "Paid", amount: "$25.00" },
   { id: "010", date: "June 25, 2026", status: "Paid", amount: "$35.00" },
@@ -11,11 +24,16 @@ const transactions = [
   { id: "005", date: "June 25, 2026", status: "Paid", amount: "$25.00" },
 ];
 
-export default function CryptoTransactions() {
-  const [selected, setSelected] = useState([]);
-  const [sortConfig, setSortConfig] = useState(null);
+interface Sort {
+  key: keyof (typeof transactions)[0]; // Ensures the key exists in transaction object
+  direction: "asc" | "desc";
+}
 
-  const toggleSelect = (id) => {
+export default function CryptoTransactions() {
+  const [selected, setSelected] = useState<string[]>([]);
+  const [sortConfig, setSortConfig] = useState<Sort | null>(null);
+
+  const toggleSelect = (id: string) => {
     setSelected((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
     );
@@ -28,91 +46,107 @@ export default function CryptoTransactions() {
     return a[key] > b[key] ? order : a[key] < b[key] ? -order : 0;
   });
 
+  const [sortOrder, setSortOrder] = useState({ key: "id", direction: "asc" });
+
   const handleSort = (key) => {
-    setSortConfig((prev) => {
-      if (prev && prev.key === key) {
-        return { key, direction: prev.direction === "asc" ? "desc" : "asc" };
-      }
-      return { key, direction: "asc" };
-    });
+    setSortOrder((prev) => ({
+      key,
+      direction: prev.key === key && prev.direction === "asc" ? "desc" : "asc",
+    }));
   };
 
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-200 to-white p-6">
+    <section>
+        <Header />
+        <div className="min-h-screen bg-[#f7f7fa] p-6 pt-20 pb-20">
       <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-lg p-6">
+        {/* Title Section */}
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">Transaction History <span className="text-gray-500">187 Total</span></h2>
+          <h2 className="text-xl font-bold">
+            Transaction History <span className="text-gray-500">187 Total</span>
+          </h2>
         </div>
 
-        <table className="w-full border-collapse">
-          <thead className="w-full flex">
-            <tr className="bg-gray-100 text-gray-600 uppercase text-sm flex items-center justify-between w-full text-center">
-              <th className="p-3 text-left cursor-pointer flex items-center gap-3" onClick={() => handleSort("id")}>Invoice
-                <div>
-                <span> <FaSortUp/>  </span>
-                <span><FaSortDown /></span>
-                </div>
-              </th>
-              <th className="p-3 cursor-pointer flex items-center gap-3 px-6 text-center" onClick={() => handleSort("date")}>Billing Date
-                
-              <div>
-                <span> <FaSortUp/>  </span>
-                <span><FaSortDown /></span>
-                </div>
-                 </th>
-              <th className="p-3 cursor-pointer flex items-center gap-3" onClick={() => handleSort("status")}>Status 
-              <div>
-                <span> <FaSortUp/>  </span>
-                <span><FaSortDown /></span>
-                </div>
-                </th>
-              <th className="p-3 cursor-pointer flex items-center gap-3" onClick={() => handleSort("amount")}>Amount
-              <div>
-                <span> <FaSortUp/>  </span>
-                <span><FaSortDown /></span>
-                </div>
-              </th>
-              <th className="p-3">Download</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sortedTransactions.map((tx) => (
-              <tr key={tx.id} className="border-b flex justify-between items-center">
-                <td className="p-3 flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={selected.includes(tx.id)}
-                    onChange={() => toggleSelect(tx.id)}
-                  />
-                  <span className="text-blue-600 font-semibold">Invoice #{tx.id} - Jun 2026</span>
-                </td>
-                <td className="p-3 text-center">{tx.date}</td>
-                <td className="p-3 text-center">
-                  <span className={`px-2 py-1 rounded-md text-xs font-bold ${tx.status === "Paid" ? "bg-blue-200 text-blue-600" : "bg-red-200 text-red-600"}`}>
-                    {tx.status}
-                  </span>
-                </td>
-                <td className="p-3 text-center">{tx.amount}</td>
-                <td className="p-3 text-center">
-                  <FaDownload className="text-gray-500 cursor-pointer hover:text-blue-600" />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {/* Table Wrapper */}
+        <TableContainer component={Paper} sx={{ maxHeight: 500 }}>
+          <Table stickyHeader>
+            {/* Table Head */}
+            <TableHead>
+              <TableRow>
+                {["id", "date", "status", "amount"].map((key) => (
+                  <TableCell key={key} align="center">
+                    <TableSortLabel
+                      active={sortOrder.key === key}
+                      direction={sortOrder.key === key ? sortOrder.direction : "asc"}
+                      onClick={() => handleSort(key)}
+                    >
+                      {key.charAt(0).toUpperCase() + key.slice(1)}
+                    </TableSortLabel>
+                  </TableCell>
+                ))}
+                <TableCell align="center">Download</TableCell>
+              </TableRow>
+            </TableHead>
 
+            {/* Table Body */}
+            <TableBody>
+              {sortedTransactions.map((tx) => (
+                <TableRow key={tx.id} hover>
+                  <TableCell>
+                    <Checkbox
+                      checked={selected.includes(tx.id)}
+                      onChange={() => toggleSelect(tx.id)}
+                    />
+                    <span className="text-blue-600 font-semibold">
+                      Invoice #{tx.id} - Jun 2026
+                    </span>
+                  </TableCell>
+                  <TableCell align="center">{tx.date}</TableCell>
+                  <TableCell align="center">
+                    <span
+                      className={`px-2 py-1 rounded-md text-xs font-bold ${
+                        tx.status === "Paid"
+                          ? "bg-blue-200 text-blue-600"
+                          : "bg-red-200 text-red-600"
+                      }`}
+                    >
+                      {tx.status}
+                    </span>
+                  </TableCell>
+                  <TableCell align="center">{tx.amount}</TableCell>
+                  <TableCell align="center">
+                    <IconButton>
+                      <FaDownload className="text-gray-500 hover:text-blue-600" />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+
+        {/* Pagination */}
         <div className="flex justify-between items-center mt-4">
-          <button className="text-blue-600">Previous</button>
+          <button className="text-blue-600 px-3 py-1 hover:underline">Previous</button>
           <div className="space-x-2">
-            {[1, 2, 3, 4, 5, "..."]?.map((num, idx) => (
-              <button key={idx} className="px-3 py-1 rounded-md border text-blue-600 border-blue-600">
+            {[1, 2, 3, 4, 5, "..."].map((num, idx) => (
+              <button
+                key={idx}
+                className="px-3 py-1 rounded-md border border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white"
+              >
                 {num}
               </button>
             ))}
           </div>
-          <button className="text-blue-600">Next</button>
+          <button className="text-blue-600 px-3 py-1 hover:underline">Next</button>
         </div>
       </div>
     </div>
+
+  <Footer />
+    </section>
+
+  
   );
 }
