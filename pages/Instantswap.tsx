@@ -1,16 +1,42 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Header from './login/header';
 import Footer from './login/footer';
 import { FaExchangeAlt } from 'react-icons/fa';
+ interface Crypto {
+  name: string
+  id:number
+  symbol: string
+ }
 
+ interface Error{
+  message: string;
+  code?: number;
+  status?: number;
+ }
 export default function InstantSwap() {
   const [fromCurrency, setFromCurrency] = useState('BTC');
   const [toCurrency, setToCurrency] = useState('USD');
   const [amount, setAmount] = useState('');
   const [balance, setBalance] = useState(0); // Mock balance
-  const [error, setError] = useState('');
-
+  const [error, setError] = useState<Error | null>(null);
+  const [cryptoList, setCryptoList] = useState<Crypto[]>([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch('/api/crypto');
+        if (!res.ok) throw new Error(res.statusText);
+        const data = await res.json();
+        setCryptoList(data);
+      } catch (err) {
+        setError(err as Error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
   const handleSwap = () => {
     setFromCurrency(toCurrency);
     setToCurrency(fromCurrency);
@@ -51,6 +77,8 @@ export default function InstantSwap() {
     </div>
     
     <div className='space-y-4'>
+ 
+
       <div className='flex flex-col md:flex-row justify-between items-center gap-4'>
         <div className='w-full'>
           <label className="block text-sm font-medium text-gray-700 mb-2">From</label>
@@ -59,8 +87,15 @@ export default function InstantSwap() {
             value={fromCurrency}
             onChange={(e) => setFromCurrency(e.target.value)}
           >
-            <option value="BTC">Bitcoin (BTC)</option>
-            <option value="ETH">Ethereum (ETH)</option>
+                 {loading ? (
+          <option>Loading cryptos...</option>
+        ) : (
+          cryptoList.map((crypto) => (
+            <option key={crypto.id} value={crypto.symbol}>
+              {crypto.name} ({crypto.symbol.toUpperCase()})
+            </option>
+          ))
+        )}
           </select>
         </div>
         
@@ -71,8 +106,15 @@ export default function InstantSwap() {
             value={toCurrency}
             onChange={(e) => setToCurrency(e.target.value)}
           >
-            <option value="USD">US Dollar (USD)</option>
-            <option value="USDT">Tether (USDT)</option>
+               {loading ? (
+          <option>Loading cryptos...</option>
+        ) : (
+          cryptoList.map((crypto) => (
+            <option key={crypto.id} value={crypto.symbol}>
+              {crypto.name} ({crypto.symbol.toUpperCase()})
+            </option>
+          ))
+        )}
           </select>
         </div>
       </div>
