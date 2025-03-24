@@ -49,10 +49,7 @@ export default function AboutPage() {
           <p className="text-[#0047AB] uppercase tracking-wide font-semibold">A bit</p>
           <h2 className="text-5xl font-extrabold text-[#0B0B3B]">About Us</h2>
           <p className="text-gray-600 leading-relaxed text-sm md:text-base">
-            From the fine john he give of rich he. They age and draw mrs like.
-            Improving end distrusts may instantly was household applauded.
-            Why kept very ever home mrs. Considered sympathize ten uncommonly
-            occasional assistance sufficient not.
+          Oceanic Charts is a leading crypto trading platform, empowering users to trade, swap, and manage digital assets with ease. We provide cutting-edge tools, secure transactions, and a community-driven experience to help you thrive in the world of crypto.
           </p>
           <Link
             href="/"
