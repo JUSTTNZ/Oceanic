@@ -9,7 +9,7 @@ import { FaExchangeAlt } from 'react-icons/fa';
   symbol: string
  }
 
- interface Error{
+ interface ApiError{
   message: string;
   code?: number;
   status?: number;
@@ -19,7 +19,7 @@ export default function InstantSwap() {
   const [toCurrency, setToCurrency] = useState('USD');
   const [amount, setAmount] = useState('');
   const [balance, setBalance] = useState(0); // Mock balance
-  const [error, setError] = useState<Error | null>(null);
+  const [error, setError] = useState<ApiError | null>(null);
   const [cryptoList, setCryptoList] = useState<Crypto[]>([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
@@ -30,7 +30,7 @@ export default function InstantSwap() {
         const data = await res.json();
         setCryptoList(data);
       } catch (err) {
-        setError(err as Error);
+        setError(err as ApiError);
       } finally {
         setLoading(false);
       }
@@ -152,7 +152,7 @@ export default function InstantSwap() {
       
       <p className="text-gray-500 text-sm mt-2">Your balance: {balance} {fromCurrency}</p>
       
-      {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+      {error && <p className="text-red-500 text-sm mt-2">{error.message}</p>}
       
       <button
         onClick={() => alert(`Swapping ${amount} ${fromCurrency} to ${toCurrency}`)}
