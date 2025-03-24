@@ -1,7 +1,9 @@
-export default function AboutUs () {
-    return (
+
+
+export default function AboutPage(){
+    return(
         <div>
-            <p>About Us</p>
+            <h1>About page</h1>
         </div>
     )
 }
