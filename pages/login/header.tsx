@@ -4,14 +4,15 @@ import Link from "next/link";
 
 import Sidebar from "./sidebar";
 import { RiMenu3Line } from "react-icons/ri";
+import {  FaChevronDown } from "react-icons/fa";
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
-  const [user, setUser] = useState(true)
+  const [user] = useState(true)
   const [isDropDownOpen, setIsDropDownOpen] = useState(false)
   const toggleDropdown = () => {
     setIsDropDownOpen((prev) => !prev);
-  };
+    };
   return (
     <header className="fixed top-0 left-0 w-full bg-blue-500 text-white p-3 flex justify-between items-center px-8 z-50 shadow-md font-poppins">
       <h1 className="text-xl font-bold">Oceanic</h1>
@@ -71,9 +72,7 @@ export default function Header() {
   onClick={toggleDropdown}
 >
   Odominic
-  <svg className="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
-  </svg>
+  <FaChevronDown size={12} className=" ms-3" aria-hidden="true" />
 </button>
 {isDropDownOpen && (
 <div 
