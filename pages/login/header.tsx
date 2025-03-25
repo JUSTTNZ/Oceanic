@@ -7,7 +7,11 @@ import { RiMenu3Line } from "react-icons/ri";
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
-
+  const [user, setUser] = useState(true)
+  const [isDropDownOpen, setIsDropDownOpen] = useState(false)
+  const toggleDropdown = () => {
+    setIsDropDownOpen((prev) => !prev);
+  };
   return (
     <header className="fixed top-0 left-0 w-full bg-blue-500 text-white p-3 flex justify-between items-center px-8 z-50 shadow-md font-poppins">
       <h1 className="text-xl font-bold">Oceanic</h1>
@@ -48,9 +52,53 @@ export default function Header() {
             </Link>
           </li>
         </ul>
-        <button className="bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold transition-transform duration-300">
+        {!user ? (
+
+
+<>
+<button className="bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold transition-transform duration-300">
           Create Account
         </button>
+</>
+          ):(
+
+            <>
+<button 
+  id="dropdownDefaultButton" 
+  data-dropdown-toggle="dropdown" 
+  className="text-white bg-blue-400  font-medium rounded-md text-sm px-5 py-2.5 text-center inline-flex items-center custom-class" 
+  type="button"
+  onClick={toggleDropdown}
+>
+  Odominic
+  <svg className="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
+  </svg>
+</button>
+{isDropDownOpen && (
+<div 
+  id="dropdown" 
+          className="z-10 absolute top-14 right-4 mt-2 bg-blue-500 text-white divide-y divide-gray-100 rounded-md shadow-sm w-44 "
+>
+  <ul className="py-2 text-sm text-white" aria-labelledby="dropdownDefaultButton">
+    <li>
+      <a href="#" className="block px-4 py-3 hover:bg-blue-400  ">My Account</a>
+    </li>
+    <li>
+      <a href="#" className="block px-4 py-3 hover:bg-blue-400 ">Transaction History</a>
+    </li>
+    <li>
+      <a href="#" className="block px-4 py-3 hover:bg-blue-400 ">Support</a>
+    </li>
+    <li>
+      <a href="#" className="block px-4 py-3 hover:bg-blue-400 ">Sign out</a>
+    </li>
+  </ul>
+</div>
+)}
+            </>
+        )}
+      
       </nav>
 
   
