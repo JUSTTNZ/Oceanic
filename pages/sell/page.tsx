@@ -16,16 +16,31 @@ import {
 } from "@heroicons/react/24/outline";
 import Image from "next/image";
 
+// Define types
+interface Coin {
+  id: string;
+  name: string;
+  symbol: string;
+  image: string;
+  current_price: number;
+  // Add any other properties you use from the API
+}
+
+interface Country {
+  name: string;
+  code: string;
+}
+
 export default function SendPage() {
   const [activeTab, setActiveTab] = useState<"buy" | "sell">("buy");
   const [searchCoin, setSearchCoin] = useState("");
-  const [coins, setCoins] = useState<any[]>([]);
-  const [selectedCoin, setSelectedCoin] = useState<any | null>(null);
+  const [coins, setCoins] = useState<Coin[]>([]);
+  const [selectedCoin, setSelectedCoin] = useState<Coin | null>(null);
   const [showCoinList, setShowCoinList] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
 
-  const [countries, setCountries] = useState<any[]>([]);
-  const [selectedCountry, setSelectedCountry] = useState<any>({ code: "NG", name: "Nigeria" });
+  const [countries, setCountries] = useState<Country[]>([]);
+  const [selectedCountry, setSelectedCountry] = useState<Country>({ code: "NG", name: "Nigeria" });
   const [searchCountry, setSearchCountry] = useState("");
   const [showCountryList, setShowCountryList] = useState(false);
 
@@ -43,10 +58,10 @@ export default function SendPage() {
     const fetchCountries = async () => {
       const res = await fetch("https://restcountries.com/v3.1/all");
       const data = await res.json();
-      const sorted = data.map(c => ({
+      const sorted = data.map((c: any) => ({
         name: c.name.common,
         code: c.cca2
-      })).sort((a, b) => a.name.localeCompare(b.name));
+      })).sort((a: Country, b: Country) => a.name.localeCompare(b.name));
       setCountries(sorted);
     };
     fetchCoins();
