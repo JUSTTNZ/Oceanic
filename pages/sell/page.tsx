@@ -144,7 +144,67 @@ export default function SendPage() {
             0 {selectedCoin?.symbol?.toUpperCase() || "BTC"}
           </div>
 
-          {/* Country Dropdown remains unchanged */}
+          {/* Country Dropdown */}
+          <div className="relative mb-4">
+            <div
+              className="flex items-center justify-between border px-4 py-3 rounded-xl cursor-pointer"
+              onClick={() => setShowCountryList(!showCountryList)}
+            >
+              <div className="flex items-center gap-2">
+                <Image
+                  src={`https://flagcdn.com/w40/${selectedCountry.code.toLowerCase()}.png`}
+                  alt={selectedCountry.name}
+                  width={24}
+                  height={16}
+                />
+                <span>{selectedCountry.name}</span>
+              </div>
+              <ChevronDownIcon className="w-5 h-5 text-gray-400" />
+            </div>
+            {showCountryList && (
+              <div className="absolute z-10 bg-white w-full border mt-2 rounded-lg shadow-md p-3 max-h-60 overflow-y-auto">
+                <input
+                  type="text"
+                  placeholder="Search country..."
+                  value={searchCountry}
+                  onChange={(e) => setSearchCountry(e.target.value)}
+                  className="w-full mb-2 border px-3 py-2 rounded-md"
+                />
+                <ul>
+                  {filteredCountries.map((country) => (
+                    <li
+                      key={country.code}
+                      className="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 rounded-md cursor-pointer"
+                      onClick={() => {
+                        setSelectedCountry(country);
+                        setShowCountryList(false);
+                        setSearchCountry("");
+                      }}
+                    >
+                      <Image
+                        src={`https://flagcdn.com/w40/${country.code.toLowerCase()}.png`}
+                        alt={country.name}
+                        width={20}
+                        height={14}
+                      />
+                      {country.name}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+
+          {/* Country Flag Display Above Coin */}
+          <div className="flex items-center justify-center mb-4">
+            <Image
+              src={`https://flagcdn.com/w80/${selectedCountry.code.toLowerCase()}.png`}
+              alt={selectedCountry.name}
+              width={48}
+              height={32}
+              className="rounded-md"
+            />
+          </div>
 
           {/* Coin Dropdown */}
           <div className="relative mb-4">
@@ -207,3 +267,4 @@ export default function SendPage() {
     </div>
   );
 }
+
