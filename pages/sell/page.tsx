@@ -58,10 +58,10 @@ export default function SendPage() {
     const fetchCountries = async () => {
       const res = await fetch("https://restcountries.com/v3.1/all");
       const data = await res.json();
-      const sorted = data.map(c => ({
+      const sorted = data.map((c: any) => ({
         name: c.name.common,
         code: c.cca2
-      })).sort((a, b) => a.name.localeCompare(b.name));
+      })).sort((a: Country, b: Country) => a.name.localeCompare(b.name));
       setCountries(sorted);
     };
     fetchCoins();
