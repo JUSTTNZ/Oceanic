@@ -19,11 +19,11 @@ export default function Navbar() {
   const [openSection, setOpenSection] = useState<string | null>(null);
 
   const megaMenus = {
-    Products: [
+    Trade: [
       { icon: CreditCardIcon, title: "Cards", desc: "Spend globally." },
       { icon: RocketLaunchIcon, title: "Instant Swap", desc: "Swap fast." },
-      { icon: LockClosedIcon, title: "Orderbook", desc: "Deep liquidity." },
-      { icon: Squares2X2Icon, title: "Launchpad", desc: "Launch tokens." },
+      { icon: LockClosedIcon, title: "Buy/Sell", desc: "Deep liquidity." },
+      { icon: Squares2X2Icon, title: "P2P", desc: "Launch tokens." },
     ],
     Resources: [
       { icon: UsersIcon, title: "Community", desc: "Join community." },
@@ -58,8 +58,8 @@ export default function Navbar() {
                 <div className="absolute left-0 top-[130%] bg-white rounded-md px-8 py-6 shadow-xl flex gap-8">
                   {megaMenus[menu as keyof typeof megaMenus].map((item, idx) => (
                     <div key={idx} className="flex-1 min-w-[150px] group cursor-pointer">
-                      <item.icon className="h-8 w-8 text-[#0047AB] mb-2" />
-                      <h3 className="text-lg font-semibold group-hover:text-[#0047AB]">{item.title}</h3>
+                      <Link href="../sell"><item.icon className="h-8 w-8 text-[#0047AB] mb-2" /></Link>
+                      <Link href="../sell"><h3 className="text-lg font-semibold group-hover:text-[#0047AB]">{item.title}</h3></Link>
                       <p className="text-sm text-gray-600">{item.desc}</p>
                     </div>
                   ))}
