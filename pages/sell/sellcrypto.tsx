@@ -1,15 +1,15 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion,  } from "framer-motion";
 import { useState, useEffect } from "react";
 import { 
-  ClipboardDocumentIcon, 
-  CheckIcon, 
   ArrowPathIcon,
-  ChevronDownIcon,
-
 } from "@heroicons/react/24/outline";
-import Image from "next/image";
+import CoinSelection from "../components/sell/coinselection";
+import TxidInput from "../components/sell/txidinput";
+import StatusMessage from "../components/sell/statusmessage";
+import NetworkWarning from "../components/sell/network";
+import WalletAddressDisplay from "../components/sell/walletaddres";
 
 interface Coin {
   id: string;
@@ -73,7 +73,6 @@ const SUPPORTED_COINS = Object.keys(BYBIT_WALLET_ADDRESSES);
 type TransactionStatus = 'pending' | 'sent' | 'received' | 'completed' | 'failed';
 
 export default function SellCrypto() {
-  const [copied, setCopied] = useState(false);
   const [status, setStatus] = useState<TransactionStatus>('pending');
   const [isChecking, setIsChecking] = useState(false);
   const [txid, setTxid] = useState("");
@@ -114,14 +113,7 @@ export default function SellCrypto() {
       "Wallet address not available for this country"
     : null;
 
-  const copyToClipboard = () => {
-    if (walletAddress) {
-      navigator.clipboard.writeText(walletAddress);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
-
+ 
   const handleSubmit = () => {
     if (!txid || !selectedCoin) {
       setStatus('failed');
@@ -160,13 +152,7 @@ export default function SellCrypto() {
     setIsChecking(false);
   };
 
-  const statusMessages = {
-    pending: "Please send your crypto and submit the TXID",
-    sent: "Waiting for transaction confirmation...",
-    received: "Transaction received! Processing your payment...",
-    completed: "Payment completed! Funds have been sent to your bank account.",
-    failed: "Transaction not found. Please verify your TXID and try again."
-  };
+ 
 
   const filteredCoins = coins.filter(coin =>
     coin.name.toLowerCase().includes(searchCoin.toLowerCase()) ||
@@ -257,159 +243,45 @@ export default function SellCrypto() {
           <h2 className="text-center font-semibold text-lg mb-4">Sell Crypto</h2>
           
           {/* Coin Selection */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Cryptocurrency</label>
-            <div className="relative">
-              <button
-                onClick={() => setShowCoinDropdown(!showCoinDropdown)}
-                className="flex items-center justify-between w-full border px-4 py-3 rounded-lg text-sm focus:border-blue-300 focus:outline-none"
-                disabled={status !== 'pending'}
-              >
-                {selectedCoin ? (
-                  <div className="flex items-center">
-                    <Image 
-                      src={selectedCoin.image} 
-                      alt={selectedCoin.name} 
-                      width={24} 
-                      height={24} 
-                      className="mr-2"
-                    />
-                    <span>{selectedCoin.name} ({selectedCoin.symbol.toUpperCase()})</span>
-                  </div>
-                ) : (
-                  <span>Select cryptocurrency</span>
-                )}
-                <ChevronDownIcon className="h-4 w-4 ml-2" />
-              </button>
+          <>
+          <CoinSelection
+  setShowCoinDropdown={setShowCoinDropdown}
+  showCoinDropdown={showCoinDropdown}
+  selectedCoin={selectedCoin}
+  searchCoin={searchCoin}
+  setSearchCoin={setSearchCoin}
+  setSelectedCoin={setSelectedCoin}
+  filteredCoins={filteredCoins}
+  status={status}
+/>
+          </>
+          
 
-              <AnimatePresence>
-                {showCoinDropdown && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg "
-                  >
-                    <div className="p-2 border-b border-blue-300">
-                      <input
-                        type="text"
-                        placeholder="Search coins..."
-                        className="w-full px-3 py-2 text-sm border rounded-md focus:border-blue-300 focus:outline-none"
-                        value={searchCoin}
-                        onChange={(e) => setSearchCoin(e.target.value)}
-                        autoFocus
-                      />
-                    </div>
-                    <div className="max-h-60 overflow-y-auto scrollbar-hide">
-                      {filteredCoins.length > 0 ? (
-                        filteredCoins.map((coin) => (
-                          <button
-                            key={coin.id}
-                            className="flex items-center w-full px-4 py-2 text-sm hover:bg-blue-100"
-                            onClick={() => {
-                              setSelectedCoin(coin);
-                              setShowCoinDropdown(false);
-                              setSearchCoin("");
-                            }}
-                          >
-                            <Image 
-                              src={coin.image} 
-                              alt={coin.name} 
-                              width={20} 
-                              height={20} 
-                              className="mr-2"
-                            />
-                            {coin.name} ({coin.symbol.toUpperCase()})
-                          </button>
-                        ))
-                      ) : (
-                        <div className="px-4 py-2 text-sm text-gray-500">
-                          No coins found
-                        </div>
-                      )}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </div>
-
-          {selectedCoin && walletAddress && (
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <label className="text-sm font-medium text-gray-700">Our {selectedCoin.symbol.toUpperCase()} Address</label>
-                <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                  {selectedCountry.name}
-                </span>
-              </div>
-              <div className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
-                <code className="text-xs truncate">{walletAddress}</code>
-                <button 
-                  onClick={copyToClipboard}
-                  className="ml-2 p-1 rounded-md hover:bg-gray-100"
-                  disabled={status !== 'pending'}
-                >
-                  {copied ? (
-                    <CheckIcon className="h-4 w-4 text-green-500" />
-                  ) : (
-                    <ClipboardDocumentIcon className="h-4 w-4 text-gray-500" />
-                  )}
-                </button>
-              </div>
-              <p className="text-xs text-gray-500">
-                Only send {selectedCoin.symbol.toUpperCase()} to this address. Sending other assets may result in permanent loss.
-              </p>
-            </div>
-          )}
-
+          <>
+          <WalletAddressDisplay
+  selectedCoin={selectedCoin}
+  selectedCountry={selectedCountry}
+  walletAddress={walletAddress}
+  
+  status={status}
+/>
+          </>
           {/* TXID Input */}
-          <div className="space-y-2">
-            <label htmlFor="txid" className="text-sm font-medium text-gray-700">
-              Transaction ID (TXID)
-            </label>
-            <input
-              id="txid"
-              type="text"
-              placeholder="Paste your transaction hash here"
-              className="border px-4 py-3 rounded-lg w-full text-sm  focus:border-blue-300 focus:outline-none"
-              value={txid}
-              onChange={(e) => setTxid(e.target.value)}
-              disabled={status !== 'pending'}
-            />
-            <p className="text-xs text-gray-500">
-              Find this in your wallet&apos;s transaction history after sending
-            </p>
-          </div>
-
+          <>
+          <TxidInput
+  txid={txid} 
+  setTxid={setTxid} 
+  status={status} 
+/>
+          </>
           {/* Status Message */}
-          <AnimatePresence mode="wait">
-            {status !== 'pending' && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className={`p-3 rounded-lg text-sm ${
-                  status === 'completed' ? 'bg-green-50 text-green-700' :
-                  status === 'failed' ? 'bg-red-50 text-red-700' :
-                  'bg-blue-50 text-blue-700'
-                }`}
-              >
-                <div className="flex items-center space-x-2">
-                  {isChecking && <ArrowPathIcon className="h-4 w-4 animate-spin" />}
-                  <p>{statusMessages[status]}</p>
-                </div>
-                {status === 'completed' || status === 'failed' ? (
-                  <button
-                    onClick={resetTransaction}
-                    className="mt-2 text-sm underline hover:text-blue-600"
-                  >
-                    Start new transaction
-                  </button>
-                ) : null}
-              </motion.div>
-            )}
-          </AnimatePresence>
-
+          <>
+          <StatusMessage
+  status={status} 
+  isChecking={isChecking} 
+  onReset={resetTransaction} 
+/>
+          </>
           {/* Submit Button */}
           <button
             onClick={handleSubmit}
@@ -429,17 +301,11 @@ export default function SellCrypto() {
               'Submit TXID'
             )}
           </button>
-
           {/* Network Warning */}
-          {selectedCoin && (
-            <div className="p-3 bg-yellow-50 rounded-lg text-yellow-700 text-xs">
-              <p className="font-medium">Important:</p>
-              <p>
-                Ensure you&apos;re sending {selectedCoin.name} ({selectedCoin.symbol.toUpperCase()}) on the correct network.
-                Sending on wrong networks may result in permanent loss.
-              </p>
-            </div>
-          )}
+        <>
+        <NetworkWarning 
+        selectedCoin={selectedCoin} />
+        </>
         </div>
       </motion.div>
     </div>
