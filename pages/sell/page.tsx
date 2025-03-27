@@ -1,29 +1,23 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/router";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeftIcon,
-  ChevronRightIcon,
-  Cog6ToothIcon,
-  ArrowsRightLeftIcon,
-  PlayPauseIcon,
   ChevronDownIcon,
-  ArrowRightIcon,
-  InformationCircleIcon,
-  ShieldCheckIcon,
-  AdjustmentsHorizontalIcon,
+  ClipboardDocumentIcon,
+  CheckIcon,
+  Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
 import Image from "next/image";
+import { useRouter } from "next/router";
 
-// Define types
 interface Coin {
   id: string;
   name: string;
   symbol: string;
   image: string;
   current_price: number;
-  // Add any other properties you use from the API
 }
 
 interface Country {
@@ -31,22 +25,35 @@ interface Country {
   code: string;
 }
 
-export default function SendPage() {
+interface ApiCountry {
+  name: { common: string };
+  cca2: string;
+}
+
+// Bybit Wallet Addresses (Replace with actual addresses)
+const BYBIT_WALLET_ADDRESSES: Record<string, Record<string, string>> = {
+  USDT: { NG: "0xYourBybitUSDTWallet", US: "0xYourBybitUSDTWalletUS" },
+  BTC: { NG: "bc1YourBybitBTCWallet", US: "bc1YourBybitBTCWalletUS" },
+  ETH: { NG: "0xYourBybitETHWallet", US: "0xYourBybitETHWalletUS" },
+};
+
+export default function CryptoExchangePage() {
   const [activeTab, setActiveTab] = useState<"buy" | "sell">("buy");
-  const [searchCoin, setSearchCoin] = useState("");
+
   const [coins, setCoins] = useState<Coin[]>([]);
   const [selectedCoin, setSelectedCoin] = useState<Coin | null>(null);
   const [showCoinList, setShowCoinList] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
+  const [searchCoin, setSearchCoin] = useState("");
 
   const [countries, setCountries] = useState<Country[]>([]);
   const [selectedCountry, setSelectedCountry] = useState<Country>({ code: "NG", name: "Nigeria" });
-  const [searchCountry, setSearchCountry] = useState("");
   const [showCountryList, setShowCountryList] = useState(false);
+  const [searchCountry, setSearchCountry] = useState("");
+
+  const [txid, setTxid] = useState("");
+  const [copied, setCopied] = useState(false);
 
   const router = useRouter();
-
-  const handleBack = () => router.push("/");
 
   useEffect(() => {
     const fetchCoins = async () => {
@@ -55,231 +62,114 @@ export default function SendPage() {
       setCoins(data);
       setSelectedCoin(data[0]);
     };
+
     const fetchCountries = async () => {
       const res = await fetch("https://restcountries.com/v3.1/all");
-      const data = await res.json();
-      const sorted = data.map((c: any) => ({
+      const data: ApiCountry[] = await res.json();
+      const sorted = data.map((c: ApiCountry) => ({
         name: c.name.common,
-        code: c.cca2
+        code: c.cca2,
       })).sort((a: Country, b: Country) => a.name.localeCompare(b.name));
       setCountries(sorted);
     };
+
     fetchCoins();
     fetchCountries();
   }, []);
 
-  const filteredCoins = coins.filter((coin) =>
-    coin.name.toLowerCase().includes(searchCoin.toLowerCase())
-  );
-
-  const filteredCountries = countries.filter((country) =>
-    country.name.toLowerCase().includes(searchCountry.toLowerCase())
-  );
-
-  if (showSettings) {
-    return (
-      <div className="bg-white min-h-screen p-6">
-        <div className="flex items-center space-x-2 mb-4 cursor-pointer" onClick={() => setShowSettings(false)}>
-          <ArrowLeftIcon className="h-6 w-6" />
-          <span className="font-semibold">Settings</span>
-        </div>
-        <ul className="space-y-4">
-          <li className="flex justify-between items-center cursor-pointer hover:bg-gray-100 px-4 py-3 rounded-md">
-            <div className="flex items-center space-x-2">
-              <AdjustmentsHorizontalIcon className="h-5 w-5" />
-              <span>Preferences</span>
-            </div>
-            <ChevronRightIcon className="h-4 w-4 text-gray-500" />
-          </li>
-          <li className="flex justify-between items-center cursor-pointer hover:bg-gray-100 px-4 py-3 rounded-md">
-            <div className="flex items-center space-x-2">
-              <InformationCircleIcon className="h-5 w-5" />
-              <span>Help</span>
-            </div>
-            <ArrowRightIcon className="h-4 w-4 text-gray-500" />
-          </li>
-          <li className="flex justify-between items-center cursor-pointer hover:bg-gray-100 px-4 py-3 rounded-md">
-            <div className="flex items-center space-x-2">
-              <ShieldCheckIcon className="h-5 w-5" />
-              <span>Terms & Privacy</span>
-            </div>
-            <ArrowRightIcon className="h-4 w-4 text-gray-500" />
-          </li>
-        </ul>
-        <p className="text-xs text-center text-gray-400 mt-6">Powered by Oceanic</p>
-      </div>
-    );
-  }
+  const copyToClipboard = () => {
+    const walletAddress = selectedCoin
+      ? BYBIT_WALLET_ADDRESSES[selectedCoin.symbol.toUpperCase()][selectedCountry.code]
+      : "";
+    navigator.clipboard.writeText(walletAddress);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
     <div className="bg-white min-h-screen">
-      <div className="flex items-center space-x-2 p-4 cursor-pointer" onClick={handleBack}>
+      {/* Back Button */}
+      <div className="flex items-center space-x-2 p-4 cursor-pointer" onClick={() => router.push("/")}>
         <ArrowLeftIcon className="h-6 w-6" />
         <span>Back to home</span>
       </div>
-      <hr className="text-gray-400" />
 
+      {/* Tab Switcher */}
       <div className="flex justify-center items-center space-x-4 py-4">
-        <button onClick={() => setActiveTab("buy")} className={`px-4 py-2 rounded-md font-semibold ${activeTab === "buy" ? "bg-[#0047AB] text-white" : "bg-gray-200 text-black"}`}>Buy</button>
-        <button onClick={() => setActiveTab("sell")} className={`px-4 py-2 rounded-md font-semibold ${activeTab === "sell" ? "bg-[#0047AB] text-white" : "bg-gray-200 text-black"}`}>Sell</button>
+        <button
+          onClick={() => setActiveTab("buy")}
+          className={`px-6 py-3 rounded-lg font-semibold transition-all duration-300 ${
+            activeTab === "buy" ? "bg-[#0047AB] text-white shadow-lg scale-105" : "bg-gray-200 text-black"
+          }`}
+        >
+          Buy
+        </button>
+        <button
+          onClick={() => setActiveTab("sell")}
+          className={`px-6 py-3 rounded-lg font-semibold transition-all duration-300 ${
+            activeTab === "sell" ? "bg-[#0047AB] text-white shadow-lg scale-105" : "bg-gray-200 text-black"
+          }`}
+        >
+          Sell
+        </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto py-10 px-4">
-        <div className="space-y-6">
-          <h1 className="text-4xl md:text-5xl font-bold">
-            Want to {activeTab} crypto? <br />It’s never been simpler.
-          </h1>
-          <p className="text-gray-600 text-base">
-            100+ cryptocurrencies. Plenty of ways to pay. Absolutely zero hassle.
-            <br />
-            Oceanic makes it easy to buy, sell, and swap crypto. Open your free account today.
-          </p>
-          <div className="flex flex-wrap gap-4 items-center">
-            <button className="bg-black text-white px-6 py-2 rounded-md font-semibold">Get started</button>
-            <div className="flex items-center space-x-2">
-              <div className="bg-gray-200 px-3 py-2 rounded-md">★</div>
-              <div>
-                <p className="font-bold text-sm">TrustScore 4.2</p>
-                <p className="text-xs text-gray-500">93K+ Reviews</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="w-full max-w-sm mx-auto border rounded-xl p-6 shadow-md">
-          <div className="flex justify-between items-center text-sm text-gray-500 mb-6">
-            <PlayPauseIcon className="w-5 h-5 bg-gray-100 p-1 rounded-full" />
-            <p className="font-bold text-black capitalize">{activeTab}</p>
-            <Cog6ToothIcon onClick={() => setShowSettings(true)} className="w-5 h-5 bg-gray-100 p-1 rounded-full cursor-pointer" />
-          </div>
-
-          <div className="text-center text-4xl font-semibold text-black mb-1">₦ 0</div>
-          <div className="text-center text-sm text-gray-500 mb-6 flex justify-center items-center gap-1">
-            <ArrowsRightLeftIcon className="w-4 h-4" />
-            0 {selectedCoin?.symbol?.toUpperCase() || "BTC"}
-          </div>
-
-          {/* Country Dropdown */}
-          <div className="relative mb-4">
-            <div
-              className="flex items-center justify-between border px-4 py-3 rounded-xl cursor-pointer"
-              onClick={() => setShowCountryList(!showCountryList)}
-            >
-              <div className="flex items-center gap-2">
-                <Image
-                  src={`https://flagcdn.com/w40/${selectedCountry.code.toLowerCase()}.png`}
-                  alt={selectedCountry.name}
-                  width={24}
-                  height={16}
-                />
-                <span>{selectedCountry.name}</span>
-              </div>
-              <ChevronDownIcon className="w-5 h-5 text-gray-400" />
-            </div>
-            {showCountryList && (
-              <div className="absolute z-10 bg-white w-full border mt-2 rounded-lg shadow-md p-3 max-h-60 overflow-y-auto">
-                <input
-                  type="text"
-                  placeholder="Search country..."
-                  value={searchCountry}
-                  onChange={(e) => setSearchCountry(e.target.value)}
-                  className="w-full mb-2 border px-3 py-2 rounded-md"
-                />
-                <ul>
-                  {filteredCountries.map((country) => (
-                    <li
-                      key={country.code}
-                      className="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 rounded-md cursor-pointer"
-                      onClick={() => {
-                        setSelectedCountry(country);
-                        setShowCountryList(false);
-                        setSearchCountry("");
-                      }}
-                    >
-                      <Image
-                        src={`https://flagcdn.com/w40/${country.code.toLowerCase()}.png`}
-                        alt={country.name}
-                        width={20}
-                        height={14}
-                      />
-                      {country.name}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-
-          {/* Country Flag Display Above Coin */}
-          <div className="flex items-center justify-center mb-4">
-            <Image
-              src={`https://flagcdn.com/w80/${selectedCountry.code.toLowerCase()}.png`}
-              alt={selectedCountry.name}
-              width={48}
-              height={32}
-              className="rounded-md"
-            />
-          </div>
-
-          {/* Coin Dropdown */}
-          <div className="relative mb-4">
-            <div
-              className="flex items-center justify-between border px-4 py-3 rounded-xl cursor-pointer"
-              onClick={() => setShowCoinList(!showCoinList)}
-            >
-              <div className="flex items-center gap-3">
-                {selectedCoin && (
-                  <Image src={selectedCoin.image} alt={selectedCoin.name} width={32} height={32} />
-                )}
-                <div className="flex flex-col text-left">
-                  <span className="text-xs text-gray-500">{activeTab === "buy" ? "Buy" : "Sell"}</span>
-                  <span className="font-semibold">{selectedCoin?.name || "Select Coin"}</span>
-                </div>
-              </div>
-              <ChevronDownIcon className="w-5 h-5 text-gray-400" />
+      <AnimatePresence mode="wait">
+        {activeTab === "buy" ? (
+          /** ======== BUY UI ======== */
+          <motion.div
+            key="buy"
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -30 }}
+            transition={{ duration: 0.3 }}
+            className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl mx-auto py-14 px-4"
+          >
+            <div className="space-y-6">
+              <h1 className="text-4xl md:text-5xl font-bold">Want to buy crypto? <br /> It’s never been simpler.</h1>
+              <p className="text-gray-600 text-base">100+ cryptocurrencies. Plenty of ways to pay. Absolutely zero hassle.</p>
             </div>
 
-            {showCoinList && (
-              <div className="absolute z-10 bg-white w-full border mt-2 rounded-lg shadow-md p-3 max-h-60 overflow-y-auto">
-                <input
-                  type="text"
-                  placeholder="Search coin..."
-                  value={searchCoin}
-                  onChange={(e) => setSearchCoin(e.target.value)}
-                  className="w-full mb-2 border px-3 py-2 rounded-md"
-                />
-                <h4 className="text-sm font-semibold text-gray-500 px-2 mb-2">Popular tokens</h4>
-                <ul>
-                  {filteredCoins.map((coin) => (
-                    <li
-                      key={coin.id}
-                      className="flex items-center gap-3 px-3 py-2 hover:bg-gray-100 rounded-md cursor-pointer"
-                      onClick={() => {
-                        setSelectedCoin(coin);
-                        setShowCoinList(false);
-                        setSearchCoin("");
-                      }}
-                    >
-                      <Image src={coin.image} alt={coin.name} width={24} height={24} />
-                      <div>
-                        <p className="font-semibold">{coin.name}</p>
-                        <p className="text-xs text-gray-500">{coin.symbol.toUpperCase()} • {coin.name}</p>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+            {/* Right-Side Buy UI */}
+            <div className="w-full max-w-sm mx-auto border border-gray-200 rounded-xl p-6 shadow-sm">
+              <h2 className="text-center font-semibold text-lg mb-4">Buy Crypto</h2>
+
+              {/* Country & Coin Selector */}
+              <div className="flex items-center justify-between">
+                <Image src={selectedCoin?.image || ""} alt={selectedCoin?.name || ""} width={32} height={32} />
+                <span>{selectedCoin?.name || "Select Coin"}</span>
               </div>
-            )}
-          </div>
 
-          <button className="w-full bg-[#0047AB] text-white font-semibold py-3 rounded-full">
-            Continue
-          </button>
+              <p className="text-center text-4xl font-semibold mt-6">₦ 0</p>
+              <p className="text-center text-gray-500 text-sm">0 {selectedCoin?.symbol?.toUpperCase()}</p>
 
-          <p className="text-xs text-center text-gray-400 mt-3">Powered by Oceanic</p>
-        </div>
-      </div>
+              <button className="w-full bg-[#0047AB] text-white font-semibold py-3 rounded-full mt-6">Continue</button>
+            </div>
+          </motion.div>
+        ) : (
+          /** ======== SELL UI ======== */
+          <motion.div
+            key="sell"
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -30 }}
+            transition={{ duration: 0.3 }}
+            className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl mx-auto py-14 px-4"
+          >
+            <div className="space-y-6">
+              <h1 className="text-4xl md:text-5xl font-bold">Sell your crypto <br /> Instantly and securely.</h1>
+              <p className="text-gray-600 text-base">Copy our wallet address, send your crypto, and enter your transaction hash (TXID) to confirm.</p>
+            </div>
+
+            <div className="w-full max-w-sm mx-auto border border-gray-200 rounded-xl p-6 shadow-sm">
+              <h2 className="text-center font-semibold text-lg mb-4">Sell Crypto</h2>
+              <p className="text-gray-500">Send to: {selectedCoin ? BYBIT_WALLET_ADDRESSES[selectedCoin.symbol.toUpperCase()][selectedCountry.code] : "Select a coin"}</p>
+              <input type="text" placeholder="Enter TXID" className="border px-4 py-3 rounded-lg w-full mt-4" value={txid} onChange={(e) => setTxid(e.target.value)} />
+              <button className="w-full bg-[#0047AB] text-white font-semibold py-3 rounded-full mt-4">Submit TXID</button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
-
