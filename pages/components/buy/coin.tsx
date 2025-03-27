@@ -23,8 +23,7 @@ export default function CoinDropdown({
   coins,
   selectedCoin,
   onSelect,
-  exchangeRate,
-  formatCurrency,
+
   className = ""
 }: CoinDropdownProps) {
   const [showDropdown, setShowDropdown] = useState(false);
@@ -48,7 +47,7 @@ export default function CoinDropdown({
       <div className="relative">
         <button
           onClick={() => setShowDropdown(!showDropdown)}
-          className="flex items-center justify-between w-full border px-4 py-3 rounded-lg text-sm hover:border-gray-400 transition-colors"
+          className="flex items-center justify-between w-full border px-4 py-3 rounded-lg text-sm hover:border-gray-400 focus:border-blue-300 focus:outline-none transition-colors"
           aria-expanded={showDropdown}
           aria-haspopup="listbox"
         >
@@ -71,20 +70,20 @@ export default function CoinDropdown({
 
         {showDropdown && (
           <div 
-            className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg"
+            className="absolute z-10 mt-1 w-full bg-white border border-gray-200  rounded-lg shadow-lg"
             role="listbox"
           >
-            <div className="p-2 border-b">
+            <div className="p-2 border-b border-blue-300">
               <input
                 type="text"
                 placeholder="Search coins..."
-                className="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-300"
+                className="w-full px-3 py-2 text-sm border rounded-md focus:border-blue-300 focus:outline-none"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 autoFocus
               />
             </div>
-            <div className="max-h-60 overflow-y-auto">
+            <div className="max-h-60 overflow-y-auto scrollbar-hide">
               {filteredCoins.length > 0 ? (
                 filteredCoins.map((coin) => (
                   <button
@@ -108,9 +107,7 @@ export default function CoinDropdown({
                     <span className="flex-1">
                       {coin.name} ({coin.symbol.toUpperCase()})
                     </span>
-                    <span className="ml-2 font-medium">
-                      {formatCurrency(coin.current_price * exchangeRate)}
-                    </span>
+                    
                   </button>
                 ))
               ) : (

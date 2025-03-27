@@ -31,7 +31,7 @@ export default function CountryDropdown({
       <div className="relative">
         <button
           onClick={() => setShowDropdown(!showDropdown)}
-          className="flex items-center justify-between w-full border px-4 py-3 rounded-lg text-sm hover:border-gray-400 transition-colors"
+          className="flex items-center justify-between w-full border px-4 py-3 rounded-lg text-sm hover:border-gray-400 focus:border-blue-300 focus:outline-none transition-colors"
           aria-expanded={showDropdown}
           aria-haspopup="listbox"
         >
@@ -54,7 +54,7 @@ export default function CountryDropdown({
 
         {showDropdown && (
           <div 
-            className="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+            className="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto scrollbar-hide"
             role="listbox"
           >
             {countries.map((country) => (
