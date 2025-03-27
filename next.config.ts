@@ -23,6 +23,10 @@ const nextConfig: NextConfig = {
         hostname: 'coin-images.coingecko.com', // Add this entry
         pathname: '/coins/images/**',
       },
+      {
+        protocol: "https",
+        hostname: "upload.wikimedia.org", 
+      },
     ],
   },
 };
