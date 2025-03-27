@@ -42,7 +42,7 @@ export default function AmountInput({
       <input
         type="text"
         placeholder="0.00"
-        className="border px-4 py-3 rounded-lg w-full text-right text-lg font-medium focus:outline-none focus:ring-1 focus:ring-blue-300"
+        className="border px-4 py-3 rounded-lg w-full text-right text-lg font-medium focus:border-blue-300 focus:outline-none"
         value={amount}
         onChange={handleChange}
         inputMode="decimal"
