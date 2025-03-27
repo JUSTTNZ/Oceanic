@@ -1,5 +1,10 @@
-import { Coin } from "./types"; // Import your Coin interface
-
+interface Coin {
+    id: string;
+    name: string;
+    symbol: string;
+    image: string;
+    current_price: number;
+  }
 interface NetworkWarningProps {
   selectedCoin: Coin | null;
 }
