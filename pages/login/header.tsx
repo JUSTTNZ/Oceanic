@@ -44,14 +44,25 @@ export default function Header() {
               Order Book
             </Link>
           </li>
-          <li>
+         {!user ? (
+           <li>
+           <Link
+             href="#"
+             className="hover:bg-blue-300 px-3 py-2 rounded transition-colors duration-300 ease-in-out"
+           >
+             Sign In
+           </Link>
+         </li>
+          ):(
+            <li>
             <Link
               href="#"
               className="hover:bg-blue-300 px-3 py-2 rounded transition-colors duration-300 ease-in-out"
             >
-              Sign In
+              Wallet
             </Link>
           </li>
+         )}
         </ul>
         {!user ? (
 
