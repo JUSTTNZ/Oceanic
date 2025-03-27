@@ -2,6 +2,7 @@
 import Navbar from "./navbar";
 import Hero from "./hero";
 import CoinLive from "./coinprice";
+import Footer from "./footer";
 
 interface LandingProps {
   coins: Coin[];
@@ -24,6 +25,7 @@ export default function Landing({ coins }: LandingProps) {
       <Navbar />
       <Hero />
       <CoinLive coins={coins} />
+      <Footer />
     </div>
   );
 }
