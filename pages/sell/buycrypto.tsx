@@ -73,7 +73,7 @@ export default function BuyCrypto() {
             return {
               code: country.cca2,
               name: country.name.common,
-              flag: country.flag,
+              flag: country.flags?.png || country.flags?.svg,
               currency: currencyCode,
               currencySymbol: country.currencies[currencyCode].symbol || currencyCode
             };
@@ -248,7 +248,9 @@ export default function BuyCrypto() {
               className="flex items-center justify-between w-full border px-4 py-3 rounded-lg text-sm"
             >
               <div className="flex items-center">
-                <span className="mr-2">{selectedCountry.flag}</span>
+              <span className="mr-2">
+  <Image src={selectedCountry.flag} alt={`${selectedCountry.name} flag`} width={24} height={16} />
+</span>
                 <span>{selectedCountry.name}</span>
               </div>
               <ChevronDownIcon className="h-4 w-4 ml-2" />
@@ -265,7 +267,9 @@ export default function BuyCrypto() {
                       setShowCountryDropdown(false);
                     }}
                   >
-                    <span className="mr-2">{country.flag}</span>
+                    <span className="mr-2">
+  <Image src={country.flag} alt={`${country.name} flag`} width={24} height={16} />
+</span>
                     {country.name}
                   </button>
                 ))}
