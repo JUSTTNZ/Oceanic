@@ -7,10 +7,9 @@ import {
   CheckIcon, 
   ArrowPathIcon,
   ChevronDownIcon,
-  ArrowLeftIcon
+
 } from "@heroicons/react/24/outline";
 import Image from "next/image";
-import { useRouter } from "next/router";
 
 interface Coin {
   id: string;
@@ -74,7 +73,6 @@ const SUPPORTED_COINS = Object.keys(BYBIT_WALLET_ADDRESSES);
 type TransactionStatus = 'pending' | 'sent' | 'received' | 'completed' | 'failed';
 
 export default function SellCrypto() {
-  const router = useRouter();
   const [copied, setCopied] = useState(false);
   const [status, setStatus] = useState<TransactionStatus>('pending');
   const [isChecking, setIsChecking] = useState(false);
@@ -83,7 +81,7 @@ export default function SellCrypto() {
   const [searchCoin, setSearchCoin] = useState("");
   const [coins, setCoins] = useState<Coin[]>([]);
   const [selectedCoin, setSelectedCoin] = useState<Coin | null>(null);
-  const [selectedCountry, setSelectedCountry] = useState<Country>({ 
+  const [selectedCountry,] = useState<Country>({ 
     code: "NG", 
     name: "Nigeria" 
   });
@@ -137,7 +135,7 @@ export default function SellCrypto() {
   const startCheckingTransaction = () => {
     setIsChecking(true);
     
-    // Simulate API check (replace with actual API calls)
+    // Simulate API check (we will call api to check is payment here)
     const checkInterval = setInterval(() => {
       const isConfirmed = Math.random() > 0.7; // 70% success rate for demo
       
@@ -146,7 +144,7 @@ export default function SellCrypto() {
         clearInterval(checkInterval);
         setIsChecking(false);
         
-        // Simulate admin processing
+        // Simulate admin processing(we will add admin logic here later)
         setTimeout(() => {
           setStatus('completed');
         }, 2000);
@@ -177,7 +175,6 @@ export default function SellCrypto() {
 
   return (
     <div className="bg-white min-h-screen">
-      {/* Back Button */}
 
       <motion.div
         key="sell"
@@ -187,7 +184,7 @@ export default function SellCrypto() {
         transition={{ duration: 0.3 }}
         className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl mx-auto py-14 px-4"
       >
-        {/* Left Side - Instructions */}
+       
         <div className="space-y-6">
           <h1 className="text-4xl md:text-5xl font-bold">
             Sell your crypto <br /> Instantly and securely.
@@ -243,7 +240,6 @@ export default function SellCrypto() {
             </div>
           </div>
 
-          {/* Supported Coins List */}
           <div className="pt-4">
             <h4 className="font-medium text-gray-700">Supported Cryptocurrencies:</h4>
             <div className="flex flex-wrap gap-2 mt-2">
@@ -256,7 +252,7 @@ export default function SellCrypto() {
           </div>
         </div>
 
-        {/* Right Side - Transaction Form */}
+        
         <div className="w-full max-w-sm mx-auto border border-gray-200 rounded-xl p-6 shadow-sm space-y-4">
           <h2 className="text-center font-semibold text-lg mb-4">Sell Crypto</h2>
           
@@ -266,7 +262,7 @@ export default function SellCrypto() {
             <div className="relative">
               <button
                 onClick={() => setShowCoinDropdown(!showCoinDropdown)}
-                className="flex items-center justify-between w-full border px-4 py-3 rounded-lg text-sm"
+                className="flex items-center justify-between w-full border px-4 py-3 rounded-lg text-sm focus:border-blue-300 focus:outline-none"
                 disabled={status !== 'pending'}
               >
                 {selectedCoin ? (
@@ -292,24 +288,24 @@ export default function SellCrypto() {
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg"
+                    className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg "
                   >
-                    <div className="p-2 border-b">
+                    <div className="p-2 border-b border-blue-300">
                       <input
                         type="text"
                         placeholder="Search coins..."
-                        className="w-full px-3 py-2 text-sm border rounded-md"
+                        className="w-full px-3 py-2 text-sm border rounded-md focus:border-blue-300 focus:outline-none"
                         value={searchCoin}
                         onChange={(e) => setSearchCoin(e.target.value)}
                         autoFocus
                       />
                     </div>
-                    <div className="max-h-60 overflow-y-auto">
+                    <div className="max-h-60 overflow-y-auto scrollbar-hide">
                       {filteredCoins.length > 0 ? (
                         filteredCoins.map((coin) => (
                           <button
                             key={coin.id}
-                            className="flex items-center w-full px-4 py-2 text-sm hover:bg-gray-100"
+                            className="flex items-center w-full px-4 py-2 text-sm hover:bg-blue-100"
                             onClick={() => {
                               setSelectedCoin(coin);
                               setShowCoinDropdown(false);
@@ -338,7 +334,6 @@ export default function SellCrypto() {
             </div>
           </div>
 
-          {/* Wallet Address */}
           {selectedCoin && walletAddress && (
             <div className="space-y-2">
               <div className="flex justify-between items-center">
@@ -376,13 +371,13 @@ export default function SellCrypto() {
               id="txid"
               type="text"
               placeholder="Paste your transaction hash here"
-              className="border px-4 py-3 rounded-lg w-full text-sm"
+              className="border px-4 py-3 rounded-lg w-full text-sm  focus:border-blue-300 focus:outline-none"
               value={txid}
               onChange={(e) => setTxid(e.target.value)}
               disabled={status !== 'pending'}
             />
             <p className="text-xs text-gray-500">
-              Find this in your wallet's transaction history after sending
+              Find this in your wallet&apos;s transaction history after sending
             </p>
           </div>
 
@@ -440,7 +435,7 @@ export default function SellCrypto() {
             <div className="p-3 bg-yellow-50 rounded-lg text-yellow-700 text-xs">
               <p className="font-medium">Important:</p>
               <p>
-                Ensure you're sending {selectedCoin.name} ({selectedCoin.symbol.toUpperCase()}) on the correct network.
+                Ensure you&apos;re sending {selectedCoin.name} ({selectedCoin.symbol.toUpperCase()}) on the correct network.
                 Sending on wrong networks may result in permanent loss.
               </p>
             </div>
