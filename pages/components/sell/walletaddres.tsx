@@ -1,6 +1,6 @@
 import { CheckIcon, ClipboardDocumentIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
 interface Coin {

@@ -1,9 +1,12 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Image from "next/image";
 import { useState, useEffect } from "react";
-import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import CountryDropdown from "../components/buy/country";
+import CoinDropdown from "../components/buy/coin";
+import AmountInput from "../components/buy/amout";
+import ConversionDisplay from "../components/buy/conversion";
+import FirstSide from "../components/buy/firstside";
 
 interface Coin {
   id: string;
@@ -21,15 +24,32 @@ interface Country {
   currencySymbol: string;
 }
 
+  interface Currency {
+    [code: string]: {
+      name: string;
+      symbol: string;
+    };
+  }
+  
+  interface ApiCountry {
+    cca2: string;
+    name: {
+      common: string;
+    };
+    flags: {
+      png?: string;
+      svg?: string;
+    };
+    currencies: Currency;
+  }
+  
+  
 export default function BuyCrypto() {
   const [coins, setCoins] = useState<Coin[]>([]);
   const [selectedCoin, setSelectedCoin] = useState<Coin | null>(null);
   const [amount, setAmount] = useState<string>("");
   const [coinAmount, setCoinAmount] = useState<number>(0);
   const [exchangeRate, setExchangeRate] = useState<number>(0);
-  const [showCoinDropdown, setShowCoinDropdown] = useState(false);
-  const [showCountryDropdown, setShowCountryDropdown] = useState(false);
-  const [searchCoin, setSearchCoin] = useState("");
   const [countries, setCountries] = useState<Country[]>([]);
   const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
   const [loading, setLoading] = useState(true);
@@ -65,10 +85,10 @@ export default function BuyCrypto() {
         const data = await response.json();
         
         const formattedCountries = data
-          .filter((country: any) => 
+          .filter((country: ApiCountry) => 
             country.currencies && Object.keys(country.currencies).length > 0
           )
-          .map((country: any) => {
+          .map((country: ApiCountry) => {
             const currencyCode = Object.keys(country.currencies)[0];
             return {
               code: country.cca2,
@@ -146,17 +166,7 @@ export default function BuyCrypto() {
     }
   }, [amount, selectedCoin, exchangeRate, selectedCountry]);
 
-  const filteredCoins = coins.filter(coin =>
-    coin.name.toLowerCase().includes(searchCoin.toLowerCase()) ||
-    coin.symbol.toLowerCase().includes(searchCoin.toLowerCase())
-  );
 
-  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (/^\d*\.?\d*$/.test(value)) {
-      setAmount(value);
-    }
-  };
 
   const formatCurrency = (value: number) => {
     if (!selectedCountry) return value.toString();
@@ -202,187 +212,49 @@ export default function BuyCrypto() {
       transition={{ duration: 0.3 }}
       className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl mx-auto py-14 px-4"
     >
-      <div className="space-y-6">
-        <h1 className="text-4xl md:text-5xl font-bold">
-          Buy Crypto Instantly <br /> With Local Currency
-        </h1>
-        <p className="text-gray-600 text-base">
-          Get the best rates in {selectedCountry.name} with instant delivery to your wallet.
-        </p>
-        
-        {coins.length > 0 && (
-          <div className="pt-4">
-            <h4 className="font-medium text-gray-700">Current Prices:</h4>
-            <div className="grid grid-cols-2 gap-2 mt-2">
-              {coins.slice(0, 4).map(coin => (
-                <div key={coin.id} className="flex items-center p-2 bg-gray-50 rounded-lg">
-                  <Image 
-                    src={coin.image} 
-                    alt={coin.name} 
-                    width={24} 
-                    height={24} 
-                    className="mr-2"
-                  />
-                  <div>
-                    <p className="font-medium">{coin.symbol.toUpperCase()}</p>
-                    <p className="text-sm">
-                      {formatCurrency(coin.current_price * exchangeRate)}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-
+    
+ <FirstSide
+        coins={coins}
+        selectedCountry={selectedCountry}
+        exchangeRate={exchangeRate}
+      />
       <div className="w-full max-w-sm mx-auto border border-gray-200 rounded-xl p-6 shadow-sm space-y-4">
         <h2 className="text-center font-semibold text-lg mb-4">Buy Crypto</h2>
 
         {/* Country Selector */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">Country</label>
-          <div className="relative">
-            <button
-              onClick={() => setShowCountryDropdown(!showCountryDropdown)}
-              className="flex items-center justify-between w-full border px-4 py-3 rounded-lg text-sm"
-            >
-              <div className="flex items-center">
-              <span className="mr-2">
-  <Image src={selectedCountry.flag} alt={`${selectedCountry.name} flag`} width={24} height={16} />
-</span>
-                <span>{selectedCountry.name}</span>
-              </div>
-              <ChevronDownIcon className="h-4 w-4 ml-2" />
-            </button>
-
-            {showCountryDropdown && (
-              <div className="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                {countries.map((country) => (
-                  <button
-                    key={country.code}
-                    className="flex items-center w-full px-4 py-2 text-sm hover:bg-gray-100"
-                    onClick={() => {
-                      setSelectedCountry(country);
-                      setShowCountryDropdown(false);
-                    }}
-                  >
-                    <span className="mr-2">
-  <Image src={country.flag} alt={`${country.name} flag`} width={24} height={16} />
-</span>
-                    {country.name}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
+        <CountryDropdown
+  countries={countries}
+  selectedCountry={selectedCountry}
+  onSelect={(country) => setSelectedCountry(country)}
+  className="mb-4"
+/>
 
         {/* Coin Selector */}
-        {selectedCoin && (
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Cryptocurrency</label>
-            <div className="relative">
-              <button
-                onClick={() => setShowCoinDropdown(!showCoinDropdown)}
-                className="flex items-center justify-between w-full border px-4 py-3 rounded-lg text-sm"
-              >
-                <div className="flex items-center">
-                  <Image 
-                    src={selectedCoin.image} 
-                    alt={selectedCoin.name} 
-                    width={24} 
-                    height={24} 
-                    className="mr-2"
-                  />
-                  <span>{selectedCoin.name} ({selectedCoin.symbol.toUpperCase()})</span>
-                </div>
-                <ChevronDownIcon className="h-4 w-4 ml-2" />
-              </button>
-
-              {showCoinDropdown && (
-                <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg">
-                  <div className="p-2 border-b">
-                    <input
-                      type="text"
-                      placeholder="Search coins..."
-                      className="w-full px-3 py-2 text-sm border rounded-md"
-                      value={searchCoin}
-                      onChange={(e) => setSearchCoin(e.target.value)}
-                      autoFocus
-                    />
-                  </div>
-                  <div className="max-h-60 overflow-y-auto">
-                    {filteredCoins.map((coin) => (
-                      <button
-                        key={coin.id}
-                        className="flex items-center w-full px-4 py-2 text-sm hover:bg-gray-100"
-                        onClick={() => {
-                          setSelectedCoin(coin);
-                          setShowCoinDropdown(false);
-                          setSearchCoin("");
-                        }}
-                      >
-                        <Image 
-                          src={coin.image} 
-                          alt={coin.name} 
-                          width={20} 
-                          height={20} 
-                          className="mr-2"
-                        />
-                        {coin.name} ({coin.symbol.toUpperCase()}) - 
-                        <span className="ml-2 font-medium">
-                          {formatCurrency(coin.current_price * exchangeRate)}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
+        <CoinDropdown 
+  coins={coins}
+  selectedCoin={selectedCoin}
+  onSelect={(coin) => setSelectedCoin(coin)}
+  exchangeRate={exchangeRate}
+  formatCurrency={formatCurrency}
+/>
         {/* Amount Input */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">
-            Amount in {selectedCountry.currency} ({selectedCountry.currencySymbol})
-          </label>
-          <input
-            type="text"
-            placeholder="0.00"
-            className="border px-4 py-3 rounded-lg w-full text-right text-lg font-medium"
-            value={amount}
-            onChange={handleAmountChange}
-          />
-        </div>
+        <AmountInput
+  selectedCountry={selectedCountry}
+  value={amount}
+  onChange={setAmount}
+  className="mb-4"
+/>
 
         {/* Conversion Display */}
-        <div className="bg-gray-50 p-4 rounded-lg space-y-2">
-          <div className="flex justify-between items-center">
-            <span className="text-gray-600">Service Fee:</span>
-            <span className="font-medium">
-              {selectedCountry.currencySymbol}{serviceFee}
-            </span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-gray-600">You pay:</span>
-            <span className="font-semibold">
-              {selectedCountry.currencySymbol}{parseFloat(amount || "0").toLocaleString('en-US')}
-            </span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-gray-600">You receive:</span>
-            <span className="font-semibold">
-              {coinAmount} {selectedCoin?.symbol.toUpperCase()}
-            </span>
-          </div>
-          {selectedCoin && (
-            <div className="pt-2 text-xs text-gray-500 border-t">
-              Rate: {formatCurrency(selectedCoin.current_price * exchangeRate)} per {selectedCoin.symbol.toUpperCase()}
-            </div>
-          )}
-        </div>
+        <ConversionDisplay
+  selectedCountry={selectedCountry}
+  selectedCoin={selectedCoin}
+  serviceFee={30}
+  amount={amount}
+  coinAmount={coinAmount}
+  exchangeRate={exchangeRate}
+  formatCurrency={(amount) => `₦${amount.toFixed(2)}`}
+/>
 
         <button 
           className="w-full bg-[#0047AB] text-white font-semibold py-3 rounded-full mt-4 hover:bg-blue-700 transition-colors disabled:opacity-50"
