@@ -31,6 +31,11 @@ interface Country {
   code: string;
 }
 
+interface ApiCountry {
+  name: { common: string };
+  cca2: string;
+}
+
 export default function SendPage() {
   const [activeTab, setActiveTab] = useState<"buy" | "sell">("buy");
   const [searchCoin, setSearchCoin] = useState("");
@@ -55,10 +60,12 @@ export default function SendPage() {
       setCoins(data);
       setSelectedCoin(data[0]);
     };
+    
+
     const fetchCountries = async () => {
       const res = await fetch("https://restcountries.com/v3.1/all");
-      const data = await res.json();
-      const sorted = data.map((c: any) => ({
+      const data: ApiCountry[] = await res.json();
+      const sorted = data.map((c: ApiCountry) => ({
         name: c.name.common,
         code: c.cca2
       })).sort((a: Country, b: Country) => a.name.localeCompare(b.name));
@@ -177,13 +184,13 @@ export default function SendPage() {
               <ChevronDownIcon className="w-5 h-5 text-gray-400" />
             </div>
             {showCountryList && (
-              <div className="absolute z-10 bg-white w-full border mt-2 rounded-lg shadow-md p-3 max-h-60 overflow-y-auto">
+              <div className="absolute z-10 bg-white w-full mt-2 rounded-lg p-3 max-h-60 overflow-y-auto">
                 <input
                   type="text"
                   placeholder="Search country..."
                   value={searchCountry}
                   onChange={(e) => setSearchCountry(e.target.value)}
-                  className="w-full mb-2 border px-3 py-2 rounded-md"
+                  className="w-full mb-2 px-3 py-2 rounded-md border-none focus:outline-none"
                 />
                 <ul>
                   {filteredCountries.map((country) => (
