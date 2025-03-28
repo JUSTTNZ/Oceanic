@@ -1,8 +1,14 @@
-import SendPage from './page'
+import Footer from '../login/footer'
+import Header from '../login/header'
+import CryptoExchangePage from './page'
+
 export default function Send() {
     return (
         <div>
-            <SendPage />
+            <Header />
+         
+            <CryptoExchangePage />
+            <Footer />
         </div>
     )
 }

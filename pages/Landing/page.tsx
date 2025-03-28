@@ -8,7 +8,7 @@ interface LandingProps {
   coins: Coin[];
 }
 
-export type Coin = {
+interface Coin  {
   id: string;
   name: string;
   symbol: string;

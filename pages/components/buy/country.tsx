@@ -21,9 +21,18 @@ export default function CountryDropdown({
   countries,
   selectedCountry,
   onSelect,
-  className = ""
+  className = "",
 }: CountryDropdownProps) {
   const [showDropdown, setShowDropdown] = useState(false);
+
+  // Fallback for undefined selectedCountry
+  const safeSelectedCountry = selectedCountry || {
+    code: "",
+    name: "Select a country",
+    flag: "/default-flag.png", // Provide a default flag
+    currency: "",
+    currencySymbol: "",
+  };
 
   return (
     <div className={`space-y-2 ${className}`}>
@@ -38,14 +47,14 @@ export default function CountryDropdown({
           <div className="flex items-center">
             <span className="mr-2">
               <Image 
-                src={selectedCountry.flag} 
-                alt={`${selectedCountry.name} flag`} 
+                src={safeSelectedCountry.flag} 
+                alt={`${safeSelectedCountry.name} flag`} 
                 width={24} 
                 height={16}
                 className="object-contain"
               />
             </span>
-            <span>{selectedCountry.name}</span>
+            <span>{safeSelectedCountry.name}</span>
           </div>
           <ChevronDownIcon 
             className={`h-4 w-4 ml-2 transition-transform ${showDropdown ? 'rotate-180' : ''}`}
@@ -66,12 +75,12 @@ export default function CountryDropdown({
                   setShowDropdown(false);
                 }}
                 role="option"
-                aria-selected={country.code === selectedCountry.code}
+                aria-selected={country.code === safeSelectedCountry.code}
               >
                 <span className="mr-2">
                   <Image 
                     src={country.flag} 
-                    alt={`${country.flag} flag`} 
+                    alt={`${country.name} flag`} 
                     width={24} 
                     height={16}
                     className="object-contain"

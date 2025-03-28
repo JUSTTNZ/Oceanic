@@ -3,8 +3,18 @@
 import Image from "next/image";
 import { useState } from "react";
 import Link from "next/link";
-import { Coin } from "./page";
 
+
+interface Coin  {
+  id: string;
+  name: string;
+  symbol: string;
+  image: string;
+  current_price: number;
+  sparkline_in_7d: {
+    price: number[];
+  };
+};
 interface CoinLiveProps {
   coins: Coin[];
 }

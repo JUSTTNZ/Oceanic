@@ -60,9 +60,10 @@ export default function BuyCrypto() {
   useEffect(() => {
     const fetchCoins = async () => {
       try {
-        const response = await fetch(
-          "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1"
-        );
+        const response = await fetch("/api/coin");
+        if (!response.ok) {
+          throw new Error("Failed to fetch cryptocurrencies");
+        }
         const data = await response.json();
         setCoins(data);
         if (data.length > 0) {
@@ -81,7 +82,10 @@ export default function BuyCrypto() {
   useEffect(() => {
     const fetchCountries = async () => {
       try {
-        const response = await fetch("https://restcountries.com/v3.1/all");
+        const response = await fetch("/api/country");
+        if (!response.ok) {
+          throw new Error("Failed to fetch cryptocurrencies");
+        }
         const data = await response.json();
         
         const formattedCountries = data
@@ -120,29 +124,13 @@ export default function BuyCrypto() {
       if (!selectedCountry) return;
 
       try {
-        // Using ExchangeRate-API (you'll need an API key for production)
-        // This is a free tier simulation - replace with actual API call
-        const rates: Record<string, number> = {
-          NG: 1500, // Nigeria - NGN
-          US: 1,    // USA - USD
-          GH: 12,   // Ghana - GHS
-          KE: 150,  // Kenya - KES
-          ZA: 18,   // South Africa - ZAR
-          UK: 0.8,  // UK - GBP
-          EU: 0.9   // Eurozone - EUR
-        };
-        
-        // Simulated API response
-        setExchangeRate(rates[selectedCountry.code] || 1);
-        
-        /* 
-        // Production API call example:
-        const response = await fetch(
-          `https://v6.exchangerate-api.com/v6/YOUR_API_KEY/latest/USD`
-        );
+        const response = await fetch("/api/rate");
+        if (!response.ok) {
+          throw new Error("Failed to fetch cryptocurrencies");
+        }
         const data = await response.json();
         setExchangeRate(data.conversion_rates[selectedCountry.currency] || 1);
-        */
+        
       } catch (err) {
         console.error("Error fetching exchange rate:", err);
         setExchangeRate(1); // Fallback to 1:1 rate
@@ -210,11 +198,11 @@ export default function BuyCrypto() {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -30 }}
       transition={{ duration: 0.3 }}
-      className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl mx-auto py-14 px-4"
+      className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl mx-auto py-14 px-4  "
     >
     
  <FirstSide
-        coins={coins}
+        coins={coins || []}
         selectedCountry={selectedCountry}
         exchangeRate={exchangeRate}
       />
