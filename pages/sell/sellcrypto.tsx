@@ -172,8 +172,8 @@ export default function SellCrypto() {
         className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl mx-auto py-14 px-4"
       >
        
-        <div className="space-y-6">
-          <h1 className="text-4xl md:text-5xl font-bold">
+        <div className="space-y-6 lg:px-0 px-2">
+          <h1 className="text-3xl md:text-5xl font-bold">
             Sell your crypto <br /> Instantly and securely.
           </h1>
           <p className="text-gray-600 text-base">
