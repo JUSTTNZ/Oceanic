@@ -60,3 +60,12 @@ body {
 .animate-bounce-infinite {
   animation: bounce-loop 5s ease-out infinite;
 }
+/* Hide scrollbar but keep scrolling */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none; /* Hide scrollbar in IE and Edge */
+  scrollbar-width: none; /* Hide scrollbar in Firefox */
+}
