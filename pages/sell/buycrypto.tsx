@@ -60,9 +60,10 @@ export default function BuyCrypto() {
   useEffect(() => {
     const fetchCoins = async () => {
       try {
-        const response = await fetch(
-          "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1"
-        );
+        const response = await fetch("/api/coin");
+        if (!response.ok) {
+          throw new Error("Failed to fetch cryptocurrencies");
+        }
         const data = await response.json();
         setCoins(data);
         if (data.length > 0) {
@@ -81,7 +82,10 @@ export default function BuyCrypto() {
   useEffect(() => {
     const fetchCountries = async () => {
       try {
-        const response = await fetch("https://restcountries.com/v3.1/all");
+        const response = await fetch("/api/country");
+        if (!response.ok) {
+          throw new Error("Failed to fetch cryptocurrencies");
+        }
         const data = await response.json();
         
         const formattedCountries = data

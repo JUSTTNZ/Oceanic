@@ -89,9 +89,10 @@ export default function SellCrypto() {
   useEffect(() => {
     const fetchCoins = async () => {
       try {
-        const res = await fetch(
-          "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&per_page=100"
-        );
+        const res = await fetch("/api/coin");
+        if (!res.ok) {
+          throw new Error("Failed to fetch cryptocurrencies");
+        }
         const data = await res.json();
         const supported = data.filter((coin: Coin) => 
           SUPPORTED_COINS.includes(coin.symbol.toUpperCase())
@@ -256,8 +257,7 @@ export default function SellCrypto() {
 />
           </>
           
-
-          <>
+  <>
           <WalletAddressDisplay
   selectedCoin={selectedCoin}
   selectedCountry={selectedCountry}
