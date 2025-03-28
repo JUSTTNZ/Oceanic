@@ -202,7 +202,7 @@ export default function BuyCrypto() {
     >
     
  <FirstSide
-        coins={coins}
+        coins={coins || []}
         selectedCountry={selectedCountry}
         exchangeRate={exchangeRate}
       />

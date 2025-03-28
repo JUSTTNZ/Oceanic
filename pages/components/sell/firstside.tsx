@@ -10,7 +10,7 @@
 
   }
   
-export default function FirstSide ({status,SUPPORTED_COINS}: CryptoProps){
+export default function FirstSide ({ status = 'pending', SUPPORTED_COINS = [] }: Partial<CryptoProps>) {
 
 
     return(
