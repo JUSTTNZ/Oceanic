@@ -20,20 +20,22 @@ export default function Navbar() {
 
   const megaMenus = {
     Trade: [
-      { icon: CreditCardIcon, title: "Cards", desc: "Spend globally." },
-      { icon: RocketLaunchIcon, title: "Instant Swap", desc: "Swap fast." },
-      { icon: LockClosedIcon, title: "Buy/Sell", desc: "Deep liquidity." },
-      { icon: Squares2X2Icon, title: "P2P", desc: "Launch tokens." },
+      { icon: CreditCardIcon, title: "Cards", desc: "Spend money globally with a card that does it all." },
+      { icon: RocketLaunchIcon, title: "Instant Swap", desc: "Buy your favourite cryptocurrency in 2 mins or less." },
+      { icon: LockClosedIcon, title: "Buy/Sell", desc: "Trade cryptocurrencies instantly with deep liquidity and competitive rates." },
+      { icon: Squares2X2Icon, title: "P2P", desc: "Securely buy and sell crypto directly with other users." },
     ],
     Resources: [
-      { icon: UsersIcon, title: "Community", desc: "Join community." },
-      { icon: RocketLaunchIcon, title: "Tutorials", desc: "Easy guides." },
-      { icon: BookOpenIcon, title: "Docs", desc: "Technical docs." },
+      { icon: UsersIcon, title: "Community", desc: "Connect with other traders and stay updated on the latest trends." },
+      { icon: RocketLaunchIcon, title: "Tutorials", desc: "Step-by-step guides to help you navigate crypto trading with ease." },
+      { icon: BookOpenIcon, title: "Docs", desc: "Comprehensive technical documentation for developers and traders." },
+      
     ],
     Company: [
-      { icon: BriefcaseIcon, title: "About Us", desc: "About Oceanic." },
-      { icon: BookOpenIcon, title: "Careers", desc: "Work with us." },
-      { icon: RocketLaunchIcon, title: "Blog", desc: "Read updates." },
+      { icon: BriefcaseIcon, title: "About Us", desc: "Learn more about Oceanic and our mission to revolutionize trading." },
+      { icon: BookOpenIcon, title: "Careers", desc: "Join our team and build a future in the world of crypto and finance." },
+      { icon: RocketLaunchIcon, title: "Blog", desc: "Stay informed with the latest news, insights, and market trends." },
+      
     ],
   };
 
@@ -48,34 +50,55 @@ export default function Navbar() {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex text-xl space-x-12 font-semibold">
-          {Object.keys(megaMenus).map((menu) => (
-            <div key={menu} onMouseEnter={() => setHoverItem(menu)} onMouseLeave={() => setHoverItem(null)} className="relative">
-              <p className={`flex items-center cursor-pointer ${hoverItem === menu ? "text-[#0047AB]" : ""}`}>
-                {menu}
-                <ChevronDownIcon className={`w-4 h-4 ml-1 transition-transform duration-300 ${hoverItem === menu ? "rotate-180 text-[#0047AB]" : ""}`} />
-              </p>
-              {hoverItem === menu && (
-                <div className="absolute left-0 top-[130%] bg-white rounded-md px-8 py-6 shadow-xl flex gap-8">
-                  {megaMenus[menu as keyof typeof megaMenus].map((item, idx) => (
-                    <div key={idx} className="flex-1 min-w-[150px] group cursor-pointer">
-                      <Link href="../sell"><item.icon className="h-8 w-8 text-[#0047AB] mb-2" /></Link>
-                      <Link href="../sell"><h3 className="text-lg font-semibold group-hover:text-[#0047AB]">{item.title}</h3></Link>
-                      <p className="text-sm text-gray-600">{item.desc}</p>
-                    </div>
-                  ))}
-                  <div className="flex flex-col justify-end">
-                    <Link href="/all"><p className="text-[#0047AB] font-semibold hover:underline">See All {menu}</p></Link>
-                  </div>
-                </div>
-              )}
+  {Object.keys(megaMenus).map((menu) => (
+    <div
+      key={menu}
+      onMouseEnter={() => setHoverItem(menu)}
+      onMouseLeave={() => setHoverItem(null)}
+      className="relative"
+    >
+      <p className={`flex items-center cursor-pointer ${hoverItem === menu ? "text-[#0047AB]" : ""}`}>
+        {menu}
+        <ChevronDownIcon
+          className={`w-4 h-4 ml-1 transition-transform duration-300 ${hoverItem === menu ? "rotate-180 text-[#0047AB]" : ""}`}
+        />
+      </p>
+      {hoverItem === menu && (
+        <div className="fixed left-0 right-0  shadow-xl z-10">
+          <div className="max-w-screen-xl mx-auto w-full bg-white rounded-md px-8 py-6 flex gap-4 pt-20">
+          <div className="grid grid-cols-4 gap-16 w-full pt-10 pb-5">
+  {megaMenus[menu as keyof typeof megaMenus].map((item, idx) => (
+    <div key={idx} className="group cursor-pointer">
+      <Link href="../sell">
+        <item.icon className="h-10 w-10 text-[#0047AB] mb-4" />
+      </Link>
+      <Link href="../sell">
+        <h3 className="text-lg font-semibold group-hover:text-[#0047AB] mb-3">
+          {item.title}
+        </h3>
+      </Link>
+      <p className="text-sm text-gray-600">{item.desc}</p>
+    </div>
+  ))}
+</div>
+
+            <div className="flex flex-col justify-end">
+              {/* <Link href="/all">
+                <p className="text-[#0047AB] font-semibold hover:underline">See All {menu}</p>
+              </Link> */}
             </div>
-          ))}
-        </nav>
+          </div>
+        </div>
+      )}
+    </div>
+  ))}
+</nav>
+
 
         {/* Desktop buttons */}
         <div className="hidden md:flex space-x-8 items-center">
           <p className="text-[#0047AB] text-lg cursor-pointer">Sign in</p>
-          <p className="text-white bg-[#0047AB] px-6 py-2 text-lg rounded-md hover:bg-[#459af5] cursor-pointer">Get Started</p>
+          <p className="text-white bg-[#0047AB] px-6 py-2 text-lg rounded-md hover:bg-[#459af5] cursor-pointer z-20">Get Started</p>
         </div>
 
         {/* Mobile Hamburger */}
