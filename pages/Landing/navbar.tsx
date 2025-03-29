@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronDownIcon,
   ChevronUpIcon,
@@ -29,13 +30,11 @@ export default function Navbar() {
       { icon: UsersIcon, title: "Community", desc: "Connect with other traders and stay updated on the latest trends." },
       { icon: RocketLaunchIcon, title: "Tutorials", desc: "Step-by-step guides to help you navigate crypto trading with ease." },
       { icon: BookOpenIcon, title: "Docs", desc: "Comprehensive technical documentation for developers and traders." },
-      
     ],
     Company: [
       { icon: BriefcaseIcon, title: "About Us", desc: "Learn more about Oceanic and our mission to revolutionize trading." },
       { icon: BookOpenIcon, title: "Careers", desc: "Join our team and build a future in the world of crypto and finance." },
       { icon: RocketLaunchIcon, title: "Blog", desc: "Stay informed with the latest news, insights, and market trends." },
-      
     ],
   };
 
@@ -50,50 +49,60 @@ export default function Navbar() {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex text-xl space-x-12 font-semibold">
-  {Object.keys(megaMenus).map((menu) => (
-    <div
-      key={menu}
-      onMouseEnter={() => setHoverItem(menu)}
-      onMouseLeave={() => setHoverItem(null)}
-      className="relative"
-    >
-      <p className={`flex items-center cursor-pointer ${hoverItem === menu ? "text-[#0047AB]" : ""}`}>
-        {menu}
-        <ChevronDownIcon
-          className={`w-4 h-4 ml-1 transition-transform duration-300 ${hoverItem === menu ? "rotate-180 text-[#0047AB]" : ""}`}
-        />
-      </p>
-      {hoverItem === menu && (
-        <div className="fixed left-0 right-0  shadow-xl z-10">
-          <div className="max-w-screen-xl mx-auto w-full bg-white rounded-md px-8 py-6 flex gap-4 pt-20">
-          <div className="grid grid-cols-4 gap-16 w-full pt-10 pb-5">
-  {megaMenus[menu as keyof typeof megaMenus].map((item, idx) => (
-    <div key={idx} className="group cursor-pointer">
-      <Link href="../sell">
-        <item.icon className="h-10 w-10 text-[#0047AB] mb-4" />
-      </Link>
-      <Link href="../sell">
-        <h3 className="text-lg font-semibold group-hover:text-[#0047AB] mb-3">
-          {item.title}
-        </h3>
-      </Link>
-      <p className="text-sm text-gray-600">{item.desc}</p>
-    </div>
-  ))}
-</div>
+          {Object.keys(megaMenus).map((menu) => (
+            <div
+              key={menu}
+              onMouseEnter={() => setHoverItem(menu)}
+              onMouseLeave={() => setHoverItem(null)}
+              className="relative"
+            >
+              <p className={`flex items-center cursor-pointer ${hoverItem === menu ? "text-[#0047AB]" : ""}`}>
+                {menu}
+                <ChevronDownIcon
+                  className={`w-4 h-4 ml-1 transition-transform duration-300 ${hoverItem === menu ? "rotate-180 text-[#0047AB]" : ""}`}
+                />
+              </p>
 
-            <div className="flex flex-col justify-end">
-              {/* <Link href="/all">
-                <p className="text-[#0047AB] font-semibold hover:underline">See All {menu}</p>
-              </Link> */}
+              {/* Animated Dropdown */}
+              <AnimatePresence>
+                {hoverItem === menu && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.3 }}
+                    className="fixed left-0 right-0 shadow-xl z-10"
+                  >
+                    <div className="max-w-screen-xl mx-auto w-full bg-white rounded-md px-8 py-6 flex gap-4 pt-20">
+                      <div className="grid grid-cols-4 gap-16 w-full pt-10 pb-5">
+                        {megaMenus[menu as keyof typeof megaMenus].map((item, idx) => (
+                          <motion.div
+                            key={idx}
+                            className="group cursor-pointer"
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -10 }}
+                            transition={{ duration: 0.3, delay: idx * 0.1 }}
+                          >
+                            <Link href="../sell">
+                              <item.icon className="h-10 w-10 text-[#0047AB] mb-4" />
+                            </Link>
+                            <Link href="../sell">
+                              <h3 className="text-lg font-semibold group-hover:text-[#0047AB] mb-3">
+                                {item.title}
+                              </h3>
+                            </Link>
+                            <p className="text-sm text-gray-600">{item.desc}</p>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
-          </div>
-        </div>
-      )}
-    </div>
-  ))}
-</nav>
-
+          ))}
+        </nav>
 
         {/* Desktop buttons */}
         <div className="hidden md:flex space-x-8 items-center">
@@ -112,34 +121,45 @@ export default function Navbar() {
       </div>
 
       {/* Mobile Collapsible Menu */}
-      {isOpen && (
-        <div className="md:hidden px-6 pb-6 space-y-6">
-          {Object.keys(megaMenus).map((menu) => (
-            <div key={menu}>
-              <div onClick={() => toggleSection(menu)} className="flex justify-between items-center cursor-pointer py-2 font-semibold">
-                <span className={openSection === menu ? "text-[#0047AB]" : ""}>{menu}</span>
-                {openSection === menu ? (
-                  <ChevronUpIcon className="w-4 h-4 text-[#0047AB]" />
-                ) : (
-                  <ChevronDownIcon className="w-4 h-4 text-gray-700" />
-                )}
-              </div>
-              {openSection === menu && (
-                <div className="space-y-4 font-thin pl-4 py-2 bg-gray-50 rounded">
-                  {megaMenus[menu as keyof typeof megaMenus].map((item, idx) => (
-                    <p key={idx} className="text-sm text-gray-700 hover:text-[#0047AB] cursor-pointer">{item.title}</p>
-                  ))}
-                  <p className="text-[#0047AB] font-semibold text-sm cursor-pointer mt-2">See All {menu}</p>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3 }}
+            className="md:hidden px-6 pb-6 space-y-6"
+          >
+            {Object.keys(megaMenus).map((menu) => (
+              <div key={menu}>
+                <div onClick={() => toggleSection(menu)} className="flex justify-between items-center cursor-pointer py-2 font-semibold">
+                  <span className={openSection === menu ? "text-[#0047AB]" : ""}>{menu}</span>
+                  {openSection === menu ? (
+                    <ChevronUpIcon className="w-4 h-4 text-[#0047AB]" />
+                  ) : (
+                    <ChevronDownIcon className="w-4 h-4 text-gray-700" />
+                  )}
                 </div>
-              )}
-            </div>
-          ))}
-          <div className="pt-4 space-y-3">
-            <p className="text-black font-semibold">Sign In</p>
-            <button className="bg-[#0047AB] w-full py-3 rounded text-white font-bold">Get Started</button>
-          </div>
-        </div>
-      )}
+                <AnimatePresence>
+                  {openSection === menu && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -5 }}
+                      transition={{ duration: 0.3 }}
+                      className="space-y-4 font-thin pl-4 py-2 bg-gray-50 rounded"
+                    >
+                      {megaMenus[menu as keyof typeof megaMenus].map((item, idx) => (
+                        <p key={idx} className="text-sm text-gray-700 hover:text-[#0047AB] cursor-pointer">{item.title}</p>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 }
