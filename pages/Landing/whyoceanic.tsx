@@ -7,6 +7,8 @@ export default function WhyOceanic() {
             <Image 
                 src= "/Images/phone.png"
                 alt='phone'
+                width={400}
+                height={700}
             />
         </div>
         <div>
