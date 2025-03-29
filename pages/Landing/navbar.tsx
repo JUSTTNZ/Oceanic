@@ -71,7 +71,7 @@ export default function Navbar() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.3 }}
-                    className="absolute left-0 right-0 shadow-xl z-10"
+                    className="fixed left-0 right-0 shadow-xl z-10"
                   >
                     <div className="max-w-screen-xl mx-auto w-full bg-white rounded-md px-8 py-6 flex gap-4 pt-20">
                       <div className="grid grid-cols-4 gap-16 w-full pt-10 pb-5">
