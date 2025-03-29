@@ -1,14 +1,14 @@
-"use-client"
+"use client"
 import Image from 'next/image'
 export default function WhyOceanic() {
     return (
-        <div className="flex items-center justify-center min-h-screen bg-[#0f0c29] text-white">
+        <div className="flex items-center justify-center bg-[#0f0c29] text-white">
         <div>
             <Image 
-                src= "/Images/phone.png"
+                src= "/Images/phone1.png"
                 alt='phone'
-                width={400}
-                height={700}
+                width={300}
+                height={500}
             />
         </div>
         <div>
