@@ -1,12 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
-interface Coin {
-  id: string;
-  name: string;
-  symbol: string;
-  image: string;
-  current_price: number;
-}
+
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { page = 1 } = req.query; // Pagination
