@@ -22,7 +22,7 @@ interface CoinLiveProps {
 export default function CoinLive({ coins }: CoinLiveProps) {
   const [search, setSearch] = useState("");
   const [showAll, setShowAll] = useState(false);
-  const [activeCategory, setActiveCategory] = useState("Newly Listed");
+  const [activeCategory, setActiveCategory] = useState("Popular");
 
   const categories = ["Popular", "Top Gainers", "Top Losers"];
 
