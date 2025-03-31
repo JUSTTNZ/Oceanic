@@ -1,6 +1,6 @@
 
 import { FaQuoteLeft, FaQuoteRight } from "react-icons/fa";
-import { motion } from "framer-motion";
+
 import Image from "next/image";
 import img from '../../public/Images/blogp.png'
 const testimonials = [

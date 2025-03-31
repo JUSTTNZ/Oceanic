@@ -4,7 +4,7 @@ import Hero from "./hero";
 import CoinLive from "./coinprice";
 import Footer from "./footer";
 import WhyOceanic from "./whyoceanic";
-import TestimonialSection from "./test";
+import TestimonialSection from "./testmonial";
 
 interface LandingProps {
   coins: Coin[];
