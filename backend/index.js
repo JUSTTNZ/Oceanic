@@ -2,9 +2,15 @@ import dotenv from 'dotenv'
 import { app } from './app.js'
 import connectDB from './config/db.js'
 
-dotenv.config({
-    path: './.env'
-})
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Load the .env file from backend folder
+dotenv.config({ path: join(__dirname, '.env') });
+//console.log('Loaded ENV VARS:', process.env);
 
 const PORT = process.env.PORT || 7001
 
