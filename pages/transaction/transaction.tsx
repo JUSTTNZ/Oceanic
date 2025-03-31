@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { FaDownload } from "react-icons/fa";
-import Footer from "./login/footer";
-import Header from "./login/header";
+import Footer from "../login/footer";
+import Header from "../login/header";
 import {
     Table,
     TableBody,

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import Header from "./login/header";
-import Footer from "./login/footer";
+import Header from "../login/header";
+import Footer from "../login/footer";
 
 const options = [
   "To invest in crypto for profit",
@@ -11,7 +11,7 @@ const options = [
   "Business",
 ];
 
-const SignupSurvey: React.FC = () => {
+export default function SignupSurvey(){
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
 
   const handleSelect = (option: string) => {
@@ -61,4 +61,3 @@ const SignupSurvey: React.FC = () => {
   );
 };
 
-export default SignupSurvey;

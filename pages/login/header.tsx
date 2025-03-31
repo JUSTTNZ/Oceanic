@@ -14,7 +14,7 @@ export default function Header() {
     setIsDropDownOpen((prev) => !prev);
     };
   return (
-    <header className="fixed top-0 left-0 w-full bg-[#0f0c29] text-white p-3 flex justify-between items-center px-8 z-50 shadow-md font-poppins">
+    <header className="fixed top-0 left-0 w-full bg-blue-400 text-white p-3 flex justify-between items-center px-8 z-50 shadow-md font-poppins">
       <h1 className="text-xl font-bold">Oceanic</h1>
 
    

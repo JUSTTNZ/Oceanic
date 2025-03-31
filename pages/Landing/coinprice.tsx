@@ -22,7 +22,7 @@ interface CoinLiveProps {
 export default function CoinLive({ coins }: CoinLiveProps) {
   const [search, setSearch] = useState("");
   const [showAll, setShowAll] = useState(false);
-  const [activeCategory, setActiveCategory] = useState("Newly Listed");
+  const [activeCategory, setActiveCategory] = useState("Popular");
 
   const categories = ["Popular", "Top Gainers", "Top Losers"];
 
@@ -47,7 +47,7 @@ export default function CoinLive({ coins }: CoinLiveProps) {
         return changeA - changeB;
       });
     }
-    // Simulate "Newly Listed" based on coin ID or fallback to all coins
+    // Simulate "Popular" based on coin ID or fallback to all coins
     return filteredCoins.slice(0, 50);
   })();
 
