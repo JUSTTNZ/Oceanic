@@ -47,7 +47,7 @@ export default function CoinLive({ coins }: CoinLiveProps) {
         return changeA - changeB;
       });
     }
-    // Simulate "Newly Listed" based on coin ID or fallback to all coins
+    // Simulate "Popular" based on coin ID or fallback to all coins
     return filteredCoins.slice(0, 50);
   })();
 
