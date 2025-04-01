@@ -12,28 +12,28 @@ export default function WhyOceanic() {
     return (
         <section className="flex flex-col md:gap-16 md:flex-row items-center justify-center min-h-screen bg-white text-gray-900 py-12 px-6 md:px-16">
             {/* Left Side - Image */}
-            <div className="flex justify-center">
+            <div className="flex justify-center h-[500px]">
                 <Image 
                     src="/Images/phone1.png"
                     alt="phone"
                     width={300}
                     height={500}
-                    className="rounded-lg"
+                    className="rounded-lg pb-10"
                 />
             </div>
 
-            {/* Right Side - Content */}
+         
             <div className="max-w-3xl text-center md:text-left">
                 <h1 className="text-4xl font-bold text-[#0f0c29] mb-4">Why Choose Oceanic?</h1>
                 <p className="text-gray-600 text-lg">
                     We simplify the complexities of crypto trading, ensuring seamless transactions with top-tier security and support.
                 </p>
 
-                {/* Features Grid */}
+          
                 <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                    {/* Lightning-Fast Transactions */}
+              
                     <div className="flex items-start space-x-4">
-                        <BoltIcon className="w-8 h-8 text-blue-600" />
+                        <BoltIcon className="w-8 h-8 lg:h-20 lg-w-20 pb-0 lg:pb-10 text-blue-600" />
                         <div>
                             <h3 className="text-lg font-semibold text-gray-900">Lightning-Fast Transactions</h3>
                             <p className="text-gray-600 text-sm">
@@ -42,9 +42,9 @@ export default function WhyOceanic() {
                         </div>
                     </div>
 
-                    {/* Ironclad Security */}
+                   
                     <div className="flex items-start space-x-4">
-                        <LockClosedIcon className="w-8 h-8 text-blue-600" />
+                        <LockClosedIcon className="w-8 h-8 lg:h-20 lg-w-20 pb-0 lg:pb-10 text-blue-600" />
                         <div>
                             <h3 className="text-lg font-semibold text-gray-900">Ironclad Security</h3>
                             <p className="text-gray-600 text-sm">
@@ -53,9 +53,9 @@ export default function WhyOceanic() {
                         </div>
                     </div>
 
-                    {/* Diverse Crypto Portfolio */}
+              
                     <div className="flex items-start space-x-4">
-                        <CurrencyDollarIcon className="w-8 h-8 text-blue-600" />
+                        <CurrencyDollarIcon className="w-8 h-8 lg:h-20 lg-w-20 pb-0 lg:pb-10 text-blue-600" />
                         <div>
                             <h3 className="text-lg font-semibold text-gray-900">Diverse Crypto Portfolio</h3>
                             <p className="text-gray-600 text-sm">
@@ -64,9 +64,9 @@ export default function WhyOceanic() {
                         </div>
                     </div>
 
-                    {/* Always-On Support */}
+                  
                     <div className="flex items-start space-x-4">
-                        <ChatBubbleLeftRightIcon className="w-8 h-8 text-blue-600" />
+                        <ChatBubbleLeftRightIcon className="w-8 h-8 lg:h-20 lg-w-20 pb-0 lg:pb-10 text-blue-600 " />
                         <div>
                             <h3 className="text-lg font-semibold text-gray-900">Always-On Support</h3>
                             <p className="text-gray-600 text-sm">

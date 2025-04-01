@@ -4,6 +4,7 @@ import Hero from "./hero";
 import CoinLive from "./coinprice";
 import Footer from "./footer";
 import WhyOceanic from "./whyoceanic";
+import TestimonialSection from "./testmonial";
 
 interface LandingProps {
   coins: Coin[];
@@ -27,6 +28,7 @@ export default function Landing({ coins }: LandingProps) {
       <Hero />
       <CoinLive coins={coins} />
       <WhyOceanic />
+      <TestimonialSection />
       <Footer />
     </div>
   );
