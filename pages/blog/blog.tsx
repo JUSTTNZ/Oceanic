@@ -4,8 +4,8 @@ import { useState } from "react";
 import Image from "next/image";
 import Img from "../public/Images/blog.png";
 import author from '../public/Images/blogp.png'
-import Footer from "./login/footer";
-import Header from "./login/header";
+import Footer from "../login/footer";
+import Header from "../login/header";
 
 export default function CryptoBlog() {
   const [posts, setPosts] = useState([
@@ -112,7 +112,7 @@ export default function CryptoBlog() {
         <section>
           <h2 className="text-2xl font-semibold mb-4 text-blue-800 text-center md:text-left">Featured Articles</h2>
 
-          {/* Blog Grid */}
+    
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {posts.map((post) => (
               <div key={post.id} className="bg-white rounded-lg shadow-md overflow-hidden">
@@ -121,7 +121,6 @@ export default function CryptoBlog() {
                   <h3 className="text-lg md:text-xl font-bold mb-2 text-blue-400">{post.title}</h3>
                   <p className="mt-2 text-gray-700 text-sm md:text-base">{post.excerpt}</p>
 
-                  {/* Author & Date Section */}
                   <div className="flex items-center gap-3 mt-4">
                     <Image src={post.authorImage} alt={post.author} width={40} height={40} className="w-10 h-10 rounded-full" />
                     <div>
@@ -134,7 +133,7 @@ export default function CryptoBlog() {
             ))}
           </div>
 
-          {/* Load More Button */}
+          
           <div className="flex justify-center mt-8">
             <button
               onClick={loadMorePosts}

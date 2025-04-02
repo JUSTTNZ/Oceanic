@@ -106,8 +106,13 @@ export default function Navbar() {
 
         {/* Desktop buttons */}
         <div className="hidden md:flex space-x-8 items-center">
-          <p className="text-[#0047AB] text-lg cursor-pointer">Sign in</p>
-          <p className="text-white bg-[#0047AB] px-6 py-2 text-lg rounded-md hover:bg-[#459af5] cursor-pointer z-20">Get Started</p>
+          <Link href={"/login"}>
+          <button className="text-[#0047AB] text-lg cursor-pointer">Sign in</button>
+          </Link>
+         <Link href="/register" >
+         <button className="text-white bg-[#0047AB] px-6 py-2 text-lg rounded-md hover:bg-[#459af5] cursor-pointer z-20">Get Started</button>
+         </Link>
+
         </div>
 
         {/* Mobile Hamburger */}
