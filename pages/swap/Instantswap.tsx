@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useEffect, useState } from 'react';
-import Header from './login/header';
-import Footer from './login/footer';
+import Header from '../login/header';
+import Footer from '../login/footer';
 import { FaExchangeAlt } from 'react-icons/fa';
  interface Crypto {
   name: string
