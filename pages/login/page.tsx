@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { useState } from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
@@ -8,10 +9,14 @@ import { FaEye, FaEyeSlash } from 'react-icons/fa';
 export default function LoginPage  ()  {
   const [captchaValue, setCaptchaValue] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
-
+  const router = useRouter()
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
+ 
+  const handlelogin = () => {
+    router.push("/survey")
+  }
 
   return (
 
@@ -88,13 +93,13 @@ export default function LoginPage  ()  {
       </div>
 
 
-            <button className="w-full bg-blue-400 text-white p-3 rounded-lg font-semibold text-sm">Sign In</button>
+            <button className="w-full bg-blue-400 text-white p-3 rounded-lg font-semibold text-sm" onClick={handlelogin}>Sign In</button>
           </form>
 
           <div className="text-center text-sm lg:items-center items-start lg:flex-row flex flex-col lg:justify-between mt-4">
             <Link href="/resetpassword" className="text-blue-900 ">Forgot Password?</Link>
             <p className="mt-2 md:mt-0">
-              Not signed up yet? <a href="#" className="text-blue-300  ">Create Account</a>
+              Not signed up yet? <Link href="/register" className="text-blue-300  ">Create Account</Link>
             </p>
           </div>
         </div>

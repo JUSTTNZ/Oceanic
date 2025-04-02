@@ -1,41 +1,89 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 import Link from 'next/link';
-import { useState } from 'react';
-import ReCAPTCHA from 'react-google-recaptcha';
+import { useEffect, useState } from 'react';
+// import ReCAPTCHA from 'react-google-recaptcha';
 import { FaChevronDown, FaEye, FaEyeSlash, FaSearch } from 'react-icons/fa';
 import img from '../register/image.png'
 import Image from 'next/image';
-const countries = [
-   
-    {
-      code: "US",
-      flagImg: "https://flagcdn.com/w40/us.png",
-      flagEmoji: "🇺🇸",
-      name: "United States",
-      dialCode: "+1",
-    },
-    {
-      code: "NG",
-      flagImg: "https://flagcdn.com/w40/ng.png",
-      flagEmoji: "🇳🇬",
-      name: "Nigeria",
-      dialCode: "+234",
-    },
-  ];
+interface Country {
+  code: string;
+  name: string;
+  flag: string;
+  currency: string;
+  currencySymbol: string;
+}
+
+interface ApiCountry {
+  cca2: string;
+  name: {
+    common: string;
+  };
+  flags: {
+    png?: string;
+    svg?: string;
+  };
+  code: number;
+}
 export default function RegistePage  ()  {
   const [captchaValue, setCaptchaValue] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
-  const [selectedCountry, setSelectedCountry] = useState(countries[0]);
+  const [countries, setCountries] = useState<Country[]>([]);
+  const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
   const [phone, setPhone] = useState("");
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
   const [accountType, setAccountType] = useState<'individual' | 'business'>('individual');
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    const fetchCountries = async () => {
+      try {
+        const response = await fetch("/api/country");
+        if (!response.ok) {
+          throw new Error("Failed to fetch country");
+        }
+        const data = await response.json();
+        
+        const formattedCountries = data
+          .filter((country: ApiCountry) => 
+            country.code && Object.keys(country.code).length > 0
+          )
+          .map((country: ApiCountry) => {
+            const countryCode = Object.keys(country.code)[0];
+            return {
+              code: country.cca2,
+              name: country.name.common,
+              flag: country.flags?.png || country.flags?.svg,
 
+            };
+          })
+          .sort((a: Country, b: Country) => a.name.localeCompare(b.name));
 
+        setCountries(formattedCountries);
+        // Set default country to Nigeria if available
+        const nigeria = formattedCountries.find((c: Country) => c.code === "NG");
+        setSelectedCountry(nigeria || formattedCountries[0]);
+        setLoading(false);
+      } catch (err) {
+        setError("Failed to fetch countries");
+        console.error("Error fetching countries:", err);
+      }
+    };
+
+    fetchCountries();
+  }, []);
+
+  const safeSelectedCountry = selectedCountry || {
+    code: "",
+    name: "Select a country",
+    flag: "/default-flag.png", // Provide a default flag
+    currency: "",
+    currencySymbol: "",
+  };
   return (    
       <div className="flex justify-center items-center min-h-screen pt-20 lg:pt-30 pb-10 bg-[#f7f7fa] font-maven p-4">
 <div className="bg-white lg:p-8 p-6 px-8 w-full max-w-md lg:max-w-xl border border-[#D5D2E5] border-opacity-80 rounded-[5px] shadow-[0_0px_30px_5px_rgba(32,23,73,0.05)]">
@@ -174,20 +222,20 @@ export default function RegistePage  ()  {
     </div>
 
         <label className="block text-gray-700 font-medium mb-1">Phone Number</label>
-      <div className="relative">
+      <div className="relative mb-5 pb-4">
         <div className="flex items-center border border-gray-300 rounded-md overflow-hidden">
           <button
             className="flex items-center  px-3 py-2 focus:outline-none"
-           
+            onClick={() => setShowDropdown(!showDropdown)}
+            aria-expanded={showDropdown}
+                      aria-haspopup="listbox"
           >
-            <Image
-              src={selectedCountry.flagImg}
-              width={20}
-              height={15}
-              alt={selectedCountry.name}
-              className="w-6 h-4 mr-2"
-              unoptimized={selectedCountry.flagImg.startsWith("http")}
-            />
+           <Image 
+             src={safeSelectedCountry.flag} 
+              alt={`${safeSelectedCountry.name} flag`}     width={24} 
+                    height={16}
+                 className="object-contain"
+                        />
             <FaChevronDown className="text-gray-500" />
           </button>
           <input
@@ -200,40 +248,46 @@ export default function RegistePage  ()  {
         </div>
 
         {/* Dropdown Menu */}
-        {dropdownOpen && (
-          <ul className="absolute top-full left-0 w-40 bg-white border border-gray-300 shadow-md rounded-md mt-1 z-10">
-            {countries.map((country) => (
-              <li
-                key={country.code}
-                className="flex items-center px-3 py-2 cursor-pointer hover:bg-gray-100"
-                onClick={() => {
-                  setSelectedCountry(country);
-                  setDropdownOpen(false);
-                }}
-              >
-                <Image
-                  src={country.flagImg}
-                  alt={country.name}
-                  width={20}
-                  height={15}
-                  className="w-6 h-4 mr-2"
-                  unoptimized={country.flagImg.startsWith("http")}
-                />
-                {country.name}
-              </li>
-            ))}
-          </ul>
+        {showDropdown && (
+            <div 
+                      className="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto scrollbar-hide"
+                      role="listbox"
+                    >
+                      {countries.map((country) => (
+                        <button
+                          key={country.code}
+                          className="flex items-center w-full px-4 py-2 text-sm hover:bg-gray-100 text-left"
+                          onClick={() => {
+                            setSelectedCountry(country);
+                            setShowDropdown(false);
+                          }}
+                          role="option"
+                          aria-selected={country.code === safeSelectedCountry.code}
+                        >
+                          <span className="mr-2">
+                            <Image 
+                              src={country.flag} 
+                              alt={`${country.name} flag`} 
+                              width={24} 
+                              height={16}
+                              className="object-contain"
+                            />
+                          </span>
+                          {country.name}
+                        </button>
+                      ))}
+                    </div>
         )}
       </div>
  
 
-<div className="mb-4 mt-8">
+{/* <div className="mb-4 mt-8">
 <ReCAPTCHA
           sitekey="6LdsiPkqAAAAAKTQ0AsrTskmsAePkAUM_ZKDr1ym" // Replace with your site key
           onChange={(value) => setCaptchaValue(value)}
         />
         
-      </div>
+      </div> */}
 
 
             <button className="w-full bg-blue-400 text-white p-3 rounded-lg font-semibold text-sm">Sign In</button>
@@ -242,7 +296,7 @@ export default function RegistePage  ()  {
           <div className="text-center text-sm lg:items-center items-start lg:flex-row flex flex-col lg:justify-between mt-4">
             <Link href="/resetpassword" className="text-blue-900 ">Forgot Password?</Link>
             <p className="mt-2 md:mt-0">
-              Not signed up yet? <a href="#" className="text-blue-300  ">Create Account</a>
+              Already have an account ? <Link href="/login" className="text-blue-300  ">Sign in</Link>
             </p>
           </div>
         </div>
