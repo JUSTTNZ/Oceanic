@@ -3,23 +3,25 @@ interface ApiErrorDetail {
   message: string;
 }
 
+interface ApiErrorProps {
+  statusCode: number;
+  message?: string;
+  errors?: ApiErrorDetail[];
+  stack?: string;
+}
+
 class ApiError extends Error {
   statusCode: number;
   data: null;
   errors: ApiErrorDetail[];
   success: boolean;
 
-  constructor({
-    statusCode,
-    message = 'Something went wrong',
-    errors = [],
-    stack
-  }: {
-    statusCode: number;
-    message?: string;
-    errors?: ApiErrorDetail[];
-    stack?: string;
-  }) {
+  constructor(
+    statusCode: number,
+    message: string = 'Something went wrong',
+    errors: ApiErrorDetail[] = [],
+    stack?: string
+  ) {
     super(message);
     this.statusCode = statusCode;
     this.data = null;
@@ -34,4 +36,4 @@ class ApiError extends Error {
   }
 }
 
-export { ApiError};
+export { ApiError, ApiErrorDetail, ApiErrorProps };

@@ -1,60 +1,80 @@
-import { User } from '../models/users.models.js'
-import { asyncHandler } from '../utils/asyncHandler.js'
-import { ApiError }  from '../utils/ApiError.js'
-import jwt from "jsonwebtoken"
+import { Request, Response, NextFunction } from 'express';
+import { User } from '../models/user.model';
+import { asyncHandler } from '../utils/AsyncHandler';
+import { ApiError } from '../utils/ApiError';
+import jwt from 'jsonwebtoken';
+import { ENV } from '../config/env';
 
-export const verifyJWT = asyncHandler(async(req, _, next) => {
-    const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "")
-    console.log(token);
+// 1️⃣ Define the type for your decoded token
+interface DecodedToken {
+  _id: string;
+  iat?: number;
+  exp?: number;
+}
 
-    if(!token) {
-        throw new ApiError(401, "Unauthorized")
+// 2️⃣ Augment Express Request type using module augmentation
+declare module 'express-serve-static-core' {
+  interface Request {
+    user?: typeof User.prototype;
+  }
+}
+
+// 3️⃣ Middleware to verify any logged-in user
+export const verifyJWT = asyncHandler(async (req: Request, _: Response, next: NextFunction) => {
+  const token = req.cookies?.accessToken || req.header('Authorization')?.replace('Bearer ', '');
+
+  if (!token) {
+    throw new ApiError(401, 'Unauthorized: No token provided');
+  }
+
+  try {
+    const decoded = jwt.verify(token, ENV.ACCESS_TOKEN_SECRET) as DecodedToken;
+
+    const user = await User.findById(decoded._id).select('-password -refreshToken');
+
+    if (!user) {
+      throw new ApiError(401, 'Unauthorized: User not found');
     }
 
-    try {
-        const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
-
-        const user = await User.findById(decodedToken?._id).select("-password, -refreshToken")
-
-        if(!user) {
-            throw new ApiError(401, "Unauthorized")
-        }
-
-        req.user = user
-
-        next()
-    } catch (error) {
-        throw new ApiError(401, error?.message || "Invalid access token")
+    req.user = user; // ✅ Now TypeScript understands req.user
+    next();
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      throw new ApiError(401, error.message || 'Invalid token');
     }
-})
+    throw new ApiError(401, 'Invalid token');
+  }
+  
+});
 
-export const adminAuth = asyncHandler(async(req, res, next) => {
+// 4️⃣ Middleware for admin-only routes
+export const adminAuth = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+  const token = req.cookies?.accessToken || req.header('Authorization')?.replace('Bearer ', '');
 
-    try {
-        const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "")
-        // console.log(token);
-        // console.log("Cookies:", req.cookies);
-        // console.log("Authorization Header:", req.header("Authorization"));
+  if (!token) {
+    throw new ApiError(401, 'Access denied: No token provided');
+  }
 
+  try {
+    const decoded = jwt.verify(token, ENV.ACCESS_TOKEN_SECRET) as DecodedToken;
 
-        if(!token) {
-            throw new ApiError(401, "Access denied, no token provided")
-        }
+    const user = await User.findById(decoded._id);
 
-        const decodedUser = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-        req.user =  decodedUser
-
-        const user = await User.findById(req.user._id);
-        if (!user) {
-            throw new ApiError(404, "User not found");
-        }
-
-        // Check if user is an admin
-        if (user.role !== "admin") {
-            throw new ApiError(403, "Access denied. Admins only.");
-        }
-        next(); 
-    } catch (error) {
-        res.status(error.statusCode || 500).json({ message: error.message || "Server error" });
+    if (!user) {
+      throw new ApiError(404, 'User not found');
     }
-})
+
+    if (user.role !== 'admin') {
+      throw new ApiError(403, 'Access denied: Admins only');
+    }
+
+    req.user = user;
+    next();
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      throw new ApiError(401, error.message || 'Invalid token');
+    }
+    throw new ApiError(401, 'Invalid token');
+  }
+  
+});
