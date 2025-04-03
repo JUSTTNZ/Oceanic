@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.ts",
-    "dev": "nodemon index/ts"
+    "dev": "nodemon --watch './' --exec \"node --loader ts-node/esm\" index.ts"
+
   },
   "keywords": [
     "nodejs",
@@ -35,7 +36,8 @@
     "@types/express": "^5.0.1",
     "@types/joi": "^17.2.3",
     "@types/jsonwebtoken": "^9.0.9",
-    "@types/node": "^22.13.14",
+    "@types/node": "^22.14.0",
+    "ts-node": "^10.9.2",
     "typescript": "^5.8.2"
   }
 }

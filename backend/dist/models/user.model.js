@@ -24,12 +24,13 @@ userSchema.methods.generateAccessToken = function () {
     return jwt.sign({ _id: this._id, role: this.role }, accessTokenSecret, { expiresIn: accessTokenExpiry });
 };
 // ✅ Refresh token generator
-userSchema.methods.generateRefreshToken = function () {
-    const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET;
-    const refreshTokenExpiry = process.env.REFRESH_TOKEN_EXPIRY || '10d';
-    if (!refreshTokenSecret) {
-        throw new Error('REFRESH_TOKEN_SECRET is not defined in environment variables');
+// ✅ Access token generator
+userSchema.methods.generateAccessToken = function () {
+    const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
+    const accessTokenExpiry = process.env.ACCESS_TOKEN_EXPIRY || '1d';
+    if (!accessTokenSecret) {
+        throw new Error('ACCESS_TOKEN_SECRET is not defined in environment variables');
     }
-    return jwt.sign({ _id: this._id }, refreshTokenSecret, { expiresIn: refreshTokenExpiry });
+    return jwt.sign({ _id: this._id, role: this.role }, accessTokenSecret, { expiresIn: accessTokenExpiry });
 };
 export const User = mongoose.model('User', userSchema);
