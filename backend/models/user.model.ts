@@ -1,26 +1,30 @@
 // models/User.js
 import mongoose, { Document, Model, Schema } from 'mongoose';
+import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs';
 import validator from 'validator';
-
-export interface IUser {
-  username: string;
-  email: string;
-  fullname: string;
-  password: string;
-  role: 'user' | 'admin' | 'superadmin';
-  isVerified: boolean;
-  refreshToken?: string;
-  bankDetails?: {
-    accountName: string;
-    accountNumber: string;
-    bankName: string;
-  };
-}
+import { IUser } from '../types/user.types';
+// export interface IUser {
+//   username: string;
+//   email: string;
+//   fullname: string;
+//   password: string;
+//   role: 'user' | 'admin' | 'superadmin';
+//   isVerified: boolean;
+//   refreshToken?: string;
+//   bankDetails?: {
+//     accountName: string;
+//     accountNumber: string;
+//     bankName: string;
+//   };
+// }
 
 export interface UserDocument extends IUser, Document {
   matchPassword(enteredPassword: string): Promise<boolean>;
+  generateAccessToken(): string;
+  generateRefreshToken(): string;
 }
+
 
 const userSchema = new Schema<UserDocument>(
   {
@@ -71,8 +75,9 @@ userSchema.methods.matchPassword = async function (enteredPassword: string) {
 
 
 // ✅ Access token generator
+// ✅ Access token generator
 userSchema.methods.generateAccessToken = function () {
-  const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
+  const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET!;
   const accessTokenExpiry = process.env.ACCESS_TOKEN_EXPIRY || '1d';
 
   if (!accessTokenSecret) {
@@ -82,25 +87,25 @@ userSchema.methods.generateAccessToken = function () {
   return jwt.sign(
     { _id: this._id, role: this.role },
     accessTokenSecret,
-    { expiresIn: accessTokenExpiry }
+    { expiresIn: accessTokenExpiry as string | number }
   );
 };
 
 // ✅ Refresh token generator
-// ✅ Access token generator
-userSchema.methods.generateAccessToken = function () {
-    const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET!;
-    const accessTokenExpiry = process.env.ACCESS_TOKEN_EXPIRY || '1d';
-  
-    if (!accessTokenSecret) {
-      throw new Error('ACCESS_TOKEN_SECRET is not defined in environment variables');
-    }
-  
-    return jwt.sign(
-      { _id: this._id, role: this.role },
-      accessTokenSecret,
-      { expiresIn: accessTokenExpiry as string | number }
-    );
+userSchema.methods.generateRefreshToken = function () {
+  const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET!;
+  const refreshTokenExpiry = process.env.REFRESH_TOKEN_EXPIRY || '7d';
+
+  if (!refreshTokenSecret) {
+    throw new Error('REFRESH_TOKEN_SECRET is not defined in environment variables');
+  }
+
+  return jwt.sign(
+    { _id: this._id },
+    refreshTokenSecret,
+    { expiresIn: refreshTokenExpiry as string | number }
+  );
 };
+
 
 export const User: Model<UserDocument> = mongoose.model<UserDocument>('User', userSchema);
