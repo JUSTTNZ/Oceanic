@@ -1,5 +1,7 @@
+// models/User.js
 import mongoose, { Document, Model, Schema } from 'mongoose';
-import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
+import validator from 'validator';
 
 export interface IUser {
   username: string;
@@ -17,27 +19,56 @@ export interface IUser {
 }
 
 export interface UserDocument extends IUser, Document {
-  generateAccessToken(): string;
-  generateRefreshToken(): string;
+  matchPassword(enteredPassword: string): Promise<boolean>;
 }
 
 const userSchema = new Schema<UserDocument>(
   {
-    username: { type: String, required: true },
-    email: { type: String, required: true },
+    username: { type: String, required: true, trim: true },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      validate: {
+        validator: validator.isEmail,
+        message: 'Please enter a valid email address',
+      },
+    },
     fullname: { type: String, required: true },
-    password: { type: String, required: true },
+    password: { type: String, required: true, minlength: 6 },
     role: { type: String, enum: ['user', 'admin', 'superadmin'], default: 'user' },
     isVerified: { type: Boolean, default: false },
     refreshToken: { type: String },
     bankDetails: {
       accountName: String,
       accountNumber: String,
-      bankName: String,
+      bankName: {
+        type: String,
+        default: function () {
+          return this.username;
+        },
+      },
     },
   },
   { timestamps: true }
 );
+
+// Encrypt password before saving
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+  next();
+});
+
+// Match password
+userSchema.methods.matchPassword = async function (enteredPassword: string) {
+  return await bcrypt.compare(enteredPassword, this.password);
+};
+
+
+
 
 // ✅ Access token generator
 userSchema.methods.generateAccessToken = function () {
