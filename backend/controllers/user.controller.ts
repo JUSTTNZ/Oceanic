@@ -1,5 +1,5 @@
 // controllers/userController.ts
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 import { asyncHandler } from '../utils/AsyncHandler';
 import { ApiError } from '../utils/ApiError.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
@@ -21,23 +21,25 @@ const generateAccessAndRefreshToken = async (userId: string) => {
 };
 
 // Register User
-const registerUser = async (req: Request, res: Response, next: NextFunction) => {
+const registerUser = async (req: Request, res: Response): Promise<void> => {
   try {
-    const user = await userService.register(req.body);
+    const userObject = req.body;
 
-    const { accessToken, refreshToken } = await generateAccessAndRefreshToken(user._id);
+    const user = await userService.register(userObject);
 
-    return res.status(201).json(new ApiResponse(201, "User created successfully", {
+    res.status(201).json(new ApiResponse(201, "User created successfully",  {
       _id: user._id,
       email: user.email,
       username: user.username,
       fullname: user.fullname,
-      role: user.role,
-      tokens: { accessToken, refreshToken }
+      role: user.role
     }));
-  } catch (error: any) {
+  } catch (error: unknown) {
+    if (error instanceof ApiError) {
+      res.status(error.statusCode).json({ message: error.message });
+    }
     console.error("Error registering user:", error);
-    return res.status(error.statusCode || 500).json({ message: error.message });
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
@@ -65,7 +67,7 @@ const loginUser = asyncHandler(async (req: Request, res: Response) => {
     throw new ApiError(401, "Invalid credentials");
   }
 
-  const { accessToken, refreshToken } = await generateAccessAndRefreshToken(user._id);
+  const { accessToken, refreshToken } = await generateAccessAndRefreshToken(user._id as string);
 
   const loggedInUser = await User.findById(user._id).select('-password -refreshToken');
   if (!loggedInUser) {
@@ -81,7 +83,7 @@ const loginUser = asyncHandler(async (req: Request, res: Response) => {
     .status(200)
     .cookie('refreshToken', refreshToken, options)
     .cookie('accessToken', accessToken, options)
-    .json(new ApiResponse(200, loggedInUser, "User logged in successfully", { accessToken, refreshToken }));
+    .json(new ApiResponse(200, "User logged in successfully", { loggedInUser, accessToken, refreshToken }));
 });
 
 

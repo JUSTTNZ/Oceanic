@@ -1,3 +1,4 @@
+// middlewares/error.middleware.ts
 import { Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
 import { ApiError } from '../utils/ApiError';
@@ -7,7 +8,7 @@ const errorHandler = (
   req: Request,
   res: Response,
   next: NextFunction
-) => {
+): Response => { // ✅ Explicitly define return type
   let error = err;
 
   // Convert error to ApiError if it isn't already
