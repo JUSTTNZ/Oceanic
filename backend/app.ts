@@ -1,16 +1,11 @@
 // app.ts
 import express from 'express';
-import cookieParser from 'cookie-parser';
-import userRouter from './routes/user.route';
+import cookieParser from 'cookie-parser'; // Must be ESM compatible
+import userRouter from './routes/user.route.js'; // Must exist and be ESM
+
 
 const app = express();
+app.use(cookieParser()); // Could throw if cookie-parser isn't ESM ready
 
-// Essential middleware
-app.use(express.json({ limit: "16kb" }));
-app.use(express.urlencoded({ extended: true, limit: "16kb" }));
-app.use(cookieParser());
-
-// Routes
-app.use("/api/v1/users", userRouter); // Note: Fixed typo from vv1 to v1
 
 export { app };
