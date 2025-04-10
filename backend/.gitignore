@@ -1,38 +1,3 @@
-# Node modules
-node_modules/
-
-# Log files
-*.log
-
-# npm package lock file
-package-lock.json
-
-# Environment files
-.env
-
-# Directory for coverage reports (if using testing tools)
-coverage/
-
-# OS-specific files
-.DS_Store
-Thumbs.db
-
-# IDE specific files (VS Code, JetBrains)
-.vscode/
-.idea/
-
-# Build output
-dist/
-build/
-
-# Temporary files from npm
-.npm/
-
-# Yarn lock file (if you're using Yarn instead of npm)
-yarn.lock
-
-# Miscellaneous
-.eslintcache
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # Local env files
