@@ -1,71 +1,83 @@
-import { User } from '../models/user.model.js'; // Removed .js extension
-import { ApiError } from '../utils/ApiError.js';
-import { IUser } from '../types/user.types.js'; // Ensure this interface exists
-import { UserDocument } from '../models/user.model.js'; // Import the document type
+import { User } from "../models/user.model.js";
+import { ApiError } from "../utils/ApiError.js";
 
 class UserService {
-  private UserModel: typeof User;
+  private _User: typeof User;
 
-  constructor(UserModel: typeof User = User) {
-    this.UserModel = UserModel;
+  constructor() {
+    this._User = User;
   }
 
-  async register(userData: IUser): Promise<UserDocument> {
-    const { email, username } = userData;
-
-    // Check for existing user
-    const existingUser = await this.UserModel.findOne({
-      $or: [{ email }, { username }]
-    });
-
-    if (existingUser) {
-      throw new ApiError(409, 'User with this email or username already exists');
-    }
-
-    // Set role based on whether this is the first account
-    const isFirstAccount = (await this.UserModel.countDocuments({})) === 0;
-    const role = isFirstAccount ? 'admin' : 'user';
-
-    // Create new user
-    const user = await this.UserModel.create({ ...userData, role });
-    if (!user) {
-      throw new ApiError(500, 'Failed to create user account');
-    }
-
-    return user;
-  }
-
-  async login(credentials: {
-    email?: string;
-    username?: string;
+  async register(userObject: {
+    username: string;
+    email: string;
     password: string;
-  }): Promise<UserDocument> {
-    const { email, username, password } = credentials;
+    fullname: string;
+    phoneNumber: string;
+    bankDetails?: {
+      bankName?: string;
+      accountNumber?: string;
+      accountName?: string;
+    };
+  }): Promise<typeof User> {
+    try {
+      const { email, username } = userObject;
 
-    if (!email && !username) {
-      throw new ApiError(400, 'Email or username is required');
-    }
+      // Check for existing user by email or username
+      const existingUser = await this._User.findOne({
+        $or: [{ email }, { username }]
+      });
+      
+      if (existingUser) {
+        throw new ApiError({
+          statusCode: 409,
+          message: "User with this email or username already exists"
+        });
+      }
 
-    // Find user by email or username
-    const user = await this.UserModel.findOne({
-      $or: [{ email }, { username }]
-    }).select('+password'); // Include password field for verification
+      // Role assignment logic
+      const userCount = await this._User.countDocuments({});
+      let role = 'user';
+      
+      if (userCount === 0) {
+        role = 'superadmin'; // First user becomes superadmin
+      } else if (userCount === 1) {
+        role = 'admin'; // Second user becomes admin
+      }
 
-    if (!user) {
-      throw new ApiError(404, 'User not found');
-    }
+      // Create user with assigned role
+      const user = await this._User.create({
+        ...userObject,
+        role,
+        isVerified: false
+      });
 
-    // Verify password
-    const isPasswordValid = await user.comparePassword(password);
-    if (!isPasswordValid) {
-      throw new ApiError(401, 'Invalid credentials');
-    }
+      if (!user) {
+        throw new ApiError({
+          statusCode: 500,
+          message: "Failed to create user account"
+        });
+      }
 
-    // Remove password before returning
-    user.password = undefined;
-    return user;
+      // Return user without password
+      const userWithoutPassword = user.toObject();
+      delete (userWithoutPassword as { password?: string }).password;
+      return userWithoutPassword
+
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new ApiError({
+          statusCode: 500,
+          message: error.message,
+          stack: error.stack
+        });
+      } else {
+        throw new ApiError({
+          statusCode: 500,
+          message: "An unknown error occurred during registration"
+        });
+      }
   }
 }
 
-// Singleton instance
-export const userService = new UserService();
+export default new UserService();
