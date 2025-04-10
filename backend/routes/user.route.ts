@@ -1,5 +1,5 @@
 import { Router } from "express"
-import { verifyJWT, adminAuth } from "../middlewares/auth.middleware.js";
+// import { verifyJWT, adminAuth } from "../middlewares/auth.middleware.js";
 import {
     registerUser
 } from "../controllers/user.controller.js"
