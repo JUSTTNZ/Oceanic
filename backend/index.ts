@@ -1,6 +1,6 @@
 import dotenv from 'dotenv'
-import { app } from './app.ts'
-import connectDB from './config/db.ts'
+import { app } from './app.js'
+import connectDB from './config/db.js'
 
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
