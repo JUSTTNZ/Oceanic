@@ -1,6 +1,15 @@
 import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
+import { IUserRegister } from "../types/user.types.js";
 
+
+type UserWithoutPassword = Omit<IUserRegister, 'password'> & {
+  _id: string;
+  role: 'user' | 'admin' | 'superadmin';
+  isVerified: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+};
 class UserService {
   private _User: typeof User;
 
@@ -8,18 +17,7 @@ class UserService {
     this._User = User;
   }
 
-  async register(userObject: {
-    username: string;
-    email: string;
-    password: string;
-    fullname: string;
-    phoneNumber: string;
-    bankDetails?: {
-      bankName?: string;
-      accountNumber?: string;
-      accountName?: string;
-    };
-  }): Promise<typeof User> {
+  async register(userObject: IUserRegister): Promise<typeof User> {
     try {
       const { email, username } = userObject;
 
@@ -62,7 +60,7 @@ class UserService {
       // Return user without password
       const userWithoutPassword = user.toObject();
       delete (userWithoutPassword as { password?: string }).password;
-      return userWithoutPassword
+      return userWithoutPassword as UserWithoutPassword;
 
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -77,6 +75,7 @@ class UserService {
           message: "An unknown error occurred during registration"
         });
       }
+    }
   }
 }
 
