@@ -83,8 +83,7 @@ const registerUser = asyncHandler( async (req, res, next) => {
             email,
             password,
             username: username.toLowerCase(),
-            subscribers: [], 
-            subscribedTo: []  
+             
         });
         
     

@@ -14,7 +14,7 @@ import healthCheckRouter from "./routes/heathcheck.route.js"
 import { errorHandler } from "./middlewares/error.middleware.js"
 
 app.use("/api/v1/healthCheck", healthCheckRouter)
-//app.use("/api/v1/users", userRouter)
+app.use("/api/v1/users", userRouter)
 app.use(errorHandler)
 
 export { app };
