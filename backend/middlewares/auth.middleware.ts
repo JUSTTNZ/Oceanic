@@ -1,30 +1,41 @@
 import { User } from '../models/user.model.js'
-import { asyncHandler } from '../utils/asyncHandler.js'
+import { asyncHandler } from '../utils/AsyncHandler.js'
 import { ApiError }  from '../utils/ApiError.js'
 import jwt from "jsonwebtoken"
+import { Request } from "express"
+
+// Extend the Request interface to include the user property
+declare global {
+    namespace Express {
+        interface Request {
+            user?: any;
+        }
+    }
+}
 
 export const verifyJWT = asyncHandler(async(req, _, next) => {
     const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "")
     console.log(token);
 
     if(!token) {
-        throw new ApiError(401, "Unauthorized")
+        throw new ApiError({ statusCode: 401, message: "Unauthorized" })
     }
 
     try {
-        const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
+        const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET) as jwt.JwtPayload;
 
-        const user = await User.findById(decodedToken?._id).select("-password, -refreshToken")
+        const user = await User.findById(decodedToken?._id).select("-password -refreshToken")
 
         if(!user) {
-            throw new ApiError(401, "Unauthorized")
+            throw new ApiError({ statusCode: 401, message: "Unauthorized" })
         }
 
         req.user = user
 
         next()
     } catch (error) {
-        throw new ApiError(401, error?.message || "Invalid access token")
+        const errorMessage = (error instanceof Error) ? error.message : "Invalid access token";
+        throw new ApiError({ statusCode: 401, message: errorMessage })
     }
 })
 
@@ -38,7 +49,7 @@ export const adminAuth = asyncHandler(async(req, res, next) => {
 
 
         if(!token) {
-            throw new ApiError(401, "Access denied, no token provided")
+            throw new ApiError({ statusCode: 401, message: "Access denied, no token provided" })
         }
 
         const decodedUser = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
@@ -46,15 +57,19 @@ export const adminAuth = asyncHandler(async(req, res, next) => {
 
         const user = await User.findById(req.user._id);
         if (!user) {
-            throw new ApiError(404, "User not found");
+            throw new ApiError({ statusCode: 404, message: "User not found" });
         }
 
         // Check if user is an admin
         if (user.role !== "admin") {
-            throw new ApiError(403, "Access denied. Admins only.");
+            throw new ApiError({ statusCode: 403, message: "Access denied. Admins only." });
         }
         next(); 
-    } catch (error) {
-        res.status(error.statusCode || 500).json({ message: error.message || "Server error" });
+    } catch (error: unknown) {
+        if (error instanceof ApiError) {
+            res.status(error.statusCode).json({ message: error.message });
+        } else {
+            res.status(500).json({ message: "Server error" });
+        }
     }
 })
