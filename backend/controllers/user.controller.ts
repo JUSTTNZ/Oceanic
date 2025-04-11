@@ -52,7 +52,7 @@ import { IUserRegister } from '../types/user.types.js';
 //     }
 // };
 
-const registerUser = asyncHandler( async (req, res) => {
+const registerUser = asyncHandler( async (req, res, next) => {
     const {fullname, email, username, password} = req.body
 
     //validation
@@ -104,6 +104,7 @@ const registerUser = asyncHandler( async (req, res) => {
         .json(new ApiResponse(200, "User registered successfully", createdUser));
     } catch (error) {
         console.log("User creation failed");
+        next(error);
         
     }
 })
