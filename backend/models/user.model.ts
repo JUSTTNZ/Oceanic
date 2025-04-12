@@ -17,8 +17,38 @@ declare global {
     }
   }
 
+  interface IUser {
+    username: string;
+    email: string;
+    fullname: string;
+    password: string;
+    role: "user" | "admin" | "superadmin";
+    phoneNumber: string;
+    isVerified: boolean;
+    bankDetails?: {
+        bankName: string;
+        accountNumber: string;
+        accountName: string;
+    };
+    createdAt: Date;
+    updatedAt: Date;
+}
 
-const UserSchema = new Schema (
+
+  interface IUserMethods {
+    comparePassword(enteredPassword: string): Promise<boolean>;
+    generateAccessToken(): string;
+    generateRefreshToken(): string;
+}
+
+// Create the User Document type by extending mongoose.Document
+interface UserDocument extends IUser, Document, IUserMethods {}
+
+// Define the User model type
+interface UserModel extends mongoose.Model<UserDocument> {}
+
+
+const UserSchema = new Schema<UserDocument, UserModel, IUserMethods> (
     {
     username: {
         type: String,
@@ -85,10 +115,9 @@ UserSchema.pre("save", async function (next) {
 })
 
 
-UserSchema.methods.comparePassword = async function (enteredPassword: string) {
-
-    return await bcrypt.compare(enteredPassword, this.password)
-}
+UserSchema.methods.comparePassword = async function(enteredPassword: string) {
+  return await bcrypt.compare(enteredPassword, this.password);
+};
 
 UserSchema.methods.generateAccessToken = function () {
   const payload = {
