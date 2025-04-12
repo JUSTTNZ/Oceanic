@@ -247,7 +247,17 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 })
 
 const changeUserCurrentPassword = asyncHandler(async(req,res) => {
-    
+    const { email } = req.body
+
+    // finduser
+    const user = await User.findOne({email})
+    // if(!user){
+    //     return res.status(200)
+    //     .json(
+    //         new ApiResponse(200, {}, 'A reset Link has been sent to your email')
+    //     );
+
+    // }
 })
 
 const updateUserDetails = asyncHandler(async(req, res) => {
