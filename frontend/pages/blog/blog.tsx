@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import Img from "../public/Images/blog.png";
-import author from '../public/Images/blogp.png'
+import Img from "../../public/Images/blog.png";
+import author from "../../public/Images/blogp.png"
 import Footer from "../login/footer";
 import Header from "../login/header";
 

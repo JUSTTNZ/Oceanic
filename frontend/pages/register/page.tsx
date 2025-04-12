@@ -4,14 +4,13 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 // import ReCAPTCHA from 'react-google-recaptcha';
 import { FaChevronDown, FaEye, FaEyeSlash, FaSearch } from 'react-icons/fa';
-import img from '../register/image.png'
+
 import Image from 'next/image';
+
 interface Country {
   code: string;
   name: string;
   flag: string;
-  currency: string;
-  currencySymbol: string;
 }
 
 interface ApiCountry {
@@ -23,8 +22,9 @@ interface ApiCountry {
     png?: string;
     svg?: string;
   };
-  code: number;
+  code?: Record<string, unknown>;
 }
+
 export default function RegistePage  ()  {
   const [captchaValue, setCaptchaValue] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -39,51 +39,60 @@ export default function RegistePage  ()  {
   };
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const safeSelectedCountry = selectedCountry || {
+    code: 'US',
+    name: 'United States',
+    flag: '/default-flag.png'
+  };
+
   useEffect(() => {
     const fetchCountries = async () => {
       try {
-        const response = await fetch("/api/country");
+        const response = await fetch('/api/country');
         if (!response.ok) {
-          throw new Error("Failed to fetch country");
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const data = await response.json();
+        const data: ApiCountry[] = await response.json();
         
         const formattedCountries = data
-          .filter((country: ApiCountry) => 
-            country.code && Object.keys(country.code).length > 0
-          )
-          .map((country: ApiCountry) => {
-            const countryCode = Object.keys(country.code)[0];
-            return {
-              code: country.cca2,
-              name: country.name.common,
-              flag: country.flags?.png || country.flags?.svg,
-
-            };
-          })
-          .sort((a: Country, b: Country) => a.name.localeCompare(b.name));
+          .filter(country => country.cca2 && country.name?.common)
+          .map(country => ({
+            code: country.cca2,
+            name: country.name.common,
+            flag: country.flags?.png || country.flags?.svg || '/default-flag.png'
+          }))
+          .sort((a, b) => a.name.localeCompare(b.name));
 
         setCountries(formattedCountries);
-        // Set default country to Nigeria if available
-        const nigeria = formattedCountries.find((c: Country) => c.code === "NG");
-        setSelectedCountry(nigeria || formattedCountries[0]);
-        setLoading(false);
+        
+        // Set default country to Nigeria if available, otherwise first country
+        const nigeria = formattedCountries.find(c => c.code === 'NG');
+        setSelectedCountry(nigeria || formattedCountries[0] || null);
       } catch (err) {
-        setError("Failed to fetch countries");
-        console.error("Error fetching countries:", err);
+        console.error('Error fetching countries:', err);
+        setError('Failed to load countries. Please try again later.');
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchCountries();
   }, []);
 
-  const safeSelectedCountry = selectedCountry || {
-    code: "",
-    name: "Select a country",
-    flag: "/default-flag.png", // Provide a default flag
-    currency: "",
-    currencySymbol: "",
-  };
+  if (loading) {
+    return <div className="p-4 text-center">Loading countries...</div>;
+  }
+
+  if (error) {
+    return <div className="p-4 text-red-500">{error}</div>;
+  }
+
+  if (!countries.length) {
+    return <div className="p-4 text-center">No countries available</div>;
+  }
+
+
+
   return (    
       <div className="flex justify-center items-center min-h-screen pt-20 lg:pt-30 pb-10 bg-[#f7f7fa] font-maven p-4">
 <div className="bg-white lg:p-8 p-6 px-8 w-full max-w-md lg:max-w-xl border border-[#D5D2E5] border-opacity-80 rounded-[5px] shadow-[0_0px_30px_5px_rgba(32,23,73,0.05)]">
@@ -221,21 +230,30 @@ export default function RegistePage  ()  {
       </span>
     </div>
 
-        <label className="block text-gray-700 font-medium mb-1">Phone Number</label>
-      <div className="relative mb-5 pb-4">
+    <div className="mb-5 pb-4">
+      <label className="block text-gray-700 font-medium mb-1">Phone Number</label>
+      <div className="relative">
         <div className="flex items-center border border-gray-300 rounded-md overflow-hidden">
           <button
-            className="flex items-center  px-3 py-2 focus:outline-none"
+            className="flex items-center px-3 py-2 focus:outline-none"
             onClick={() => setShowDropdown(!showDropdown)}
             aria-expanded={showDropdown}
-                      aria-haspopup="listbox"
+            aria-haspopup="listbox"
+            disabled={!countries.length}
           >
-           <Image 
-             src={safeSelectedCountry.flag} 
-              alt={`${safeSelectedCountry.name} flag`}     width={24} 
-                    height={16}
-                 className="object-contain"
-                        />
+            {safeSelectedCountry.flag && (
+              <Image 
+                src={safeSelectedCountry.flag} 
+                alt={`${safeSelectedCountry.name} flag`}
+                width={24}
+                height={16}
+                className="object-contain mr-2"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = '/default-flag.png';
+                }}
+              />
+            )}
+            <span className="mr-2">+{/* You might want to add country code here */}</span>
             <FaChevronDown className="text-gray-500" />
           </button>
           <input
@@ -247,50 +265,49 @@ export default function RegistePage  ()  {
           />
         </div>
 
-        {/* Dropdown Menu */}
         {showDropdown && (
-            <div 
-                      className="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto scrollbar-hide"
-                      role="listbox"
-                    >
-                      {countries.map((country) => (
-                        <button
-                          key={country.code}
-                          className="flex items-center w-full px-4 py-2 text-sm hover:bg-gray-100 text-left"
-                          onClick={() => {
-                            setSelectedCountry(country);
-                            setShowDropdown(false);
-                          }}
-                          role="option"
-                          aria-selected={country.code === safeSelectedCountry.code}
-                        >
-                          <span className="mr-2">
-                            <Image 
-                              src={country.flag} 
-                              alt={`${country.name} flag`} 
-                              width={24} 
-                              height={16}
-                              className="object-contain"
-                            />
-                          </span>
-                          {country.name}
-                        </button>
-                      ))}
-                    </div>
+          <div 
+            className="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+            role="listbox"
+          >
+            {countries.map((country) => (
+              <button
+                key={country.code}
+                className={`flex items-center w-full px-4 py-2 text-sm hover:bg-gray-100 text-left ${
+                  country.code === safeSelectedCountry.code ? 'bg-blue-50' : ''
+                }`}
+                onClick={() => {
+                  setSelectedCountry(country);
+                  setShowDropdown(false);
+                }}
+                role="option"
+                aria-selected={country.code === safeSelectedCountry.code}
+              >
+                <span className="mr-2">
+                  <Image 
+                    src={country.flag} 
+                    alt={`${country.name} flag`}
+                    width={24}
+                    height={16}
+                    className="object-contain"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/default-flag.png';
+                    }}
+                  />
+                </span>
+                {country.name}
+              </button>
+            ))}
+          </div>
         )}
       </div>
+    </div>
  
 
-{/* <div className="mb-4 mt-8">
-<ReCAPTCHA
-          sitekey="6LdsiPkqAAAAAKTQ0AsrTskmsAePkAUM_ZKDr1ym" // Replace with your site key
-          onChange={(value) => setCaptchaValue(value)}
-        />
-        
-      </div> */}
 
 
-            <button className="w-full bg-blue-400 text-white p-3 rounded-lg font-semibold text-sm">Sign In</button>
+
+            <button type='submit' className="w-full bg-blue-400 text-white p-3 rounded-lg font-semibold text-sm">Sign In</button>
           </form>
 
           <div className="text-center text-sm lg:items-center items-start lg:flex-row flex flex-col lg:justify-between mt-4">
