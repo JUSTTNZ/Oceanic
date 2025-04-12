@@ -174,7 +174,29 @@ const loginUser = asyncHandler(async (req, res, next) => {
         next(error); // Forward the error to Express error handler
     }
 });
+
+const logOutUser = asyncHandler(async (req, res) => {
+
+})
+
+const refreshAccessToken = asyncHandler(async (req, res) => {
+
+})
+
+const changeUserCurrentPassword = asyncHandler(async(req,res) => {
+    
+})
+
+const updateUserDetails = asyncHandler(async(req, res) => {
+    
+})
+
+
 export {
     registerUser,
-    loginUser
+    loginUser,
+    logOutUser,
+    refreshAccessToken,
+    changeUserCurrentPassword,
+    updateUserDetails
 }
