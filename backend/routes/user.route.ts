@@ -2,7 +2,8 @@ import { Router } from "express"
 // import { verifyJWT, adminAuth } from "../middlewares/auth.middleware.js";
 import {
     registerUser,
-    loginUser
+    loginUser,
+    
 } from "../controllers/user.controller.js"
 import { userRegisterValidator, userLoginValidator } from "../middlewares/validator.js";
 
