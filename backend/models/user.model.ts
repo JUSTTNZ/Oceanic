@@ -25,6 +25,7 @@ declare global {
     role: "user" | "admin" | "superadmin";
     phoneNumber: string;
     isVerified: boolean;
+    refreshToken?: string; 
     bankDetails?: {
         bankName: string;
         accountNumber: string;

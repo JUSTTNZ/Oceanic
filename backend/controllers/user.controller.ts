@@ -180,7 +180,46 @@ const logOutUser = asyncHandler(async (req, res) => {
 })
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
+    const { refreshToken } = req.cookies || req.body
 
+    const incomingRefreshToken = refreshToken
+
+    if(!incomingRefreshToken) {
+        throw new ApiError({ statusCode: 401, message: "Refresh token is invalid" })
+    }
+
+    try {
+        const decodedToken = jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET) 
+
+        const userId = (decodedToken as jwt.JwtPayload)?._id;
+        if (!userId) {
+            throw new ApiError({ statusCode: 401, message: "Invalid token payload" });
+        }
+        const user = await User.findById(userId);
+
+        if(!user) {
+            throw new ApiError({ statusCode: 401, message: "Unauthorized" })
+        }
+
+        if(incomingRefreshToken !== user?.refreshToken) {
+            throw new ApiError({ statusCode: 401, message: "Invalid refresh token" })
+        }
+
+        const options = {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production"
+        }
+
+        const { accessToken, refreshToken: newRefreshToken } = await generateAccessAndRefreshToken(user._id.toString());
+
+        return res
+        .status(200)
+        .cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", newRefreshToken, options)
+        .json(new ApiResponse(200, "Access token refreshed successfully", {accessToken, refreshToken: newRefreshToken}))
+    } catch (error) {
+        throw new ApiError({ statusCode: 400, message: "Something happened while refreshing token" })
+    }
 })
 
 const changeUserCurrentPassword = asyncHandler(async(req,res) => {
