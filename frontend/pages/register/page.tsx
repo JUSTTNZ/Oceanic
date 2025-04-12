@@ -235,6 +235,7 @@ export default function RegistePage  ()  {
       <div className="relative">
         <div className="flex items-center border border-gray-300 rounded-md overflow-hidden">
           <button
+           type="button"
             className="flex items-center px-3 py-2 focus:outline-none"
             onClick={() => setShowDropdown(!showDropdown)}
             aria-expanded={showDropdown}
@@ -272,6 +273,7 @@ export default function RegistePage  ()  {
           >
             {countries.map((country) => (
               <button
+               type="button"
                 key={country.code}
                 className={`flex items-center w-full px-4 py-2 text-sm hover:bg-gray-100 text-left ${
                   country.code === safeSelectedCountry.code ? 'bg-blue-50' : ''
