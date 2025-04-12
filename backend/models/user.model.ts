@@ -17,8 +17,39 @@ declare global {
     }
   }
 
+  interface IUser {
+    username: string;
+    email: string;
+    fullname: string;
+    password: string;
+    role: "user" | "admin" | "superadmin";
+    phoneNumber: string;
+    isVerified: boolean;
+    refreshToken?: string; 
+    bankDetails?: {
+        bankName: string;
+        accountNumber: string;
+        accountName: string;
+    };
+    createdAt: Date;
+    updatedAt: Date;
+}
 
-const UserSchema = new Schema (
+
+  interface IUserMethods {
+    comparePassword(enteredPassword: string): Promise<boolean>;
+    generateAccessToken(): string;
+    generateRefreshToken(): string;
+}
+
+// Create the User Document type by extending mongoose.Document
+interface UserDocument extends IUser, Document, IUserMethods {}
+
+// Define the User model type
+interface UserModel extends mongoose.Model<UserDocument> {}
+
+
+const UserSchema = new Schema<UserDocument, UserModel, IUserMethods> (
     {
     username: {
         type: String,
@@ -85,62 +116,83 @@ UserSchema.pre("save", async function (next) {
 })
 
 
-UserSchema.methods.comparePassword = async function (enteredPassword: string) {
+UserSchema.methods.comparePassword = async function(enteredPassword: string) {
+  return await bcrypt.compare(enteredPassword, this.password);
+};
 
-    return await bcrypt.compare(enteredPassword, this.password)
-}
+UserSchema.methods.generateAccessToken = function () {
+  const payload = {
+    _id: this._id,
+    username: this.username,
+    email: this.email,
+    role: this.role
+  };
 
-UserSchema.methods.generateAccessToken = function (): string {
-    const payload = {
-      _id: this._id,
-      username: this.username,
-      email: this.email,
-      role: this.role
-    };
+  if (!process.env.ACCESS_TOKEN_SECRET) {
+    throw new Error('ACCESS_TOKEN_SECRET is not configured');
+  }
+
+  const accessTokenExpiry = process.env.ACCESS_TOKEN_EXPIRY;
+  if (!accessTokenExpiry || !isValidExpiry(accessTokenExpiry)) {
+    throw new Error('Invalid ACCESS_TOKEN_EXPIRY format. Use like "15m" or "1h"');
+  }
+
+  const opts = {expiresIn: accessTokenExpiry} as jwt.SignOptions //we add "as jwt.SignOptions" to make the jwt.sign method know that we passed an object and not a callback function.
+
+  return jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, opts);
   
-    if (!process.env.ACCESS_TOKEN_SECRET) {
-      throw new Error('ACCESS_TOKEN_SECRET is not configured');
-    }
+};
   
-    const accessTokenExpiry = process.env.ACCESS_TOKEN_EXPIRY;
-    if (!accessTokenExpiry || !isValidExpiry(accessTokenExpiry)) {
-      throw new Error('Invalid ACCESS_TOKEN_EXPIRY format. Use like "15m" or "1h"');
-    }
+UserSchema.methods.generateRefreshToken = function () {
+  const payload = { _id: this._id }; // Minimal payload for refresh token
+
+  if (!process.env.REFRESH_TOKEN_SECRET) {
+    throw new Error('REFRESH_TOKEN_SECRET is not configured');
+  }
+
+  const refreshTokenExpiry = process.env.REFRESH_TOKEN_EXPIRY;
+  if (!refreshTokenExpiry || !isValidExpiry(refreshTokenExpiry)) {
+    throw new Error('Invalid REFRESH_TOKEN_EXPIRY format. Use like "7d" or "30d"');
+  }
   
-    return jwt.sign(
-      payload,
-      process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: accessTokenExpiry }
-    );
-  };
-  
-  UserSchema.methods.generateRefreshToken = function (): string {
-    const payload = { _id: this._id }; // Minimal payload for refresh token
-  
-    if (!process.env.REFRESH_TOKEN_SECRET) {
-      throw new Error('REFRESH_TOKEN_SECRET is not configured');
-    }
-  
-    const refreshTokenExpiry = process.env.REFRESH_TOKEN_EXPIRY;
-    if (!refreshTokenExpiry || !isValidExpiry(refreshTokenExpiry)) {
-      throw new Error('Invalid REFRESH_TOKEN_EXPIRY format. Use like "7d" or "30d"');
-    }
-  
-    return jwt.sign(
-      payload,
-      process.env.REFRESH_TOKEN_SECRET,
-      { expiresIn: refreshTokenExpiry }
-    );
-  };
+  const opts =   { expiresIn: refreshTokenExpiry } as jwt.SignOptions; //we add "as jwt.SignOptions" to make the jwt.sign method know that we passed an object and not a callback function.
+
+  return jwt.sign(
+    payload,
+    process.env.REFRESH_TOKEN_SECRET,
+    opts
+  );
+};
+
   
   // Helper function to validate expiry format
-  function isValidExpiry(expiry: string): boolean {
-    if (/^\d+$/.test(expiry)) return true; // Accept plain numbers (seconds)
-    try {
-      return Boolean(ms(expiry)); // Validate string formats like "15m"
-    } catch {
-      return false;
+  function isValidExpiry(expiry: any): boolean {
+    // if it is a negative number return false.
+    if(Number(expiry) < 0) return false;
+
+    //check if expiry is a number written as a string.
+    const regexIsNumber = /^\d+$/;
+
+    //test for format like "10 days", "10d", "2 hrs", "4h".
+    const regexAlphaNum = /^(\d{1,})+\s?[a-z]+$/;
+
+    const isNumber = regexIsNumber.test(expiry);
+    const isAlphaNum = regexAlphaNum.test(expiry);
+
+    if (isNumber) return true; // Accept plain numbers (seconds)
+    else{
+      //if expiry contains a number and a letter.
+      if(isAlphaNum){
+        try {
+          const milliseconds = ms(expiry);
+          return milliseconds != undefined ? true : false; // Validate string formats like "15m"
+        } catch {
+          //if an error is thrown return false;
+          return false;
+        }
+      }else return false;
     }
+         
   }
 
 export const User = mongoose.model('User', UserSchema);

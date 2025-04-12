@@ -1,1 +1,1 @@
-export const DB_NAME = "Oceanic Charts"
+export const DB_NAME = "Oceanic_Charts"

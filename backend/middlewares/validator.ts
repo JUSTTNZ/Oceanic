@@ -8,6 +8,7 @@ const userRegisterValidator = async (req: Request, res: Response, next: NextFunc
     fullname: Joi.string().min(3).required(),
     username: Joi.string().alphanum().min(3).required(),
     password: Joi.string().min(6).required(),
+    phoneNumber: Joi.string().required(),
   });
 
   try {
