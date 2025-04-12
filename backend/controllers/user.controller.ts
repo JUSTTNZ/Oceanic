@@ -53,7 +53,8 @@ import { IUserRegister } from '../types/user.types.js';
 // };
 
 const registerUser = asyncHandler( async (req, res, next) => {
-    const {fullname, email, username, password} = req.body
+    
+    const {fullname, email, username, password, phoneNumber} = req.body
 
     //validation
     if(
@@ -77,12 +78,12 @@ const registerUser = asyncHandler( async (req, res, next) => {
     }
 
 
-    try {
         const user = await User.create({
             fullname,
             email,
             password,
             username: username.toLowerCase(),
+            phoneNumber
              
         });
         
@@ -101,11 +102,7 @@ const registerUser = asyncHandler( async (req, res, next) => {
         return res
         .status(201)
         .json(new ApiResponse(200, "User registered successfully", createdUser));
-    } catch (error) {
-        console.log("User creation failed");
-        next(error);
-        
-    }
+    
 })
 export {
     registerUser,
