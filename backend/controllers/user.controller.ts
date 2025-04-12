@@ -175,8 +175,32 @@ const loginUser = asyncHandler(async (req, res, next) => {
     }
 });
 
-const logOutUser = asyncHandler(async (req, res) => {
-
+const logOutUser = asyncHandler(async (req, res,next) => {
+    try{
+    const userId = req.user._id
+    //find logged in user
+    const loggedInUser = await User.findById(userId)
+    if(!loggedInUser){
+        throw new ApiError({statusCode:401, message:"User not found"})
+    }
+   
+    // clear token 
+    const options = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        expires: new Date(0) // set to expire now now
+    }
+    return res 
+    .status(200)
+    // clear cookies here
+    .clearCookie("refreshToken",  options)
+    .clearCookie("accessToken",  options)
+    .json(new ApiResponse(200, "User logged out Successfully", {}))
+}
+catch(error){
+    console.log("User logout failed", error)
+    next(error)
+}
 })
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
@@ -223,7 +247,17 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 })
 
 const changeUserCurrentPassword = asyncHandler(async(req,res) => {
-    
+    const { email } = req.body
+
+    // finduser
+    const user = await User.findOne({email})
+    // if(!user){
+    //     return res.status(200)
+    //     .json(
+    //         new ApiResponse(200, {}, 'A reset Link has been sent to your email')
+    //     );
+
+    // }
 })
 
 const updateUserDetails = asyncHandler(async(req, res) => {
