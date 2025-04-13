@@ -1,9 +1,8 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 "use client"
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-// import ReCAPTCHA from 'react-google-recaptcha';
-import { FaChevronDown, FaEye, FaEyeSlash, FaSearch } from 'react-icons/fa';
+import { FaChevronDown, FaEye, FaEyeSlash,  } from 'react-icons/fa';
 
 import Image from 'next/image';
 
@@ -26,7 +25,6 @@ interface ApiCountry {
 }
 
 export default function RegistePage  ()  {
-  const [captchaValue, setCaptchaValue] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [countries, setCountries] = useState<Country[]>([]);
   const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
