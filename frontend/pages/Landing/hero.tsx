@@ -43,7 +43,7 @@ export default function Hero() {
           </div>
         </div>
         
-        <div ref={imageRef} className="relative hidden md:block">
+        <div ref={imageRef} className="relative  ">
           <Image
             src={hero}
             alt="Phone Mockup"
