@@ -3,7 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowTrendingUpIcon } from "@heroicons/react/24/outline";
-
+import users from '../../public/Images/users.png'
+import phone from '../../public/Images/phone1.png'
+import globe from '../../public/Images/globe.png'
 export default function AboutPage() {
   return (
     <section className="bg-white py-20 px-6 md:px-20">
@@ -20,16 +22,16 @@ export default function AboutPage() {
             </p>
             <hr className="border-t-2 border-[#0047AB] my-2" />
             <div className="flex flex-col items-start gap-2 flex-wrap">
-              <Image src="/images/users.png" alt="users" width={160} height={160} />
-              <Image src="/images/users.png" alt="users" width={200} height={200} />
+              <Image src={users} alt="users" width={160} height={160} />
+            <Image src={users} alt="users" width={200} height={200} />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-2">
             <div className="relative">
-              <Image src="/images/phone1.png" alt="product 1" width={150} height={150} className="rounded-md" />
+              <Image src={phone} alt="product 1" width={150} height={150} className="rounded-md" />
             </div>
-            <Image src="/images/globe.png" alt="product 2" width={300} height={300} className="rounded-md" />
+            <Image src={globe} alt="product 2" width={300} height={300} className="rounded-md" />
           </div>
 
           <div className="bg-white shadow p-4 rounded-md text-center">
