@@ -13,7 +13,9 @@ import userRouter from './routes/user.route.js'; // Must exist and be ESM
 import healthCheckRouter from "./routes/healthcheck.route.js"
 import transactionRouter from "./routes/transaction.route.js"
 import { errorHandler } from "./middlewares/error.middleware.js"
-
+app.get('/', (req, res) => {
+    res.send('Welcome to the backend!');
+  });
 app.use("/api/v1/healthCheck", healthCheckRouter)
 app.use("/api/v1/users", userRouter)
 app.use("api/v1/transaction", transactionRouter)
