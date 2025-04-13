@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-
+import hero from '../../public/Images/hero.webp'
 
 export default function Hero() {
 
@@ -45,7 +45,7 @@ export default function Hero() {
         
         <div ref={imageRef} className="relative hidden md:block">
           <Image
-            src="/Images/hero.webp"
+            src={hero}
             alt="Phone Mockup"
             width={400}
             height={700}

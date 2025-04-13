@@ -1,13 +1,12 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 "use client"
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
-import ReCAPTCHA from 'react-google-recaptcha';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 export default function LoginPage  ()  {
-  const [captchaValue, setCaptchaValue] = useState<string | null>(null);
+
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter()
   const togglePasswordVisibility = () => {
@@ -84,13 +83,6 @@ export default function LoginPage  ()  {
       </span>
     </div>
 
-<div className="mb-4">
-<ReCAPTCHA
-          sitekey="6LdsiPkqAAAAAKTQ0AsrTskmsAePkAUM_ZKDr1ym" // Replace with your site key
-          onChange={(value) => setCaptchaValue(value)}
-        />
-        
-      </div>
 
 
             <button className="w-full bg-blue-400 text-white p-3 rounded-lg font-semibold text-sm" onClick={handlelogin}>Sign In</button>
