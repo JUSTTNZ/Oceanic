@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { Transaction } from '../models/transaction.model.js';
 import { sendUserNotification } from '../utils/notification.js';
 import { sendAdminEmail } from '../utils/mailer.js';
-import { io } from '../socket.js';
+import { io } from '../config/socket.js';
 import crypto from 'crypto';
 
 export const handleBitgetWebhook = async (req: Request, res: Response) => {
@@ -22,7 +22,7 @@ export const handleBitgetWebhook = async (req: Request, res: Response) => {
     transaction.status = status;
     await transaction.save();
 
-    await sendUserNotification(transaction.user.toString(), `Your ${type} transaction is now ${status}`);
+    await sendUserNotification(transaction.userId.toString(), `Your ${type} transaction is now ${status}`);
 
     await sendAdminEmail({
       subject: 'Transaction Update',
@@ -30,7 +30,7 @@ export const handleBitgetWebhook = async (req: Request, res: Response) => {
     });
 
     io.emit('transaction_updated', {
-      user: transaction.user,
+      user: transaction.userId,
       txid,
       status,
       type

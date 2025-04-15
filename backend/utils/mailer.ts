@@ -5,8 +5,7 @@ interface SendMailProps {
   text?: string;
   html?: string;
 }
-
-export const sendAdminEmail = async ({ subject, text, html }: SendMailProps): Promise<void> => {
+ const sendAdminEmail = async ({ subject, text, html }: SendMailProps): Promise<void> => {
   try {
     const transporter = nodemailer.createTransport({
       service: 'gmail',
@@ -33,3 +32,6 @@ export const sendAdminEmail = async ({ subject, text, html }: SendMailProps): Pr
     console.error(' Failed to send email:', error);
   }
 };
+
+
+export {sendAdminEmail}

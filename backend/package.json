@@ -20,6 +20,7 @@
   "dependencies": {
     "@types/joi": "^17.2.3",
     "@types/socket.io": "^3.0.2",
+    "axios": "^1.8.4",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^3.0.2",
     "cloudinary": "^2.6.0",
@@ -39,6 +40,7 @@
     "validator": "^13.15.0"
   },
   "devDependencies": {
+    "@types/axios": "^0.14.4",
     "@types/bcrypt": "^5.0.2",
     "@types/bcryptjs": "^3.0.0",
     "@types/cookie-parser": "^1.4.8",
