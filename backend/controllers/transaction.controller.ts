@@ -3,27 +3,70 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Transaction } from "../models/transaction.model.js";
 import { getIO } from '../config/socket.js';
+import { CoinWallet } from "../models/coinWallet.model.js";
 
 // Create Transaction (Buy or Sell)
 const createTransaction = asyncHandler(async (req, res) => {
-  try {
-    const transactionData = new Transaction({
-      ...req.body,
-      user: req.user._id,
-    });
-    await transactionData.save();
-
+    try{
+    const { coin, amount, txid, type, walletAddressUsed, country } = req.body;
+  
+    // Validate common required fields
+    if (!coin || !amount || !txid || !type || !country) {
+      throw new ApiError({ statusCode: 400, message: "Missing required fields" });
+    }
+  
+    // Check transaction type
+    if (type !== "buy" && type !== "sell") {
+      throw new ApiError({ statusCode: 400, message: "Transaction type must be 'buy' or 'sell'" });
+    }
+  
+    // Prevent duplicate txid
+    const existing = await Transaction.findOne({ txid });
+    if (existing) {
+      throw new ApiError({ statusCode: 400, message: "Transaction with this TXID already exists" });
+    }
+  
+    const data: any = {
+      userId: req.user._id,
+      coin,
+      amount,
+      txid,
+      type,
+      country,
+    };
+  
+    // If it's a buy, require user's wallet address
+    if (type === "buy") {
+      if (!walletAddressUsed) {
+        throw new ApiError({ statusCode: 400, message: "User wallet address is required for buy transactions" });
+      }
+      data.walletAddressUsed = walletAddressUsed;
+    }
+  
+    // If it's a sell, add walletAddressSentTo from admin’s CoinWallet model
+    if (type === "sell") {
+      const coinWallet = await CoinWallet.findOne({ coin });
+      if (!coinWallet) {
+        throw new ApiError({ statusCode: 404, message: "No wallet address found for this coin" });
+      }
+      data.walletAddressSentTo = coinWallet.walletAddress;
+    }
+  
+    // Save transaction
+    const transaction = await Transaction.create(data);
+  
     const io = getIO();
-    io.emit('transaction_created', {
+    io.emit("transaction_created", {
       user: req.user._id,
-      transaction: transactionData
+      transaction,
     });
-
-    return res.status(201).json(new ApiResponse(201, 'Transaction created successfully', transactionData));
-  } catch (error) {
+  
+    res.status(201).json(new ApiResponse(201, "Transaction created successfully", transaction));
+    } catch (error) {
     throw new ApiError({ statusCode: 500, message: 'Something went wrong while creating transaction' });
-  }
+    }
 });
+  
 
 // Get All Transactions with optional sorting and filtering
 const getAllTransactions = asyncHandler(async (req, res) => {
