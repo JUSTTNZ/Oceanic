@@ -3,8 +3,8 @@
 import Image from "next/image";
 import { useState } from "react";
 import Link from "next/link";
-
-
+import green from '../../public/Images/greentrend.png'
+import red from '../../public/Images/redtrend.png'
 interface Coin  {
   id: string;
   name: string;
@@ -107,7 +107,7 @@ export default function CoinLive({ coins }: CoinLiveProps) {
               <div className={trendUp ? "text-green-400" : "text-red-400"}>{change.toFixed(2)}%</div>
               <div>
                 <Image
-                  src={trendUp ? "/images/greentrend.png" : "/images/redtrend.png"}
+                  src={trendUp ? green : red}
                   alt="trend"
                   width={60}
                   height={20}
@@ -144,7 +144,7 @@ export default function CoinLive({ coins }: CoinLiveProps) {
               <div className="text-right text-xs flex flex-col items-end">
                 <div className="text-black font-semibold">USDT ${coin.current_price.toFixed(4)}</div>
                 <Image
-                  src={trendUp ? "/images/greentrend.png" : "/images/redtrend.png"}
+           src={trendUp ? green : red}
                   alt="trend"
                   width={50}
                   height={15}

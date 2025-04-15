@@ -2,17 +2,7 @@ import { useState } from "react";
 import { FaDownload } from "react-icons/fa";
 import Footer from "../login/footer";
 import Header from "../login/header";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    Paper,
-    IconButton,
-    TableSortLabel,
-} from "@mui/material";
+
 
 const transactions = [
     { id: "011", date: "June 25, 2026", status: "Paid", amount: "0.005 BTC", type: "Deposit", wallet: "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh" },
@@ -61,75 +51,75 @@ export default function CryptoTransactions() {
                     </div>
 
                     {/* Table Wrapper */}
-                    <TableContainer component={Paper} sx={{ maxHeight: 500 }}>
-                        <Table stickyHeader>
-                            {/* Table Head */}
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell>
-                                        <TableSortLabel
-                                            active={sortOrder.key === "id"}
-                                            direction={sortOrder.key === "id" ? sortOrder.direction : "asc"}
-                                            onClick={() => handleSort("id")}
-                                        >
-                                            Invoice
-                                        </TableSortLabel>
-                                    </TableCell>
-                                    {(["date", "type", "status", "amount", "wallet"] as const).map((key) => (
-                                        <TableCell key={key} align="center">
-                                            <TableSortLabel
-                                                active={sortOrder.key === key}
-                                                direction={sortOrder.key === key ? sortOrder.direction : "asc"}
-                                                onClick={() => handleSort(key)}
-                                            >
-                                                {key.charAt(0).toUpperCase() + key.slice(1)}
-                                            </TableSortLabel>
-                                        </TableCell>
-                                    ))}
-                                    <TableCell align="center">Download</TableCell>
-                                </TableRow>
-                            </TableHead>
+                    <div className="max-h-500 overflow-y-auto">
+            <table className="min-w-full border-collapse border border-gray-200">
+                {/* Table Head */}
+                <thead className="bg-gray-100">
+                    <tr>
+                        <th className="border border-gray-300 p-2">
+                            <button
+                                onClick={() => handleSort("id")}
+                                className="flex items-center"
+                            >
+                                Invoice
+                                {sortOrder.key === "id" && (
+                                    <span className={`ml-1 ${sortOrder.direction === 'asc' ? '⬆️' : '⬇️'}`}></span>
+                                )}
+                            </button>
+                        </th>
+                        {(["date", "type", "status", "amount", "wallet"] as const).map((key) => (
+                            <th key={key} className="border border-gray-300 p-2 text-center">
+                                <button
+                                    onClick={() => handleSort(key)}
+                                    className="flex items-center"
+                                >
+                                    {key.charAt(0).toUpperCase() + key.slice(1)}
+                                    {sortOrder.key === key && (
+                                        <span className={`ml-1 ${sortOrder.direction === 'asc' ? '⬆️' : '⬇️'}`}></span>
+                                    )}
+                                </button>
+                            </th>
+                        ))}
+                        <th className="border border-gray-300 p-2 text-center">Download</th>
+                    </tr>
+                </thead>
 
-                            {/* Table Body */}
-                            <TableBody>
-                                {sortedTransactions.map((tx) => (
-                                    <TableRow key={tx.id} hover>
-                                        <TableCell>
-                                            {/* <Checkbox
-                                                checked={selected.includes(tx.id)}
-                                                onChange={() => toggleSelect(tx.id)}
-                                            /> */}
-                                            <span className="text-blue-600 font-semibold">
-                                                Invoice #{tx.id} 
-                                            </span>
-                                        </TableCell>
-                                        <TableCell align="center">{tx.date}</TableCell>
-                                        <TableCell align="center">{tx.type}</TableCell>
-                                        <TableCell align="center">
-                                            <span
-                                                className={`px-2 py-1 rounded-md text-xs font-bold ${
-                                                    tx.status === "Paid"
-                                                        ? "bg-blue-200 text-blue-600"
-                                                        : "bg-red-200 text-red-600"
-                                                }`}
-                                            >
-                                                {tx.status}
-                                            </span>
-                                        </TableCell>
-                                        <TableCell align="center">{tx.amount}</TableCell>
-                                        <TableCell align="center" className="break-all">
-                                            {tx.wallet}
-                                        </TableCell>
-                                        <TableCell align="center">
-                                            <IconButton>
-                                                <FaDownload className="text-gray-500 hover:text-blue-600" />
-                                            </IconButton>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
+                {/* Table Body */}
+                <tbody>
+                    {sortedTransactions.map((tx) => (
+                        <tr key={tx.id} className="hover:bg-gray-100">
+                            <td className="border border-gray-300 p-2">
+                                <span className="text-blue-600 font-semibold">
+                                    Invoice #{tx.id}
+                                </span>
+                            </td>
+                            <td className="border border-gray-300 p-2 text-center">{tx.date}</td>
+                            <td className="border border-gray-300 p-2 text-center">{tx.type}</td>
+                            <td className="border border-gray-300 p-2 text-center">
+                                <span
+                                    className={`px-2 py-1 rounded-md text-xs font-bold ${
+                                        tx.status === "Paid"
+                                            ? "bg-blue-200 text-blue-600"
+                                            : "bg-red-200 text-red-600"
+                                    }`}
+                                >
+                                    {tx.status}
+                                </span>
+                            </td>
+                            <td className="border border-gray-300 p-2 text-center">{tx.amount}</td>
+                            <td className="border border-gray-300 p-2 text-center break-all">
+                                {tx.wallet}
+                            </td>
+                            <td className="border border-gray-300 p-2 text-center">
+                                <button>
+                                    <FaDownload className="text-gray-500 hover:text-blue-600" />
+                                </button>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
 
                     {/* Pagination */}
                     <div className="flex justify-between items-center mt-4">

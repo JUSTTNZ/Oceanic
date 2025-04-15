@@ -52,68 +52,47 @@ const generateAccessAndRefreshToken = async (userId: string): Promise<{ accessTo
 //     }
 // };
 
-const registerUser = asyncHandler( async (req, res, next) => {
-    
-    const {fullname, email, username, password, phoneNumber} = req.body
+const registerUser = asyncHandler(async (req, res, next) => {
+    console.log("Received registration data:", req.body);
+    const { fullname, email, username, password, phoneNumber } = req.body;
 
-    //validation
-    if(
-        [fullname, email, username, password].some((field) => field?.trim() === "")
-    ) {
+    // Validation - now includes phoneNumber
+    if ([fullname, email, username, password, phoneNumber].some(field => !field?.trim())) {
         throw new ApiError({
             statusCode: 400,
-            message: "All fields required",
-          });
+            message: "All fields are required",
+        });
     }
 
-    const exitingUser = await User.findOne({
-        $or: [{username},{email}]
-    })
+    const existingUser = await User.findOne({
+        $or: [{ username: username.toLowerCase() }, { email: email.toLowerCase() }]
+    });
 
-    if(exitingUser) {
+    if (existingUser) {
         throw new ApiError({
-            statusCode: 404,
-            message: "Resource not found",
-          });
+            statusCode: 409, // Changed from 404 to 409
+            message: "User with this email or username already exists",
+        });
     }
 
     const userCount = await User.countDocuments();
-    let role: 'user' | 'admin' | 'superadmin' = 'user';
-  
-    if (userCount === 0) {
-      role = 'superadmin';
-    } else if (userCount === 1) {
-      role = 'admin';
-    }
-  
+    let role = 'user';
+    if (userCount === 0) role = 'superadmin';
+    else if (userCount === 1) role = 'admin';
 
+    const user = await User.create({
+        fullname,
+        email: email.toLowerCase(),
+        password,
+        username: username.toLowerCase(),
+        phoneNumber,
+        role // Added missing role
+    });
 
-        const user = await User.create({
-            fullname,
-            email,
-            password,
-            username: username.toLowerCase(),
-            phoneNumber,
-            role
-        });
-        
-    
-        const createdUser = await User.findById(user._id).select(
-            "-password -refreshToken"
-        )
-    
-        if(!createdUser) {
-            throw new ApiError({
-                statusCode:500,
-                message: "Something went wrong while registering the user",
-              });
-        }
-    
-        return res
-        .status(201)
-        .json(new ApiResponse(200, "User registered successfully", createdUser));
-    
-})
+    return res.status(201).json(
+        new ApiResponse(201, "User registered successfully", user)
+    );
+});
 
 const loginUser = asyncHandler(async (req, res, next) => {
     const { email, username, password } = req.body
@@ -176,8 +155,32 @@ const loginUser = asyncHandler(async (req, res, next) => {
     }
 });
 
-const logOutUser = asyncHandler(async (req, res) => {
-
+const logOutUser = asyncHandler(async (req, res,next) => {
+    try{
+    const userId = req.user._id
+    //find logged in user
+    const loggedInUser = await User.findById(userId)
+    if(!loggedInUser){
+        throw new ApiError({statusCode:401, message:"User not found"})
+    }
+   
+    // clear token 
+    const options = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        expires: new Date(0) // set to expire now now
+    }
+    return res 
+    .status(200)
+    // clear cookies here
+    .clearCookie("refreshToken",  options)
+    .clearCookie("accessToken",  options)
+    .json(new ApiResponse(200, "User logged out Successfully", {}))
+}
+catch(error){
+    console.log("User logout failed", error)
+    next(error)
+}
 })
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
@@ -224,7 +227,17 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 })
 
 const changeUserCurrentPassword = asyncHandler(async(req,res) => {
-    
+    const { email } = req.body
+
+    // finduser
+    const user = await User.findOne({email})
+    // if(!user){
+    //     return res.status(200)
+    //     .json(
+    //         new ApiResponse(200, {}, 'A reset Link has been sent to your email')
+    //     );
+
+    // }
 })
 
 const updateUserDetails = asyncHandler(async(req, res) => {
