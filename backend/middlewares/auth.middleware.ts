@@ -39,6 +39,38 @@ export const verifyJWT = asyncHandler(async(req, _, next) => {
     }
 })
 
+export const adminOrSuperadminAuth = asyncHandler(async (req, res, next) => {
+    try{
+    const token = req.cookies?.accessToken || req.header('Authorization')?.replace('Bearer ', '');
+  
+    if (!token) {
+      throw new ApiError({ statusCode: 401, message: 'Access denied, no token provided' });
+    }
+  
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!);
+    req.user = decoded;
+  
+    const user = await User.findById(req.user._id);
+  
+    if (!user) {
+      throw new ApiError({ statusCode: 404, message: 'User not found' });
+    }
+  
+    if (user.role !== 'admin' && user.role !== 'superadmin') {
+      throw new ApiError({ statusCode: 403, message: 'Access denied. Admins or Superadmins only.' });
+    }
+  
+    next();
+    }catch (error: unknown) {
+        if (error instanceof ApiError) {
+            res.status(error.statusCode).json({ message: error.message });
+        } else {
+            res.status(500).json({ message: "Server error" });
+        }
+    }
+
+  });
+
 export const superAdminAuth = asyncHandler(async (req, res, next) => {
     try{
     const token =
