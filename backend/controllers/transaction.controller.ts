@@ -2,7 +2,7 @@ import { asyncHandler } from "../utils/AsyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Transaction } from "../models/transaction.model.js";
-import { io } from '../config/socket.js';
+import { getIO } from '../config/socket.js'; 
 
 const createTransaction = asyncHandler(async (req, res) => {
     try {
@@ -10,16 +10,15 @@ const createTransaction = asyncHandler(async (req, res) => {
             ...req.body,
             userId: req.user._id
         });
-
         await transactionData.save();
-
+        
+        const io = getIO();
         io.emit('transaction_created', {
             user: req.user._id,
             transactionData
-          });
+        });
+        
         return res.status(201).json(new ApiResponse(201, "Transaction created successfully", transactionData));
-
-
     } catch (error) {
         throw new ApiError({ statusCode: 500, message: "Something went wrong while creating transaction" })
     }
