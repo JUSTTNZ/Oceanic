@@ -1,9 +1,11 @@
 // app.ts
 import express from 'express';
 import cookieParser from 'cookie-parser'; // Must be ESM compatible
+import http from 'http';
 
 
 const app = express();
+const server = http.createServer(app);
 app.use(express.json({limit: "16kb"}))
 app.use(express.urlencoded({extended: true, limit: "16kb"}))
 app.use(cookieParser()); // Could throw if cookie-parser isn't ESM ready
@@ -19,4 +21,4 @@ app.use("/api/v1/users", userRouter)
 app.use("api/v1/transaction", transactionRouter)
 app.use(errorHandler)
 
-export { app };
+export { app, server };
