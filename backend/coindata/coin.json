@@ -1,0 +1,18 @@
+[
+    {
+      "coin": "BTC",
+      "network": "Bitcoin",
+      "walletAddress": "bc1qexamplebtc"
+    },
+    {
+      "coin": "ETH",
+      "network": "Ethereum",
+      "walletAddress": "0xexampleeth"
+    },
+    {
+      "coin": "USDT",
+      "network": "TRC20",
+      "walletAddress": "Texampleusdt"
+    }
+  ]
+  
