@@ -1,9 +1,12 @@
 import { Router } from 'express';
-import { verifyJWT, adminAuth } from '../middlewares/auth.middleware.js';
-import { createTransaction } from '../controllers/transaction.controller.js';
+import { verifyJWT, superAdminAuth, adminOrSuperadminAuth } from '../middlewares/auth.middleware.js';
+import { createTransaction, getUserTransactions, getAllTransactions, updateTransactionStatus } from '../controllers/transaction.controller.js';
 
 const router = Router();
 
 router.route("/").post(verifyJWT, createTransaction)
+router.route("/user").post(verifyJWT, getUserTransactions)
+router.route("/admin").get(verifyJWT,adminOrSuperadminAuth, getAllTransactions)
+router.route("/status/:txid").patch(verifyJWT, superAdminAuth, updateTransactionStatus)
 
 export default router;

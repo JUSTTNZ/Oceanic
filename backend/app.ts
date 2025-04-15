@@ -2,8 +2,12 @@
 import express from 'express';
 import cookieParser from 'cookie-parser'; // Must be ESM compatible
 import cors from 'cors'; 
+import http from 'http';
+
 
 const app = express();
+const server = http.createServer(app);
+
 // CORS Configuration
 app.use(cors({
     origin:  'http://localhost:3000',
@@ -29,4 +33,4 @@ app.use("/api/v1/users", userRouter)
 app.use("api/v1/transaction", transactionRouter)
 app.use(errorHandler)
 
-export { app };
+export { app, server };
