@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Header from "../login/header";
 import Footer from "../login/footer";
+import { useSelector } from "react-redux";
 
 const options = [
   "To invest in crypto for profit",
@@ -11,12 +12,25 @@ const options = [
   "Business",
 ];
 
+interface RootState {
+  user: {
+    uid: number;
+    email: string;
+    username: string;
+    roles: string;
+  };
+}
+
 export default function SignupSurvey(){
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
 
   const handleSelect = (option: string) => {
     setSelectedOption(option);
   };
+  const user = useSelector((state: RootState) => state.user);
+
+  
+  console.log("user", user)
 
   return (
     <section>

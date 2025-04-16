@@ -1,21 +1,78 @@
 
 "use client"
+import { setUser } from '@/action';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { useDispatch } from 'react-redux';
 
 export default function LoginPage  ()  {
-
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter()
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
- 
-  const handlelogin = () => {
-    router.push("/survey")
-  }
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    
+  });
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+const dispatch = useDispatch()
+  const handlelogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+  
+    try {
+      setLoading(true);
+  
+      const response = await fetch('http://localhost:7001/api/v1/users/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email, password: formData.password }),
+        credentials: 'include' // if using cookies/session
+      });
+  
+      const data = await response.json();
+      console.log("Login response:", data);
+  
+      if (!response.ok) {
+        throw new Error(data.message || data.error || "Login failed");
+      }
+  
+      // Destructure the user data
+      const { _id, email, username, role } = data.data;
+  
+      // Dispatch user data to Redux
+      dispatch(setUser({
+        uid: _id,
+        email,
+        username,
+        roles: role
+      }));
+  
+      
+      router.push("/survey")
+  
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Login failed';
+      setError(errorMessage);
+      console.error("Login error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
 
   return (
 
@@ -55,21 +112,33 @@ export default function LoginPage  ()  {
 </div>
          
           </div>
-
-          <form>
+          {error && (
+          <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md text-sm">
+            {error}
+          </div>
+        )}
+          <form onSubmit={handlelogin}>
             <label className="  text-sm font-medium block mb-2">E-mail Address *</label>
             <input
               type="email"
+               name="email"
               className="w-full h-[50px] p-3 border text-sm border-[#D5D2E5] border-opacity-80 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
               placeholder="E-mail Address"
+              value={formData.email}
+              onChange={handleChange}
+              required
             />
 
 <div className="relative mb-4">
       <label className="block mb-2 text-sm font-medium">Password *</label>
       <input
         type={showPassword ? 'text' : 'password'}
+          name="password"
         className="w-full p-3 h-[50px] text-sm border border-[#D5D2E5] border-opacity-80 rounded-lg pr-10 focus:outline-none focus:ring-2 focus:ring-blue-400"
         placeholder="Password"
+        value={formData.password}
+        onChange={handleChange}
+        required
       />
       <span
         className="absolute inset-y-0 top-7 right-10  flex items-center   cursor-pointer border-l border-[#D5D2E5]"
@@ -85,7 +154,14 @@ export default function LoginPage  ()  {
 
 
 
-            <button className="w-full bg-blue-400 text-white p-3 rounded-lg font-semibold text-sm" onClick={handlelogin}>Sign In</button>
+            <button
+            type='submit'
+             className="w-full bg-blue-400 text-white p-3 rounded-lg font-semibold text-sm" 
+             disabled={loading}
+             >
+              
+              {loading ? 'Logging...' : 'Login'}
+              </button>
           </form>
 
           <div className="text-center text-sm lg:items-center items-start lg:flex-row flex flex-col lg:justify-between mt-4">
