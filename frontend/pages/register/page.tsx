@@ -3,7 +3,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
-
+import { useDispatch } from 'react-redux';
+import {setUser} from '../../action'
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   // const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -20,7 +21,7 @@ export default function RegisterPage() {
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
-  
+  const dispatch = useDispatch();
   // const toggleConfirmPasswordVisibility = () => {
   //   setShowConfirmPassword(!showConfirmPassword);
   // };
@@ -53,7 +54,14 @@ export default function RegisterPage() {
         });
 
         const data = await response.json();
+        
         console.log("Response data:", data); // Log response
+        dispatch(setUser({
+          uid: data.data._id,
+          email: data.data.email,
+          username: data.data.username,
+          role: data.data.role
+        }));
         
         if (!response.ok) {
             throw new Error(
@@ -62,7 +70,8 @@ export default function RegisterPage() {
                 `Registration failed with status ${response.status}`
             );
         }
-
+      
+    
         router.push('/survey');
         
     } catch (err) {
