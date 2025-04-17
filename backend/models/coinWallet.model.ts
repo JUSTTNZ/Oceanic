@@ -9,10 +9,10 @@ interface CoinWalletDocument extends Document {
 const coinWalletSchema = new Schema<CoinWalletDocument>(
   {
     coin: { type: String, required: true, unique: true },
-    walletAddress: { type: String, required: true },
     network: { type: String },
+    walletAddress: { type: String, required: true },
   },
   { timestamps: true }
 );
 
-export const CoinWallet = mongoose.model<CoinWalletDocument>('CoinWallet', coinWalletSchema);
+export const CoinWallet = mongoose.model<CoinWalletDocument>('CoinWallet', coinWalletSchema, 'coinWallets');

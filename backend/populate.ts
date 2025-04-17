@@ -7,6 +7,7 @@ dotenv.config();
 
 const connectDB = async () => {
   await mongoose.connect(process.env.MONGODB_URI!);
+  console.log("MongoDB connected successfully");
 };
 
 const populateCoins = async () => {
@@ -15,6 +16,7 @@ const populateCoins = async () => {
     await CoinWallet.deleteMany();
     const result = await CoinWallet.insertMany(coinData);
     console.log("Coins seeded:", result.length);
+    console.log("Coin data:", coinData);
     process.exit(0);
   } catch (err) {
     console.error("Error seeding coins:", err);

@@ -6,7 +6,7 @@ import { getIO } from '../config/socket.js';
 import { CoinWallet } from "../models/coinWallet.model.js";
 
 // Create Transaction (Buy or Sell)
-const createTransaction = asyncHandler(async (req, res) => {
+  const createTransaction = asyncHandler(async (req, res) => {
     try{
     const { coin, amount, txid, type, walletAddressUsed, country } = req.body;
   
