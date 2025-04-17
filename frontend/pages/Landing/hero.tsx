@@ -32,8 +32,8 @@ export default function Hero() {
   };
 }, []);
   return (
-    <section className="bg-white relative overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6 py-24 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+    <section className="bg-white relative overflow-hidden font-grotesk">
+      <div className="max-w-7xl mx-auto px-6 lg:py-24 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
         <div>
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-[#0047AB] mb-6 leading-tight">Buy and sell <br /> crypto with ease</h1>
           <p className="text-base sm:text-lg text-gray-600 mb-8">Oceanic makes it simple to trade cryptocurrency securely and globally. Join us and start today!</p>

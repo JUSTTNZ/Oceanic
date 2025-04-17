@@ -2,7 +2,7 @@ import { FaFacebookF, FaTwitter, FaInstagram, FaTelegramPlane } from "react-icon
 
 export default function Footer() {
   return (
-    <footer className="bg-white py-6 border-t border-gray-200 font-poppins text-sm">
+    <footer className="bg-white py-6 border-t border-gray-200 font-grotesk text-sm">
       <div className="container mx-auto px-6 flex flex-col items-center text-gray-600 text-sm space-y-4 lg:space-y-0 lg:flex-row lg:justify-between">
         
        

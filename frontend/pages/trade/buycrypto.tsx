@@ -198,7 +198,7 @@ export default function BuyCrypto() {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -30 }}
       transition={{ duration: 0.3 }}
-      className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl mx-auto py-14 px-4  "
+      className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl mx-auto py-14 px-4  font-grotesk"
     >
     
  <FirstSide
@@ -206,7 +206,7 @@ export default function BuyCrypto() {
         selectedCountry={selectedCountry}
         exchangeRate={exchangeRate}
       />
-      <div className="w-full max-w-sm mx-auto border border-gray-200 rounded-xl p-6 shadow-sm space-y-4">
+      <div className="w-full max-w-sm mx-auto border border-gray-200 rounded-xl p-6  md:shadow-xl shadow-2xl space-y-4">
         <h2 className="text-center font-semibold text-lg mb-4">Buy Crypto</h2>
 
         {/* Country Selector */}
@@ -241,7 +241,7 @@ export default function BuyCrypto() {
   amount={amount}
   coinAmount={coinAmount}
   exchangeRate={exchangeRate}
-  formatCurrency={(amount) => `₦${amount.toFixed(2)}`}
+  formatCurrency={(amount) => `${amount.toFixed(2)}`}
 />
 
         <button 

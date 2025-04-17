@@ -102,18 +102,18 @@ export default function CryptoBlog() {
   return (
     <section>
         <Header />
-        <div className="min-h-screen bg-[#f7f7fa] font-maven pt-20 pb-20 px-4">
+        <div className="min-h-screen bg-[#f7f7fa] font-maven pt-20 lg:pt-30 pb-20 px-4">
       <header className="text-center">
         <h1 className="text-3xl md:text-4xl text-blue-900 font-bold">Crypto Blog</h1>
         <p className="text-blue-900 text-sm md:text-base">Latest news and updates in the crypto world</p>
       </header>
 
-      <main className="lg:max-w-7xl p-4 mx-auto py-8">
+      <main className="lg:max-w-7xl p-4 mx-auto py-8 lg:px-20 md:px-10 ">
         <section>
           <h2 className="text-2xl font-semibold mb-4 text-blue-800 text-center md:text-left">Featured Articles</h2>
 
     
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
             {posts.map((post) => (
               <div key={post.id} className="bg-white rounded-lg shadow-md overflow-hidden">
                 <Image src={post.image} alt={post.title} width={400} height={250} className="w-full h-48 object-cover" />

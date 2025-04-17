@@ -9,6 +9,7 @@ interface Coin {
 interface ConversionDisplayProps {
   selectedCountry?: {
     currencySymbol: string;
+    currency?: string;
   }; // ✅ Made optional to avoid undefined errors
   selectedCoin?: Coin | null;
   serviceFee: number;
@@ -19,20 +20,37 @@ interface ConversionDisplayProps {
 }
 
 export default function ConversionDisplay({
-  selectedCountry = { currencySymbol: "$" }, // ✅ Default fallback value
+  selectedCountry ,
   selectedCoin,
   serviceFee,
   amount,
   coinAmount,
   exchangeRate,
-  formatCurrency,
+  // formatCurrency,
 }: ConversionDisplayProps) {
   
   // ✅ Prevent rendering if essential data is missing
   if (!selectedCountry) {
     return <p>Loading...</p>;
   }
+  const safeCountry = selectedCountry || { name: "your country", currency: "USD", currencySymbol: "$" };
+  
+  const formatCurrency = (value: number): string => {
+    if (!safeCountry.currency) {
+      return value.toFixed(2);
+    }
 
+    const formatter = new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: safeCountry.currency,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+
+    return safeCountry.currencySymbol
+      ? formatter.format(value).replace(safeCountry.currency, safeCountry.currencySymbol)
+      : formatter.format(value);
+  };
   return (
     <div className="bg-gray-50 p-4 rounded-lg space-y-2">
       <div className="flex justify-between items-center">

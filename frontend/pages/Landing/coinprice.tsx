@@ -54,7 +54,7 @@ export default function CoinLive({ coins }: CoinLiveProps) {
   const visibleCoins = showAll ? categoryCoins : categoryCoins.slice(0, 10);
 
   return (
-    <div className="p-4 md:bg-[#0f0c29] bg-gray-200  text-white">
+    <div className="p-4 md:bg-[#0f0c29] bg-gray-200  text-white font-grotesk">
       {/* Category Tabs */}
       <div className="flex space-x-4 overflow-x-auto scrollbar-hide mb-4">
         {categories.map((cat) => (

@@ -24,7 +24,7 @@ export default function Header() {
     const user = useSelector((state: RootState) => state.user);
 
   return (
-    <header className="fixed top-0 left-0 w-full bg-blue-400 text-white p-3 flex justify-between items-center px-8 z-50 shadow-md font-poppins">
+    <header className="fixed top-0 left-0 w-full bg-blue-400 text-white p-3 flex justify-between items-center px-8 z-50 shadow-md font-grotesk">
       <h1 className="text-xl font-bold">Oceanic</h1>
 
    
@@ -32,15 +32,15 @@ export default function Header() {
         <ul className="flex gap-6 pt-2">
           <li>
             <Link
-              href="#"
+              href="Markets"
               className="hover:bg-blue-300 px-3 py-2 rounded transition-colors duration-300 ease-in-out"
             >
-              OCC Token
+              Markets
             </Link>
           </li>
           <li>
             <Link
-              href="#"
+              href="/swap"
               className="hover:bg-blue-300 px-3 py-2 rounded transition-colors duration-300 ease-in-out"
             >
               Instant Swap
@@ -48,10 +48,10 @@ export default function Header() {
           </li>
           <li>
             <Link
-              href="#"
+              href="/blog"
               className="hover:bg-blue-300 px-3 py-2 rounded transition-colors duration-300 ease-in-out"
             >
-              Order Book
+              Blog
             </Link>
           </li>
          {!user ? (
@@ -66,10 +66,10 @@ export default function Header() {
           ):(
             <li>
             <Link
-              href="#"
+              href="/trade"
               className="hover:bg-blue-300 px-3 py-2 rounded transition-colors duration-300 ease-in-out"
             >
-              Wallet
+              Trade
             </Link>
           </li>
          )}
@@ -86,27 +86,7 @@ export default function Header() {
           O{user.username}
           <FaChevronDown size={12} className=" ms-3" aria-hidden="true" />
         </button>
-        {isDropDownOpen && (
-        <div 
-          id="dropdown" 
-                  className="z-10 absolute top-14 right-4 mt-2 bg-blue-500 text-white divide-y divide-gray-100 rounded-md shadow-sm w-44 "
-        >
-          <ul className="py-2 text-sm text-white" aria-labelledby="dropdownDefaultButton">
-            <li>
-              <a href="#" className="block px-4 py-3 hover:bg-blue-400  ">My Account</a>
-            </li>
-            <li>
-              <a href="#" className="block px-4 py-3 hover:bg-blue-400 ">Transaction History</a>
-            </li>
-            <li>
-              <a href="#" className="block px-4 py-3 hover:bg-blue-400 ">Support</a>
-            </li>
-            <li>
-              <a href="#" className="block px-4 py-3 hover:bg-blue-400 ">Sign out</a>
-            </li>
-          </ul>
-        </div>
-        )}
+
                     </>
 
 
@@ -118,7 +98,27 @@ export default function Header() {
                     </button>
             </>
         )}
-      
+       {isDropDownOpen && (
+        <div 
+          id="dropdown" 
+                  className="z-10 absolute top-14 right-4 mt-2 bg-blue-500 text-white divide-y divide-gray-100 rounded-md shadow-sm w-44 "
+        >
+          <ul className="py-2 text-sm text-white" aria-labelledby="dropdownDefaultButton">
+            <li>
+              <Link href="/profile" className="block px-4 py-3 hover:bg-blue-400  ">My Account</Link>
+            </li>
+            <li>
+              <Link href="/transaction" className="block px-4 py-3 hover:bg-blue-400 ">Transaction History</Link>
+            </li>
+            <li>
+              <Link href="#" className="block px-4 py-3 hover:bg-blue-400 ">Support</Link>
+            </li>
+            <li>
+              <Link href="#" className="block px-4 py-3 hover:bg-blue-400 ">Sign out</Link>
+            </li>
+          </ul>
+        </div>
+        )}
       </nav>
 
   
