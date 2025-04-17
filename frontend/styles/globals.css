@@ -31,9 +31,17 @@
   font-style: normal;
 }
 
-
+@layer base {
+  @font-face {
+    font-family: 'SpaceGrotesk';
+    src: url('/fonts/SpaceGrotesk-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+  }
+}
 body {
-  font-family: 'Poppins', sans-serif;
+  /* font-family: 'Poppins', sans-serif; */
+  font-family:  "SpaceGrotesk";
 }
 .font-poppins {
   font-family: 'Poppins', sans-serif;
@@ -46,7 +54,10 @@ body {
 .font-inter {
   font-family: 'Inter', sans-serif;
 }
-
+.font-grotesk {
+  font-family:  "SpaceGrotesk";
+   }
+ 
 @keyframes bounce-loop {
   0%   { transform: translateY(0); }
   20%  { transform: translateY(-70px); }

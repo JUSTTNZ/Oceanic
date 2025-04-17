@@ -10,7 +10,7 @@ import {
 
 export default function WhyOceanic() {
     return (
-        <section className="flex flex-col md:gap-16 md:flex-row items-center justify-center min-h-screen bg-white text-gray-900 py-12 px-6 md:px-16">
+        <section className="flex flex-col md:gap-16 md:flex-row items-center justify-center min-h-screen bg-white text-gray-900 py-12 px-6 md:px-16 font-grotesk">
             {/* Left Side - Image */}
             <div className="flex justify-center h-[500px]">
                 <Image 

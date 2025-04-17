@@ -47,20 +47,17 @@ const dispatch = useDispatch()
       console.log("Login response:", data);
   
       if (!response.ok) {
-        throw new Error(data.message || data.error || "Login failed");
+        setError(data.message || data.error || "Login failed");
       }
   
-      // Destructure the user data
-      const { _id, email, username, role } = data.data;
-  
+     
       // Dispatch user data to Redux
-      dispatch(setUser({
-        uid: _id,
-        email,
-        username,
-        roles: role
+      dispatch(setUser ({
+        uid: data.data.user?._id,
+        email: data.data.user?.email,
+        username: data.data.user?.username,
+        role: data.data.user?.role
       }));
-  
       
       router.push("/survey")
   

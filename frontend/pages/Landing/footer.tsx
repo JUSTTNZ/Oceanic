@@ -4,7 +4,7 @@ import { FaFacebook, FaTwitter, FaInstagram, FaTelegram } from 'react-icons/fa';
 const Footer = () => {
   return (
     // bg-[#080616]
-    <footer className="bg-[#0047AB] text-white py-10 px-6 md:px-16 lg:px-15 font-inter">
+    <footer className="bg-[#0047AB] text-white py-10 px-6 md:px-16 lg:px-15 font-grotesk">
       <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
         {/* Quidax Info */}
         <div>
