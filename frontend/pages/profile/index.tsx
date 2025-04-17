@@ -1,7 +1,15 @@
+import { useSelector } from "react-redux";
 import Footer from "../login/footer";
 import Header from "../login/header";
 import { FiEdit, FiUser, FiMail, FiPhone, FiShield, FiGlobe } from "react-icons/fi";
-
+interface RootState {
+    user: {
+      uid: number;
+      email: string;
+      username: string;
+      roles: string;
+    };
+  }
 export default function Profile() {
   const userData = {
     email: "ejim@gmail.com",
@@ -13,6 +21,7 @@ export default function Profile() {
     verificationStatus: "Verified",
     country: "Nigeria"
   };
+  const user = useSelector((state: RootState) => state.user);
 
   return (
     <section className="bg-gray-50">
@@ -24,7 +33,7 @@ export default function Profile() {
             <div className="flex items-center mb-4 md:mb-0">
               <div className="relative">
                 <div className="w-20 h-20 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white text-3xl font-bold">
-                  {userData.username.charAt(0).toUpperCase()}
+                  {user?.username.charAt(0).toUpperCase()}
                 </div>
                 <button className="absolute bottom-0 right-0 bg-white p-2 rounded-full shadow-md hover:bg-gray-100 transition-colors">
                   <FiEdit className="text-blue-600" />
@@ -32,7 +41,7 @@ export default function Profile() {
               </div>
               <div className="ml-4">
                 <h1 className="text-2xl font-bold text-gray-900">{userData.fullName}</h1>
-                <p className="text-gray-600">@{userData.username}</p>
+                <p className="text-gray-600">@{user?.username}</p>
               </div>
             </div>
             <div className="bg-white px-4 py-3 rounded-lg shadow-sm">
@@ -55,7 +64,7 @@ export default function Profile() {
                   </div>
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-500">Email Address</p>
-                    <p className="mt-1 text-sm text-gray-900">{userData.email}</p>
+                    <p className="mt-1 text-sm text-gray-900">{user?.email}</p>
                   </div>
                 </div>
 
@@ -65,7 +74,7 @@ export default function Profile() {
                   </div>
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-500">Username</p>
-                    <p className="mt-1 text-sm text-gray-900">{userData.username}</p>
+                    <p className="mt-1 text-sm text-gray-900">{user?.username}</p>
                   </div>
                 </div>
 
@@ -133,12 +142,6 @@ export default function Profile() {
                   <div className="space-y-2">
                     <button className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                       <span className="text-sm font-medium text-gray-900">Change Password</span>
-                      <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </button>
-                    <button className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                      <span className="text-sm font-medium text-gray-900">Two-Factor Authentication</span>
                       <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
