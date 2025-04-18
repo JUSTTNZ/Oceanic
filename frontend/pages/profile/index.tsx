@@ -39,7 +39,7 @@ export default function Profile() {
   return (
     <section className="bg-gray-50">
       <Header />
-      <div className="min-h-screen p-4 pt-20 pb-16">
+      <div className="min-h-screen p-4 pt-20 pb-16 font-grotesk">
         <div className="max-w-6xl mx-auto">
           {/* Profile Header */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">

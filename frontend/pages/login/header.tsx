@@ -32,7 +32,7 @@ export default function Header() {
         <ul className="flex gap-6 pt-2">
           <li>
             <Link
-              href="Markets"
+              href="markets"
               className="hover:bg-blue-300 px-3 py-2 rounded transition-colors duration-300 ease-in-out"
             >
               Markets
@@ -54,16 +54,10 @@ export default function Header() {
               Blog
             </Link>
           </li>
-         {!user ? (
-           <li>
-           <Link
-             href="#"
-             className="hover:bg-blue-300 px-3 py-2 rounded transition-colors duration-300 ease-in-out"
-           >
-             Sign In
-           </Link>
-         </li>
-          ):(
+        
+         {user && (
+        
+       
             <li>
             <Link
               href="/trade"
@@ -72,14 +66,14 @@ export default function Header() {
               Trade
             </Link>
           </li>
-         )}
+          )}
         </ul>
         {user ? (
         <>
         <button 
           id="dropdownDefaultButton" 
           data-dropdown-toggle="dropdown" 
-          className="text-white bg-[#0047AB]  font-medium rounded-md text-sm px-5 py-2.5 text-center inline-flex items-center custom-class" 
+          className="text-white bg-[#0047AB]  text-grotesk rounded-md text-sm px-5 py-2.5 text-center inline-flex items-center custom-class" 
           type="button"
           onClick={toggleDropdown}
         >
@@ -94,7 +88,10 @@ export default function Header() {
 
             <>
             <button className="bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold transition-transform duration-300">
+              <Link href={'/register'}>
+            
                       Create Account
+                      </Link>
                     </button>
             </>
         )}
@@ -111,7 +108,7 @@ export default function Header() {
               <Link href="/transaction" className="block px-4 py-3 hover:bg-blue-400 ">Transaction History</Link>
             </li>
             <li>
-              <Link href="#" className="block px-4 py-3 hover:bg-blue-400 ">Support</Link>
+              <Link href="/support" className="block px-4 py-3 hover:bg-blue-400 ">Support</Link>
             </li>
             <li>
               <Link href="#" className="block px-4 py-3 hover:bg-blue-400 ">Sign out</Link>

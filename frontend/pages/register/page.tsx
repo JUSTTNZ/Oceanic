@@ -45,8 +45,12 @@ export default function RegisterPage() {
         // Properly remove confirmPassword
         const {  ...dataToSend } = formData;
         console.log("Sending data:", dataToSend);
-        
-        const response = await fetch('http://localhost:7001/api/v1/users/register', {
+        const API_BASE_URL =
+        process.env.NODE_ENV === 'development'
+          ? 'http://localhost:7001'
+          : 'https://oceanic-servernz.vercel.app';
+      
+        const response = await fetch(`${API_BASE_URL}/api/v1/users/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(dataToSend),
@@ -72,7 +76,7 @@ export default function RegisterPage() {
         }
       
     
-        router.push('/survey');
+        router.push('/markets');
         
     } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Registration failed';

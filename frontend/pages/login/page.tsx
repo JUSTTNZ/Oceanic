@@ -35,8 +35,12 @@ const dispatch = useDispatch()
   
     try {
       setLoading(true);
-  
-      const response = await fetch('http://localhost:7001/api/v1/users/login', {
+      const API_BASE_URL =
+      process.env.NODE_ENV === 'development'
+        ? 'http://localhost:7001'
+        : 'https://oceanic-servernz.vercel.app';
+    
+        const response = await fetch(`${API_BASE_URL}/api/v1/users/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: formData.email, password: formData.password }),
@@ -63,7 +67,7 @@ const dispatch = useDispatch()
         lastLogin: new Date().toISOString()
       }));
       
-      router.push("/survey")
+      router.push("/markets")
   
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Login failed';
