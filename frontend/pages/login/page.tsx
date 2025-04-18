@@ -35,12 +35,8 @@ const dispatch = useDispatch()
   
     try {
       setLoading(true);
-      const API_BASE_URL =
-      process.env.NODE_ENV === 'development'
-        ? 'http://localhost:7001'
-        : 'https://oceanic-servernz.vercel.app';
-    
-        const response = await fetch(`${API_BASE_URL}/api/v1/users/login`, {
+  
+      const response = await fetch('https://oceanic-servernz.vercel.app/api/v1/users/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: formData.email, password: formData.password }),

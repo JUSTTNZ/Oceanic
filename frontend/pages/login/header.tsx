@@ -24,12 +24,13 @@ export default function Header() {
     const user = useSelector((state: RootState) => state.user);
 
   return (
+    
     <header className="fixed top-0 left-0 w-full bg-blue-400 text-white p-3 flex justify-between items-center px-8 z-50 shadow-md font-grotesk">
       <h1 className="text-xl font-bold">Oceanic</h1>
 
    
       <nav className="hidden lg:flex gap-6">
-        <ul className="flex gap-6 pt-2">
+        <ul className="flex gap-6 pt-2"> 
           <li>
             <Link
               href="markets"
@@ -39,12 +40,19 @@ export default function Header() {
             </Link>
           </li>
           <li>
-            <Link
-              href="/swap"
-              className="hover:bg-blue-300 px-3 py-2 rounded transition-colors duration-300 ease-in-out"
-            >
-              Instant Swap
-            </Link>
+          
+          {user && (
+        
+       
+        <li>
+        <Link
+          href="/trade"
+          className="hover:bg-blue-300 px-3 py-2 rounded transition-colors duration-300 ease-in-out"
+        >
+          Trade
+        </Link>
+      </li>
+      )}
           </li>
           <li>
             <Link
@@ -54,19 +62,7 @@ export default function Header() {
               Blog
             </Link>
           </li>
-        
-         {user && (
-        
-       
-            <li>
-            <Link
-              href="/trade"
-              className="hover:bg-blue-300 px-3 py-2 rounded transition-colors duration-300 ease-in-out"
-            >
-              Trade
-            </Link>
-          </li>
-          )}
+      
         </ul>
         {user ? (
         <>

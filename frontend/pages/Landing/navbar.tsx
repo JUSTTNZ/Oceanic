@@ -97,6 +97,7 @@ export default function Navbar() {
                         ))}
                       </div>
                     </div>
+                    
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -128,6 +129,7 @@ export default function Navbar() {
       {/* Mobile Collapsible Menu */}
       <AnimatePresence>
         {isOpen && (
+          
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -135,6 +137,7 @@ export default function Navbar() {
             transition={{ duration: 0.3 }}
             className="md:hidden px-6 pb-6 space-y-6"
           >
+            
             {Object.keys(megaMenus).map((menu) => (
               <div key={menu}>
                 <div onClick={() => toggleSection(menu)} className="flex justify-between items-center cursor-pointer py-2 font-semibold">
@@ -162,7 +165,20 @@ export default function Navbar() {
                 </AnimatePresence>
               </div>
             ))}
+              <div className="pt-4 space-y-4">
+    <Link href="/login">
+      <button className="w-full text-[#0047AB] text-lg border mb-4 border-[#0047AB] py-2 rounded-md">
+        Sign in
+      </button>
+    </Link>
+    <Link href="/register">
+      <button className="w-full bg-[#0047AB] text-white text-lg py-2 rounded-md hover:bg-[#459af5]">
+        Get Started
+      </button>
+    </Link>
+  </div>
           </motion.div>
+          
         )}
       </AnimatePresence>
     </header>

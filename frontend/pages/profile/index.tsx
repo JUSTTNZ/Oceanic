@@ -3,8 +3,9 @@ import Footer from "../login/footer";
 import Header from "../login/header";
 import { FiEdit, FiUser, FiMail, FiPhone, FiShield, FiGlobe } from "react-icons/fi";
 import { timeAgo } from "./time";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import EditProfileModal from "./modal";
+import { useRouter } from "next/router";
 interface RootState {
     user: {
       uid: number;
@@ -36,6 +37,20 @@ export default function Profile() {
 //     // Update your user data here (API call, state update, etc.)
 //     console.log("Updated data:", updatedData);
 //   };
+ const router = useRouter();
+
+      const [checkingAuth, setCheckingAuth] = useState(true);
+    
+      useEffect(() => {
+        if (!user) {
+          router.replace("/login");
+        } else {
+          setCheckingAuth(false);
+        }
+      }, [user, router]);
+    
+      // Don't render anything while checking auth
+      if (checkingAuth) return null;
   return (
     <section className="bg-gray-50">
       <Header />
