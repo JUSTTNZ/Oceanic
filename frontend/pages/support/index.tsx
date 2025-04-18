@@ -4,13 +4,13 @@ import Header from "../login/header";
 import { 
   FiMail, 
   FiPhone, 
-  FiMessageSquare, 
   FiHelpCircle, 
   FiClock,
   FiChevronDown,
   FiChevronUp,
   FiCheckCircle
 } from "react-icons/fi";
+import { FaWhatsapp } from "react-icons/fa";
 
 export default function Support() {
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
@@ -77,7 +77,7 @@ export default function Support() {
   return (
     <section className="bg-gray-50">
       <Header />
-      <div className="min-h-screen p-4 pt-20 pb-16">
+      <div className="min-h-screen p-4 pt-30 pb-16 font-grotesk">
         <div className="max-w-6xl mx-auto">
           {/* Support Header */}
           <div className="text-center mb-12">
@@ -100,14 +100,14 @@ export default function Support() {
                 href="mailto:support@cryptoweb.com" 
                 className="text-blue-600 font-medium hover:text-blue-700"
               >
-                support@cryptoweb.com
+                Oceanic@gmail.com
               </a>
             </div>
 
             {/* Live Chat */}
             <div className="bg-white rounded-xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
               <div className="bg-green-50 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
-                <FiMessageSquare className="text-green-600 text-xl" />
+                <FaWhatsapp className="text-green-600 text-xl" />
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Live Chat</h3>
               <p className="text-gray-600 mb-4">Chat with our support agents in real-time</p>
@@ -254,27 +254,7 @@ export default function Support() {
             </div>
           </div>
 
-          {/* Additional Resources */}
-          <div className="mt-12 text-center">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Additional Resources</h2>
-            <div className="flex flex-wrap justify-center gap-4">
-              <a href="#" className="text-blue-600 hover:text-blue-700 hover:underline">
-                Help Center
-              </a>
-              <span className="text-gray-300">•</span>
-              <a href="#" className="text-blue-600 hover:text-blue-700 hover:underline">
-                Community Forum
-              </a>
-              <span className="text-gray-300">•</span>
-              <a href="#" className="text-blue-600 hover:text-blue-700 hover:underline">
-                API Documentation
-              </a>
-              <span className="text-gray-300">•</span>
-              <a href="#" className="text-blue-600 hover:text-blue-700 hover:underline">
-                System Status
-              </a>
-            </div>
-          </div>
+    
         </div>
       </div>
       <Footer />

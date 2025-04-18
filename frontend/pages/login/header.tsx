@@ -24,27 +24,35 @@ export default function Header() {
     const user = useSelector((state: RootState) => state.user);
 
   return (
+    
     <header className="fixed top-0 left-0 w-full bg-blue-400 text-white p-3 flex justify-between items-center px-8 z-50 shadow-md font-grotesk">
       <h1 className="text-xl font-bold">Oceanic</h1>
 
    
       <nav className="hidden lg:flex gap-6">
-        <ul className="flex gap-6 pt-2">
+        <ul className="flex gap-6 pt-2"> 
           <li>
             <Link
-              href="Markets"
+              href="markets"
               className="hover:bg-blue-300 px-3 py-2 rounded transition-colors duration-300 ease-in-out"
             >
               Markets
             </Link>
           </li>
           <li>
-            <Link
-              href="/swap"
-              className="hover:bg-blue-300 px-3 py-2 rounded transition-colors duration-300 ease-in-out"
-            >
-              Instant Swap
-            </Link>
+          
+          {user && (
+        
+       
+        <li>
+        <Link
+          href="/trade"
+          className="hover:bg-blue-300 px-3 py-2 rounded transition-colors duration-300 ease-in-out"
+        >
+          Trade
+        </Link>
+      </li>
+      )}
           </li>
           <li>
             <Link
@@ -54,32 +62,14 @@ export default function Header() {
               Blog
             </Link>
           </li>
-         {!user ? (
-           <li>
-           <Link
-             href="#"
-             className="hover:bg-blue-300 px-3 py-2 rounded transition-colors duration-300 ease-in-out"
-           >
-             Sign In
-           </Link>
-         </li>
-          ):(
-            <li>
-            <Link
-              href="/trade"
-              className="hover:bg-blue-300 px-3 py-2 rounded transition-colors duration-300 ease-in-out"
-            >
-              Trade
-            </Link>
-          </li>
-         )}
+      
         </ul>
         {user ? (
         <>
         <button 
           id="dropdownDefaultButton" 
           data-dropdown-toggle="dropdown" 
-          className="text-white bg-[#0047AB]  font-medium rounded-md text-sm px-5 py-2.5 text-center inline-flex items-center custom-class" 
+          className="text-white bg-[#0047AB]  text-grotesk rounded-md text-sm px-5 py-2.5 text-center inline-flex items-center custom-class" 
           type="button"
           onClick={toggleDropdown}
         >
@@ -94,7 +84,10 @@ export default function Header() {
 
             <>
             <button className="bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold transition-transform duration-300">
+              <Link href={'/register'}>
+            
                       Create Account
+                      </Link>
                     </button>
             </>
         )}
@@ -111,7 +104,7 @@ export default function Header() {
               <Link href="/transaction" className="block px-4 py-3 hover:bg-blue-400 ">Transaction History</Link>
             </li>
             <li>
-              <Link href="#" className="block px-4 py-3 hover:bg-blue-400 ">Support</Link>
+              <Link href="/support" className="block px-4 py-3 hover:bg-blue-400 ">Support</Link>
             </li>
             <li>
               <Link href="#" className="block px-4 py-3 hover:bg-blue-400 ">Sign out</Link>

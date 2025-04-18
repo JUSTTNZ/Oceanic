@@ -103,9 +103,9 @@ export default function CryptoTransactions() {
   };
 
   return (
-    <section className="bg-gray-50">
+    <section className="bg-gray-50 ">
       <Header />
-      <div className="min-h-screen p-4 pt-20 pb-16">
+      <div className="min-h-screen p-4 pt-20 pb-16 font-grotesk">
         <div className="max-w-6xl mx-auto">
           {/* Header Section */}
           <div className="mb-6">

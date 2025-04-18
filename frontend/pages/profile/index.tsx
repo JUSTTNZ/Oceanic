@@ -2,9 +2,11 @@ import { useSelector } from "react-redux";
 import Footer from "../login/footer";
 import Header from "../login/header";
 import { FiEdit, FiUser, FiMail, FiPhone, FiShield, FiGlobe } from "react-icons/fi";
-import { timeAgo } from "./time";
-import { useState } from "react";
+
+import { useEffect, useState } from "react";
 import EditProfileModal from "./modal";
+import { useRouter } from "next/router";
+import timeAgo from "./time";
 interface RootState {
     user: {
       uid: number;
@@ -36,10 +38,24 @@ export default function Profile() {
 //     // Update your user data here (API call, state update, etc.)
 //     console.log("Updated data:", updatedData);
 //   };
+ const router = useRouter();
+
+      const [checkingAuth, setCheckingAuth] = useState(true);
+    
+      useEffect(() => {
+        if (!user) {
+          router.replace("/login");
+        } else {
+          setCheckingAuth(false);
+        }
+      }, [user, router]);
+    
+      // Don't render anything while checking auth
+      if (checkingAuth) return null;
   return (
     <section className="bg-gray-50">
       <Header />
-      <div className="min-h-screen p-4 pt-20 pb-16">
+      <div className="min-h-screen p-4 pt-20 pb-16 font-grotesk">
         <div className="max-w-6xl mx-auto">
           {/* Profile Header */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
