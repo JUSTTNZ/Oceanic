@@ -2,10 +2,11 @@ import { useSelector } from "react-redux";
 import Footer from "../login/footer";
 import Header from "../login/header";
 import { FiEdit, FiUser, FiMail, FiPhone, FiShield, FiGlobe } from "react-icons/fi";
-import { timeAgo } from "./time";
+
 import { useEffect, useState } from "react";
 import EditProfileModal from "./modal";
 import { useRouter } from "next/router";
+import timeAgo from "./time";
 interface RootState {
     user: {
       uid: number;
