@@ -38,15 +38,13 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    
+
     try {
         setLoading(true);
-        
-        // Properly remove confirmPassword
-        const {  ...dataToSend } = formData;
+
+        const { ...dataToSend } = formData;
         console.log("Sending data:", dataToSend);
-        
-      
+
         const response = await fetch(`https://oceanic-servernz.vercel.app/api/v1/users/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -55,30 +53,31 @@ export default function RegisterPage() {
         });
 
         const data = await response.json();
-        
-        console.log("Response data:", data); // Log response
-        dispatch(setUser({
-          uid: data.data?._id,
-          email: data.data?.email,
-          username: data.data?.username,
-          role: data.data?.role,
-          fullname:data.data?.fullname,
-          createdAt:data.data?.createdAt,
-          phoneNumber:data.data?.phoneNumber,
-          lastLogin: new Date().toISOString()
-        }));
-        
+        console.log("Response data:", data);
+
         if (!response.ok) {
             setError(
-                data.message || 
-                data.error || 
+                data.message ||
+                data.error ||
                 `Registration failed with status ${response.status}`
             );
+            return; // Stop execution if there's an error
         }
-      
-    
+
+        // Only dispatch and redirect if successful
+        dispatch(setUser({
+            uid: data.data?._id,
+            email: data.data?.email,
+            username: data.data?.username,
+            role: data.data?.role,
+            fullname: data.data?.fullname,
+            createdAt: data.data?.createdAt,
+            phoneNumber: data.data?.phoneNumber,
+            lastLogin: new Date().toISOString()
+        }));
+
         router.push('/markets');
-        
+
     } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Registration failed';
         setError(errorMessage);
@@ -87,6 +86,7 @@ export default function RegisterPage() {
         setLoading(false);
     }
 };
+
 
   return (    
     <div className="flex justify-center items-center min-h-screen pt-20 lg:pt-30 pb-10 bg-[#f7f7fa] font-maven p-4">
