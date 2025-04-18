@@ -56,7 +56,11 @@ const dispatch = useDispatch()
         uid: data.data.user?._id,
         email: data.data.user?.email,
         username: data.data.user?.username,
-        role: data.data.user?.role
+        role: data.data.user?.role,
+        fullname:data.data.user?.fullname,
+        createdAt:data.data.user?.createdAt,
+        phoneNumber:data.data.user?.phoneNumber,
+        lastLogin: new Date().toISOString()
       }));
       
       router.push("/survey")

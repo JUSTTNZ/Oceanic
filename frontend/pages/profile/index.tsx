@@ -2,27 +2,40 @@ import { useSelector } from "react-redux";
 import Footer from "../login/footer";
 import Header from "../login/header";
 import { FiEdit, FiUser, FiMail, FiPhone, FiShield, FiGlobe } from "react-icons/fi";
+import { timeAgo } from "./time";
+import { useState } from "react";
+import EditProfileModal from "./modal";
 interface RootState {
     user: {
       uid: number;
       email: string;
       username: string;
       roles: string;
+      fullname:string;
+      phoneNumber:string;
+      createdAt:string;
+      country:string;
+      lastLogin:string
     };
   }
+  
 export default function Profile() {
-  const userData = {
-    email: "ejim@gmail.com",
-    username: "ejim",
-    fullName: "Ejimofor Chukwuemeka",
-    phoneNumber: "+234 907 253 6483",
-    joinDate: "January 15, 2023",
-    lastLogin: "2 hours ago",
-    verificationStatus: "Verified",
-    country: "Nigeria"
-  };
-  const user = useSelector((state: RootState) => state.user);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
+  const user = useSelector((state: RootState) => state.user);
+  const formattedDate = user?.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  }) : '';
+  const lastLoginTime = user.lastLogin;
+
+  // Format the last login time
+  const formattedLastLogin = lastLoginTime ? timeAgo(lastLoginTime) : 'Never logged in';
+//   const handleSaveProfile = (updatedData:void) => {
+//     // Update your user data here (API call, state update, etc.)
+//     console.log("Updated data:", updatedData);
+//   };
   return (
     <section className="bg-gray-50">
       <Header />
@@ -40,13 +53,13 @@ export default function Profile() {
                 </button>
               </div>
               <div className="ml-4">
-                <h1 className="text-2xl font-bold text-gray-900">{userData.fullName}</h1>
+                <h1 className="text-2xl font-bold text-gray-900">{user?.fullname}</h1>
                 <p className="text-gray-600">@{user?.username}</p>
               </div>
             </div>
             <div className="bg-white px-4 py-3 rounded-lg shadow-sm">
               <p className="text-sm text-gray-500">Member since</p>
-              <p className="font-medium">{userData.joinDate}</p>
+              <p className="font-medium">{formattedDate}</p>
             </div>
           </div>
 
@@ -84,7 +97,7 @@ export default function Profile() {
                   </div>
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-500">Phone Number</p>
-                    <p className="mt-1 text-sm text-gray-900">{userData.phoneNumber}</p>
+                    <p className="mt-1 text-sm text-gray-900">{user?.phoneNumber}</p>
                   </div>
                 </div>
 
@@ -94,15 +107,27 @@ export default function Profile() {
                   </div>
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-500">Country</p>
-                    <p className="mt-1 text-sm text-gray-900">{userData.country}</p>
+                    <p className="mt-1 text-sm text-gray-900">{"Nigeria"}</p>
                   </div>
                 </div>
               </div>
               <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end">
-                <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                <button 
+                  onClick={() => setIsEditModalOpen(true)}
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600  cursor-pointer">
                   <FiEdit className="mr-2" /> Edit Profile
                 </button>
               </div>
+              <>
+              {isEditModalOpen && (
+  <EditProfileModal
+    user={user} 
+    onClose={() => setIsEditModalOpen(false)}
+    
+  />
+)}
+
+              </>
             </div>
 
             {/* Account Security Card */}
@@ -119,7 +144,7 @@ export default function Profile() {
                     <p className="text-sm font-medium text-gray-500">Verification Status</p>
                     <div className="mt-1 flex items-center">
                       <span className="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                        {userData.verificationStatus}
+                        {"Verified"}
                       </span>
                     </div>
                   </div>
@@ -133,7 +158,7 @@ export default function Profile() {
                   </div>
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-500">Last Login</p>
-                    <p className="mt-1 text-sm text-gray-900">{userData.lastLogin}</p>
+                    <p className="mt-1 text-sm text-gray-900">{formattedLastLogin}</p>
                   </div>
                 </div>
 
@@ -147,7 +172,7 @@ export default function Profile() {
                       </svg>
                     </button>
                     <button className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                      <span className="text-sm font-medium text-gray-900">Connected Devices</span>
+                      <span className="text-sm font-medium text-red-600">Delete Account</span>
                       <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
@@ -157,46 +182,7 @@ export default function Profile() {
               </div>
             </div>
 
-            {/* Additional Sections */}
-            <div className="md:col-span-2 bg-white rounded-xl shadow-sm overflow-hidden">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-900">Account Preferences</h2>
-              </div>
-              <div className="p-6">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">Email Notifications</p>
-                      <p className="text-sm text-gray-500">Receive updates and notifications via email</p>
-                    </div>
-                    <button className="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-gray-200 transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                      <span className="sr-only">Use setting</span>
-                      <span className="translate-x-0 inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
-                    </button>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">SMS Notifications</p>
-                      <p className="text-sm text-gray-500">Receive important alerts via SMS</p>
-                    </div>
-                    <button className="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-blue-600 transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                      <span className="sr-only">Use setting</span>
-                      <span className="translate-x-5 inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
-                    </button>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">Dark Mode</p>
-                      <p className="text-sm text-gray-500">Switch between light and dark theme</p>
-                    </div>
-                    <button className="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-gray-200 transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                      <span className="sr-only">Use setting</span>
-                      <span className="translate-x-0 inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
+        
           </div>
         </div>
       </div>
