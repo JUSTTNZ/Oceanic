@@ -45,12 +45,9 @@ export default function RegisterPage() {
         // Properly remove confirmPassword
         const {  ...dataToSend } = formData;
         console.log("Sending data:", dataToSend);
-        const API_BASE_URL =
-        process.env.NODE_ENV === 'development'
-          ? 'http://localhost:7001'
-          : 'https://oceanic-servernz.vercel.app';
+        
       
-        const response = await fetch(`${API_BASE_URL}/api/v1/users/register`, {
+        const response = await fetch(`https://oceanic-servernz.vercel.app/api/v1/users/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(dataToSend),
