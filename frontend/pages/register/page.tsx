@@ -58,14 +58,18 @@ export default function RegisterPage() {
         
         console.log("Response data:", data); // Log response
         dispatch(setUser({
-          uid: data.data._id,
-          email: data.data.email,
-          username: data.data.username,
-          role: data.data.role
+          uid: data.data?._id,
+          email: data.data?.email,
+          username: data.data?.username,
+          role: data.data?.role,
+          fullname:data.data?.fullname,
+          createdAt:data.data?.createdAt,
+          phoneNumber:data.data?.phoneNumber,
+          lastLogin: new Date().toISOString()
         }));
         
         if (!response.ok) {
-            throw new Error(
+            setError(
                 data.message || 
                 data.error || 
                 `Registration failed with status ${response.status}`
