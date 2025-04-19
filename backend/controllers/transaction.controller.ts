@@ -62,6 +62,8 @@ import { CoinWallet } from "../models/coinWallet.model.js";
     });
   
     res.status(201).json(new ApiResponse(201, "Transaction created successfully", transaction));
+    console.log("Transaction created:", transaction);
+    
     } catch (error) {
     throw new ApiError({ statusCode: 500, message: 'Something went wrong while creating transaction' });
     }
@@ -80,11 +82,13 @@ const getAllTransactions = asyncHandler(async (req, res) => {
     const sortOrder = sort === 'asc' ? 1 : -1;
 
     const transactions = await Transaction.find(filter)
-      .populate('user', 'email username')
+      .populate('userId', 'email username fullname')
       .sort({ createdAt: sortOrder });
 
     res.json(new ApiResponse(200, 'All transactions', transactions));
+    console.log('All transactions:', transactions);
   } catch (error) {
+    console.error("Error fetching transactions:", error);
     throw new ApiError({ statusCode: 500, message: 'Something went wrong in the process' });
   }
 });
@@ -93,7 +97,7 @@ const getAllTransactions = asyncHandler(async (req, res) => {
 const getUserTransactions = asyncHandler(async (req, res) => {
   try {
     const { sort = 'desc', coin, type } = req.query;
-    const filter: { user: any; coin?: string; type?: string } = { user: req.user._id };
+    const filter: { userId: any; coin?: string; type?: string } = { userId: req.user._id };
 
     if (coin && typeof coin === 'string') filter.coin = coin;
     if (type && typeof type === 'string') filter.type = type;
