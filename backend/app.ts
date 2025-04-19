@@ -31,7 +31,7 @@ app.get('/', (req, res) => {
   });
 app.use("/api/v1/healthCheck", healthCheckRouter)
 app.use("/api/v1/users", userRouter)
-app.use("api/v1/transaction", transactionRouter)
+app.use("/api/v1/transaction", transactionRouter)
 app.use(errorHandler)
 
 export { app, server };

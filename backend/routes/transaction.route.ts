@@ -5,7 +5,7 @@ import { createTransaction, getUserTransactions, getAllTransactions, updateTrans
 const router = Router();
 
 router.route("/").post(verifyJWT, createTransaction)
-router.route("/user").post(verifyJWT, getUserTransactions)
+router.route("/user").get(verifyJWT, getUserTransactions)
 router.route("/admin").get(verifyJWT,adminOrSuperadminAuth, getAllTransactions)
 router.route("/status/:txid").patch(verifyJWT, superAdminAuth, updateTransactionStatus)
 
