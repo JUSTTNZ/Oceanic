@@ -2,6 +2,18 @@
 
 import Link from "next/link";
 import { LiaTimesSolid } from "react-icons/lia";
+import { useSelector } from "react-redux";
+import { useState } from "react";
+import { FaChevronDown } from "react-icons/fa";
+
+interface RootState {
+  user: {
+    uid: number;
+    email: string;
+    username: string;
+    roles: string;
+  };
+}
 
 interface SidebarProps {
   isOpen: boolean;
@@ -9,11 +21,13 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ isOpen, closeSidebar }: SidebarProps) {
+  const user = useSelector((state: RootState) => state.user);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
   return (
     <>
- 
       <div
-        className={`fixed top-0 left-0 h-full w-64 bg-blue-800 text-white transform ${
+        className={`fixed top-0 left-0 h-full w-64 bg-blue-400 text-white transform ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         } transition-transform duration-300 ease-in-out z-50 shadow-lg`}
       >
@@ -29,41 +43,104 @@ export default function Sidebar({ isOpen, closeSidebar }: SidebarProps) {
 
         <nav className="flex flex-col gap-4 p-4">
           <Link
-            href="#"
-            className="hover:bg-blue-400 px-3 py-2 rounded transition-colors duration-300 ease-in-out"
+            href="/markets"
+            onClick={closeSidebar}
+            className="hover:bg-blue-400 px-3 py-2 rounded transition-colors duration-300"
           >
-            OCC Token
+            Markets
           </Link>
           <Link
-            href="#"
-            className="hover:bg-blue-400 px-3 py-2 rounded transition-colors duration-300 ease-in-out"
+            href="/swap"
+            onClick={closeSidebar}
+            className="hover:bg-blue-400 px-3 py-2 rounded transition-colors duration-300"
           >
             Instant Swap
           </Link>
           <Link
-            href="#"
-            className="hover:bg-blue-400 px-3 py-2 rounded transition-colors duration-300 ease-in-out"
+            href="/blog"
+            onClick={closeSidebar}
+            className="hover:bg-blue-400 px-3 py-2 rounded transition-colors duration-300"
           >
-            Order Book
+            Blog
           </Link>
-          <Link
-            href="#"
-            className="hover:bg-blue-400 px-3 py-2 rounded transition-colors duration-300 ease-in-out"
-          >
-            Sign In
-          </Link>
-          <button className="bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold transition-transform duration-300 ">
-            Create Account
-          </button>
+
+          {user && (
+            <Link
+              href="/trade"
+              onClick={closeSidebar}
+              className="hover:bg-blue-400 px-3 py-2 rounded transition-colors duration-300"
+            >
+              Trade
+            </Link>
+          )}
+
+          {user ? (
+            <>
+              <button
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className="flex items-center justify-between bg-blue-600 px-3 py-2 rounded"
+              >
+                O{user.username}
+                <FaChevronDown size={12} className="ml-2" />
+              </button>
+
+              {isDropdownOpen && (
+                <div className="flex flex-col gap-2 mt-2">
+                  <Link
+                    href="/profile"
+                    onClick={closeSidebar}
+                    className="px-4 py-2 rounded hover:bg-blue-400"
+                  >
+                    My Account
+                  </Link>
+                  <Link
+                    href="/transaction"
+                    onClick={closeSidebar}
+                    className="px-4 py-2 rounded hover:bg-blue-400"
+                  >
+                    Transaction History
+                  </Link>
+                  <Link
+                    href="/support"
+                    onClick={closeSidebar}
+                    className="px-4 py-2 rounded hover:bg-blue-400"
+                  >
+                    Support
+                  </Link>
+                  <Link
+                    href="#"
+                    onClick={closeSidebar}
+                    className="px-4 py-2 rounded hover:bg-blue-400"
+                  >
+                    Sign out
+                  </Link>
+                </div>
+              )}
+            </>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                onClick={closeSidebar}
+                className="hover:bg-blue-400 px-3 py-2 rounded transition-colors duration-300"
+              >
+                Sign In
+              </Link>
+              <Link href="/register" onClick={closeSidebar}>
+                <button className="bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold transition-transform duration-300 w-full mt-2">
+                  Create Account
+                </button>
+              </Link>
+            </>
+          )}
         </nav>
       </div>
 
- 
       {isOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-40 transition-opacity duration-300"
           onClick={closeSidebar}
-        ></div>
+        />
       )}
     </>
   );

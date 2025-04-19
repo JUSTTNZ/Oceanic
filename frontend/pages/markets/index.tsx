@@ -6,7 +6,8 @@ import {
 import Footer from "../login/footer";
 import Header from "../login/header";
 import Image from "next/image";
-import Link from "next/link";
+import { useSelector } from "react-redux";
+import { useRouter } from "next/router";
 
 interface Coin {
   id: string;
@@ -21,8 +22,25 @@ interface Coin {
   image: string;
   sparkline_in_7d?: { price: number[] };
 }
-
+interface RootState {
+  user: {
+    uid: number;
+    email: string;
+    username: string;
+    roles: string;
+  } | null;
+}
 export default function Markets() {
+  const user = useSelector((state: RootState) => state.user);
+  const router = useRouter();
+
+  const handleTradeClick = () => {
+    if (user) {
+      router.push("/trade");
+    } else {
+      router.push("/login");
+    }
+  };
   const [coins, setCoins] = useState<Coin[]>([]);
   const [selectedCoin, setSelectedCoin] = useState<Coin | null>(null);
   const [loading, setLoading] = useState(true);
@@ -104,22 +122,22 @@ export default function Markets() {
   return (
     <section className="bg-gray-50">
       <Header />
-      <div className="min-h-screen p-4 pt-20 pb-16">
+      <div className="min-h-screen p-8 pt-30 pb-16 font-grotesk">
         <div className="max-w-7xl mx-auto">
-          {/* Market Overview Header */}
+       
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2"> Markets</h1>
+            <h1 className="text-3xl font-bold text-blue-500 mb-2"> Markets</h1>
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center space-x-4">
                 <div className="bg-white px-4 py-2 rounded-lg shadow-sm">
                   <p className="text-sm text-gray-500">Global Market Cap</p>
-                  <p className="font-semibold">
+                  <p className="font-semibold text-blue-400">
                     {formatNumber(coins.reduce((sum, coin) => sum + coin.market_cap, 0))}
                   </p>
                 </div>
                 <div className="bg-white px-4 py-2 rounded-lg shadow-sm">
                   <p className="text-sm text-gray-500">24h Volume</p>
-                  <p className="font-semibold">
+                  <p className="font-semibold text-blue-400">
                     {formatNumber(coins.reduce((sum, coin) => sum + coin.total_volume, 0))}
                   </p>
                 </div>
@@ -148,12 +166,12 @@ export default function Markets() {
             </div>
           </div>
 
-          {/* Main Content Grid */}
+          
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Coins List */}
+         
             <div className="lg:col-span-2">
               <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-                {/* Table Header */}
+               
                 <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
                   <div className="relative w-full max-w-md">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -172,7 +190,7 @@ export default function Markets() {
                   </button>
                 </div>
 
-                {/* Table */}
+                
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
@@ -287,10 +305,10 @@ export default function Markets() {
               </div>
             </div>
 
-            {/* Selected Coin Details */}
+            
             <div className="lg:col-span-1">
               {selectedCoin ? (
-                <div className="bg-white rounded-xl shadow-sm overflow-hidden h-full">
+                <div className="bg-white rounded-xl shadow-sm overflow-hidden h-full lg:h-auto ">
                   <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
                     <h2 className="text-lg font-semibold text-gray-900">Coin Details</h2>
                     <button 
@@ -370,11 +388,13 @@ export default function Markets() {
                       )}
 
                       <div className="pt-4">
-                        <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors">
-                            <Link href={"/trade"}>
+                        <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
+                        onClick={handleTradeClick}
+                        >
+                          
                            
                           Trade {selectedCoin.symbol.toUpperCase()}
-                          </Link>
+                          
                         </button>
                       </div>
                     </div>
