@@ -65,7 +65,8 @@ import { CoinWallet } from "../models/coinWallet.model.js";
     console.log("Transaction created:", transaction);
     
     } catch (error) {
-    throw new ApiError({ statusCode: 500, message: 'Something went wrong while creating transaction' });
+      console.error("Error creating transaction:", error);
+      throw new ApiError({ statusCode: 500, message: 'Something went wrong while creating transaction' });
     }
 });
   
