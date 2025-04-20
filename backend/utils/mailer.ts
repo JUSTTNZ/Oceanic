@@ -21,7 +21,7 @@ interface SendMailProps {
 
     const info = await transporter.sendMail({
       from: `"Oceanic Charts 🚀" <${process.env.ADMIN_EMAIL}>`,
-      to: process.env.ADMIN_EMAIL_TWO || process.env.ADMIN_EMAIL, // allow override
+      to: process.env.ADMIN_EMAIL, // allow override
       subject,
       text,
       html,
