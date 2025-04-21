@@ -1,10 +1,15 @@
 // generateSignature.ts
+import dotenv from 'dotenv';
+dotenv.config();
 import crypto from 'crypto';
 
 const payload = JSON.stringify({
-  txid: "TX123456ABC",
-  status: "confirmed",
-  type: "sell"
+  "coin": "ETH",
+  "amount": 200,
+  "txid": "buy123abc",
+  "type": "buy",
+  "country": "Nigeria",
+  "status": "confirmed"
 });
 
 const secret = process.env.BITGET_SECRET_KEY; // Replace with your real secret or load from .env
