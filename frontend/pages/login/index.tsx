@@ -9,9 +9,9 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <Header />
+      {/* <Header /> */}
       <LoginPage />
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 }
