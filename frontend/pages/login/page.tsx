@@ -75,18 +75,21 @@ export default function LoginPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: formData.email, password: formData.password }),
-        credentials: 'include'
+        
       });
   
       const data = await response.json();
       console.log("Login response:", data);
+      localStorage.setItem('accessToken', data.data.accessToken);
+      localStorage.setItem('refreshToken', data.data.refreshToken);
+      
   
       if (!response.ok) {
         const errorMessage = data.message || data.error || "Login failed";
         setError(prev => ({ ...prev, general: errorMessage }));
         return;
       }
-  
+    
       // Dispatch user data to Redux
       dispatch(setUser({
         uid: data.data.user?._id,
