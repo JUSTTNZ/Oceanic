@@ -116,38 +116,82 @@ export default function SellCrypto() {
     : null;
 
  
-  const handleSubmit = () => {
+
+  const [errorMessage, setErrorMessage] = useState("");
+  const handleSubmit = async () => {
     if (!txid || !selectedCoin) {
       setStatus('failed');
       return;
     }
-    
-    setStatus('sent');
-    startCheckingTransaction();
-  };
+  
+    try {
+      setStatus('sent');
+      setIsChecking(true);
+     // Get the access token
+     const accessToken = localStorage.getItem('accessToken');
+     if (!accessToken) {
+       throw new Error('Please login first');
+     }
+      const response = await fetch('https://oceanic-servernz.vercel.app/api/v1/transaction', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`
 
-  const startCheckingTransaction = () => {
-    setIsChecking(true);
-    
-    // Simulate API check (we will call api to check is payment here)
-    const checkInterval = setInterval(() => {
-      const isConfirmed = Math.random() > 0.7; // 70% success rate for demo
-      
-      if (isConfirmed) {
-        setStatus('received');
-        clearInterval(checkInterval);
-        setIsChecking(false);
-        
-        // Simulate admin processing(we will add admin logic here later)
-        setTimeout(() => {
-          setStatus('completed');
-        }, 2000);
+        },
+        body: JSON.stringify({
+          coin: selectedCoin.symbol,
+          amount: 100, // You should add amount input in your form
+          txid,
+          type: "sell",
+          country: selectedCountry.code,
+          // Add walletAddressUsed if needed
+        }),
+        credentials: 'include'
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Transaction failed');
       }
-    }, 3000);
-
-    return () => clearInterval(checkInterval);
+  
+      const data = await response.json();
+      console.log("Transaction created:", data);
+      
+      // Poll for transaction status updates
+      const pollStatus = setInterval(async () => {
+        const statusRes = await fetch(`/api/v1/transaction/user`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        
+        if (statusRes.ok) {
+          const transactions = await statusRes.json();
+          const currentTx = transactions.data.find((t: { txid: string; }) => t.txid === txid);
+          
+          if (currentTx) {
+            setStatus(currentTx.status); // 'pending', 'completed', etc.
+            if (currentTx.status === 'completed') {
+              clearInterval(pollStatus);
+              setIsChecking(false);
+            }
+          }
+        }
+      }, 3000);
+  
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Login failed';
+      console.error("Transaction error:", error);
+      
+      setStatus('failed');
+      setIsChecking(false);
+      setErrorMessage(errorMessage);
+      // Show error message to user
+    }
   };
 
+  
   const resetTransaction = () => {
     setStatus('pending');
     setTxid("");
@@ -183,7 +227,7 @@ export default function SellCrypto() {
         
         <div className="w-full max-w-sm mx-auto border border-gray-200 rounded-xl p-6 shadow-sm space-y-4">
           <h2 className="text-center font-semibold text-lg mb-4">Sell Crypto</h2>
-          
+          {errorMessage && <div className="text-red-500">{errorMessage}</div>}
           {/* Coin Selection */}
           <>
           <CoinSelection
