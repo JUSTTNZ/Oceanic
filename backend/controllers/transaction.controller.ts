@@ -28,6 +28,9 @@ import { CoinWallet } from "../models/coinWallet.model.js";
   
     const data: any = {
       userId: req.user._id,
+      userFullname: req.user.fullname, // Add fullname
+      userUsername: req.user.username, // Add username
+      userEmail: req.user.email, // Add email
       coin,
       amount,
       txid,
