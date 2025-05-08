@@ -5,9 +5,9 @@ import crypto from 'crypto';
 
 const payload = JSON.stringify({
   "coin": "ETH",
-  "amount": 200,
-  "txid": "buy123abc",
-  "type": "buy",
+  "amount": 50,
+  "txid": "sell52210",
+  "type": "sell",
   "country": "Nigeria",
   "status": "confirmed"
 });

@@ -75,22 +75,20 @@ export default function LoginPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: formData.email, password: formData.password }),
-        
       });
   
       const data = await response.json();
       console.log("Login response:", data);
-      localStorage.setItem('accessToken', data.data.accessToken);
-      localStorage.setItem('refreshToken', data.data.refreshToken);
-      
   
-      if (!response.ok) {
+      if (!response.ok || !data.data) {
         const errorMessage = data.message || data.error || "Login failed";
         setError(prev => ({ ...prev, general: errorMessage }));
         return;
       }
-    
-      // Dispatch user data to Redux
+  
+      localStorage.setItem('accessToken', data.data.accessToken);
+      localStorage.setItem('refreshToken', data.data.refreshToken);
+  
       dispatch(setUser({
         uid: data.data.user?._id,
         email: data.data.user?.email,
@@ -101,7 +99,7 @@ export default function LoginPage() {
         phoneNumber: data.data.user?.phoneNumber,
         lastLogin: new Date().toISOString()
       }));
-      
+  
       router.push("/markets");
   
     } catch (err) {
