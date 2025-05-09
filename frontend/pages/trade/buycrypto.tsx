@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { usePaystackPayment } from 'react-paystack';
 import { useState, useEffect } from "react";
 import CountryDropdown from "../components/buy/country";
 import CoinDropdown from "../components/buy/coin";
@@ -52,9 +53,51 @@ export default function BuyCrypto() {
   const [exchangeRate, setExchangeRate] = useState<number>(0);
   const [countries, setCountries] = useState<Country[]>([]);
   const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
+  const [walletAddress, setWalletAddress] = useState("");
+  const [reference, setReference] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const serviceFee = 30; // Your ₦30 gain
+
+  const paystackConfig = {
+    reference: reference,
+    email: "user@example.com", // use real user email
+    amount: parseFloat(amount) * 100, // in kobo
+    publicKey: "your_paystack_public_key"
+  };
+
+const onSuccess = (ref: any) => {
+  alert("Payment successful!");
+  // backend will handle webhook, you can optionally refresh user transactions
+};
+
+const onClose = () => {
+  console.log("Payment closed");
+};
+
+const initializePayment = usePaystackPayment(paystackConfig);
+
+  const createTransaction = async () => {
+  const res = await fetch("http://localhost:7001/api/v1/transaction/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+    body: JSON.stringify({
+      coin: selectedCoin?.symbol,
+      amount: parseFloat(amount),
+      txid: `ref_${Date.now()}`,
+      type: "buy",
+      country: selectedCountry?.name,
+      walletAddressUsed: walletAddress
+    }),
+  });
+
+  const data = await res.json();
+  setReference(data.data.txid); // set txid as the reference
+};
+
 
   // Fetch coins from CoinGecko API
   useEffect(() => {
@@ -243,13 +286,25 @@ export default function BuyCrypto() {
   exchangeRate={exchangeRate}
   formatCurrency={(amount) => `${amount.toFixed(2)}`}
 />
+        <input
+  className="w-full border p-2 rounded mb-2"
+  placeholder="Your wallet address"
+  value={walletAddress}
+  onChange={(e) => setWalletAddress(e.target.value)}
+  required
+/>
 
-        <button 
+        <button
+          onClick={async () => {
+            await createTransaction();
+            initializePayment(onSuccess, onClose);
+          }}
           className="w-full bg-[#0047AB] text-white font-semibold py-3 rounded-full mt-4 hover:bg-blue-700 transition-colors disabled:opacity-50"
-          disabled={!amount || parseFloat(amount) <= serviceFee || !selectedCoin}
+          disabled={!amount || parseFloat(amount) <= serviceFee || !selectedCoin || !walletAddress}
         >
           Continue to Payment
         </button>
+
 
         <div className="text-xs text-gray-500 text-center">
           Includes {selectedCountry.currencySymbol}{serviceFee} service fee. Rates update in real-time.
