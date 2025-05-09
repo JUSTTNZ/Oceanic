@@ -4,6 +4,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { Transaction } from "../models/transaction.model.js";
 import { getIO } from '../config/socket.js';
 import { CoinWallet } from "../models/coinWallet.model.js";
+import coins from "../coindata/coin.json" with { type: "json" };
 
 // Create Transaction (Buy or Sell)
   const createTransaction = asyncHandler(async (req, res) => {
@@ -48,12 +49,27 @@ import { CoinWallet } from "../models/coinWallet.model.js";
   
     // If it's a sell, add walletAddressSentTo from admin’s CoinWallet model
     if (type === "sell") {
-      const coinWallet = await CoinWallet.findOne({ coin });
-      if (!coinWallet) {
-        throw new ApiError({ statusCode: 404, message: "No wallet address found for this coin" });
+      const walletInfo = await CoinWallet.findOne({ coin });
+    
+      if (!walletInfo) {
+        const fallback = coins.find(c => c.coin.toUpperCase() === coin.toUpperCase());
+        
+        console.log("🔍 Fallback from coin.json:", fallback);
+        
+        if (!fallback) {
+          throw new ApiError({ statusCode: 404, message: 'No wallet address found for this coin' });
+        }
+    
+        console.log("✅ Using fallback wallet address:", fallback.walletAddress);
+        
+        data.walletAddressSentTo = fallback.walletAddress;
+      } else {
+        console.log("✅ Found wallet in MongoDB:", walletInfo.walletAddress);
+        data.walletAddressSentTo = walletInfo.walletAddress;
       }
-      data.walletAddressSentTo = coinWallet.walletAddress;
     }
+    
+    
   
     // Save transaction
     const transaction = await Transaction.create(data);
