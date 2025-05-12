@@ -30,7 +30,7 @@ const testimonials = [
 export default function TestimonialSection() {
   return (
     <div className="py-12 pb-20 text-center font-grotesk">
-      <h2 className="lg:text-2xl text-md text-grotesk font-bold mb-6">What Our Users Say</h2>
+      <h2 className="lg:text-2xl text-md font-grotesk font-bold mb-6">What Our Users Say</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto px-4">
         {testimonials.map((testimonial) => (
           <div
@@ -47,7 +47,7 @@ export default function TestimonialSection() {
                 height={20}
                 className="w-16 h-16 rounded-full shadow-lg"
               />
-              <h4 className="font-semibold text-sm mt-2">{testimonial.name}</h4>
+              <h4 className="font-semibold font-grotesk text-sm mt-2">{testimonial.name}</h4>
 
             </div>
             <FaQuoteRight className="absolute bottom-4 right-4 text-gray-300 text-md" />
