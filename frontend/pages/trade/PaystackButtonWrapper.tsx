@@ -3,13 +3,22 @@
 import { usePaystackPayment } from "react-paystack";
 
 interface Props {
-  config: any;
+  config: {
+    reference: string;
+    email: string;
+    amount: number;
+  };
   onSuccess: (reference: any) => void;
   onClose: () => void;
 }
 
 export default function PaystackButtonWrapper({ config, onSuccess, onClose }: Props) {
-  const initializePayment = usePaystackPayment(config);
+  const mergedConfig = {
+    ...config,
+    publicKey: process.env.NEXT_PUBLIC_PAYSTACK_KEY!,
+  };
+
+  const initializePayment = usePaystackPayment(mergedConfig);
 
   return (
     <button

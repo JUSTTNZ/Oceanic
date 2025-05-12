@@ -240,6 +240,28 @@ const changeUserCurrentPassword = asyncHandler(async(req,res) => {
     // }
 })
 
+const getCurrentUser = async (req: Request, res: Response) => {
+  try {
+    const user = await User.findById(req.user.id).select("email name");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({
+      status: "success",
+      data: {
+        email: user.email,
+        username: user.username,
+        fullname: user.fullname,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 const updateUserDetails = asyncHandler(async(req, res) => {
     
 })
@@ -251,5 +273,6 @@ export {
     logOutUser,
     refreshAccessToken,
     changeUserCurrentPassword,
-    updateUserDetails
+    updateUserDetails,
+    getCurrentUser
 }
