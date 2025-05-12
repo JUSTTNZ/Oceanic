@@ -61,6 +61,7 @@ export default function BuyCrypto() {
   const [reference, setReference] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string>("");
   const serviceFee = 30;
 
   const onSuccess = (ref: any) => {
@@ -108,6 +109,34 @@ export default function BuyCrypto() {
 
     setReference(data.data.txid);
   };
+
+  useEffect(() => {
+  const token = localStorage.getItem("accessToken");
+
+  if (!token) return;
+
+  const fetchUser = async () => {
+    try {
+      const res = await fetch("http://localhost:7001/api/v1/users/getCurrentUser", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setUserEmail(data.data.email);
+      } else {
+        console.error("Failed to fetch user email:", data.message);
+      }
+    } catch (err) {
+      console.error("Error fetching user info:", err);
+    }
+  };
+
+  fetchUser();
+}, []);
 
   useEffect(() => {
     const fetchCoins = async () => {
