@@ -7,6 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.ts",
     "seed": "node --no-warnings --loader ts-node/esm populate.ts",
+    "generate-signature": "node --loader ts-node/esm generateSignature.ts",
     "dev": "nodemon --watch ./ --exec \"node --no-warnings --loader ts-node/esm\" ./index.ts"
   },
   "keywords": [

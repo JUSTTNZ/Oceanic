@@ -5,8 +5,8 @@ import crypto from 'crypto';
 
 const payload = JSON.stringify({
   "coin": "ETH",
-  "amount": 50,
-  "txid": "sell52210",
+  "amount": 950,
+  "txid": "08012345",
   "type": "sell",
   "country": "Nigeria",
   "status": "confirmed"
@@ -20,3 +20,10 @@ if (!secret) {
 const signature = crypto.createHmac('sha256', secret).update(payload).digest('hex');
 
 console.log("📬 Signature:", signature);
+
+console.log("Payload:", payload);
+console.log("Secret:", secret);
+console.log("Signature:", signature);
+
+// This is the signature you should use in the x-signature header
+console.log("\nCopy this signature to your x-signature header in Postman:");
