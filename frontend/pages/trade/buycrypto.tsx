@@ -1,13 +1,18 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { usePaystackPayment } from 'react-paystack';
 import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import CountryDropdown from "../components/buy/country";
 import CoinDropdown from "../components/buy/coin";
 import AmountInput from "../components/buy/amout";
 import ConversionDisplay from "../components/buy/conversion";
 import FirstSide from "../components/buy/firstside";
+
+// Dynamically import the wrapper to avoid SSR crash
+const PaystackButton = dynamic(() => import("./PaystackButtonWrapper"), {
+  ssr: false,
+});
 
 interface Coin {
   id: string;
@@ -25,26 +30,25 @@ interface Country {
   currencySymbol: string;
 }
 
-  interface Currency {
-    [code: string]: {
-      name: string;
-      symbol: string;
-    };
-  }
-  
-  interface ApiCountry {
-    cca2: string;
-    name: {
-      common: string;
-    };
-    flags: {
-      png?: string;
-      svg?: string;
-    };
-    currencies: Currency;
-  }
-  
-  
+interface Currency {
+  [code: string]: {
+    name: string;
+    symbol: string;
+  };
+}
+
+interface ApiCountry {
+  cca2: string;
+  name: {
+    common: string;
+  };
+  flags: {
+    png?: string;
+    svg?: string;
+  };
+  currencies: Currency;
+}
+
 export default function BuyCrypto() {
   const [coins, setCoins] = useState<Coin[]>([]);
   const [selectedCoin, setSelectedCoin] = useState<Coin | null>(null);
@@ -57,163 +61,143 @@ export default function BuyCrypto() {
   const [reference, setReference] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const serviceFee = 30; // Your ₦30 gain
+  const serviceFee = 30;
 
-  const paystackConfig = {
-    reference: reference,
-    email: "user@example.com", // use real user email
-    amount: parseFloat(amount) * 100, // in kobo
-    publicKey: "your_paystack_public_key"
+  const onSuccess = (ref: any) => {
+    alert("Payment successful!");
   };
 
-const onSuccess = (ref: any) => {
-  alert("Payment successful!");
-  // backend will handle webhook, you can optionally refresh user transactions
-};
+  const onClose = () => {
+    console.log("Payment closed");
+  };
 
-const onClose = () => {
-  console.log("Payment closed");
-};
-
-const initializePayment = usePaystackPayment(paystackConfig);
+  function generateUniqueTxid() {
+    return "tx_" + Math.random().toString(36).substr(2, 9);
+  }
 
   const createTransaction = async () => {
-  const res = await fetch("http://localhost:7001/api/v1/transaction/", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
-    body: JSON.stringify({
-      coin: selectedCoin?.symbol,
-      amount: parseFloat(amount),
-      txid: `ref_${Date.now()}`,
-      type: "buy",
-      country: selectedCountry?.name,
-      walletAddressUsed: walletAddress
-    }),
-  });
+    const token = localStorage.getItem("accessToken");
 
-  const data = await res.json();
-  setReference(data.data.txid); // set txid as the reference
-};
+    const res = await fetch("http://localhost:7001/api/v1/transaction", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        coin: selectedCoin?.symbol,
+        amount: parseFloat(amount),
+        txid: generateUniqueTxid(),
+        type: "buy",
+        country: selectedCountry?.name,
+        walletAddressUsed: walletAddress,
+      }),
+    });
 
+    const data = await res.json();
 
-  // Fetch coins from CoinGecko API
+    if (!res.ok) {
+      alert("Failed to create transaction.");
+      return;
+    }
+
+    if (!data?.data?.txid) {
+      alert("Invalid transaction response.");
+      return;
+    }
+
+    setReference(data.data.txid);
+  };
+
   useEffect(() => {
     const fetchCoins = async () => {
       try {
         const response = await fetch("/api/coin");
-        if (!response.ok) {
-          throw new Error("Failed to fetch cryptocurrencies");
-        }
+        if (!response.ok) throw new Error("Failed to fetch coins");
         const data = await response.json();
         setCoins(data);
-        if (data.length > 0) {
-          setSelectedCoin(data[0]);
-        }
+        setSelectedCoin(data[0]);
       } catch (err) {
         setError("Failed to fetch cryptocurrencies");
-        console.error("Error fetching coins:", err);
+        console.log(err);
+        
       }
     };
-
     fetchCoins();
   }, []);
 
-  // Fetch countries from RestCountries API
   useEffect(() => {
     const fetchCountries = async () => {
       try {
         const response = await fetch("/api/country");
-        if (!response.ok) {
-          throw new Error("Failed to fetch cryptocurrencies");
-        }
+        if (!response.ok) throw new Error("Failed to fetch countries");
         const data = await response.json();
-        
-        const formattedCountries = data
-          .filter((country: ApiCountry) => 
-            country.currencies && Object.keys(country.currencies).length > 0
-          )
-          .map((country: ApiCountry) => {
-            const currencyCode = Object.keys(country.currencies)[0];
-            return {
-              code: country.cca2,
-              name: country.name.common,
-              flag: country.flags?.png || country.flags?.svg,
-              currency: currencyCode,
-              currencySymbol: country.currencies[currencyCode].symbol || currencyCode
-            };
-          })
-          .sort((a: Country, b: Country) => a.name.localeCompare(b.name));
 
-        setCountries(formattedCountries);
-        // Set default country to Nigeria if available
-        const nigeria = formattedCountries.find((c: Country) => c.code === "NG");
-        setSelectedCountry(nigeria || formattedCountries[0]);
+        const formatted = data
+          .filter((c: ApiCountry) => c.currencies && Object.keys(c.currencies).length > 0)
+          .map((c: ApiCountry) => {
+            const code = Object.keys(c.currencies)[0];
+            return {
+              code: c.cca2,
+              name: c.name.common,
+              flag: c.flags?.png || c.flags?.svg,
+              currency: code,
+              currencySymbol: c.currencies[code]?.symbol || code,
+            };
+          });
+
+        setCountries(formatted);
+        setSelectedCountry(formatted.find((c: Country) => c.code === "NG") || formatted[0]);
         setLoading(false);
       } catch (err) {
         setError("Failed to fetch countries");
-        console.error("Error fetching countries:", err);
+        console.log(err);
+        
       }
     };
-
     fetchCountries();
   }, []);
 
-  // Fetch exchange rate based on selected country
   useEffect(() => {
     const fetchExchangeRate = async () => {
       if (!selectedCountry) return;
 
       try {
         const response = await fetch("/api/rate");
-        if (!response.ok) {
-          throw new Error("Failed to fetch cryptocurrencies");
-        }
+        if (!response.ok) throw new Error("Failed to fetch rate");
         const data = await response.json();
         setExchangeRate(data.conversion_rates[selectedCountry.currency] || 1);
-        
-      } catch (err) {
-        console.error("Error fetching exchange rate:", err);
-        setExchangeRate(1); // Fallback to 1:1 rate
+      } catch {
+        setExchangeRate(1);
       }
     };
-
     fetchExchangeRate();
   }, [selectedCountry]);
 
-  // Calculate coin amount when inputs change
   useEffect(() => {
     if (amount && selectedCoin && exchangeRate > 0 && selectedCountry) {
-      const localValue = parseFloat(amount) || 0;
-      const amountAfterFee = localValue - serviceFee;
-      const coinValue = amountAfterFee > 0 ? 
-        amountAfterFee / (selectedCoin.current_price * exchangeRate) : 
-        0;
-      setCoinAmount(parseFloat(coinValue.toFixed(6)));
+      const localVal = parseFloat(amount) || 0;
+      const netAmount = localVal - serviceFee;
+      const coinVal = netAmount > 0 ? netAmount / (selectedCoin.current_price * exchangeRate) : 0;
+      setCoinAmount(parseFloat(coinVal.toFixed(6)));
     } else {
       setCoinAmount(0);
     }
   }, [amount, selectedCoin, exchangeRate, selectedCountry]);
 
-
-
   const formatCurrency = (value: number) => {
     if (!selectedCountry) return value.toString();
-    
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
       currency: selectedCountry.currency,
       minimumFractionDigits: 2,
-      maximumFractionDigits: 2
     }).format(value).replace(selectedCountry.currency, selectedCountry.currencySymbol);
   };
 
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500" />
       </div>
     );
   }
@@ -241,70 +225,71 @@ const initializePayment = usePaystackPayment(paystackConfig);
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -30 }}
       transition={{ duration: 0.3 }}
-      className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl mx-auto py-14 px-4  font-grotesk"
+      className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl mx-auto py-14 px-4 font-grotesk"
     >
-    
- <FirstSide
-        coins={coins || []}
-        selectedCountry={selectedCountry}
-        exchangeRate={exchangeRate}
-      />
-      <div className="w-full max-w-sm mx-auto border border-gray-200 rounded-xl p-6  md:shadow-xl shadow-2xl space-y-4">
+      <FirstSide coins={coins} selectedCountry={selectedCountry} exchangeRate={exchangeRate} />
+
+      <div className="w-full max-w-sm mx-auto border border-gray-200 rounded-xl p-6 md:shadow-xl shadow-2xl space-y-4">
         <h2 className="text-center font-semibold text-lg mb-4">Buy Crypto</h2>
 
-        {/* Country Selector */}
         <CountryDropdown
-  countries={countries}
-  selectedCountry={selectedCountry}
-  onSelect={(country) => setSelectedCountry(country)}
-  className="mb-4"
-/>
+          countries={countries}
+          selectedCountry={selectedCountry}
+          onSelect={setSelectedCountry}
+        />
 
-        {/* Coin Selector */}
-        <CoinDropdown 
-  coins={coins}
-  selectedCoin={selectedCoin}
-  onSelect={(coin) => setSelectedCoin(coin)}
-  exchangeRate={exchangeRate}
-  formatCurrency={formatCurrency}
-/>
-        {/* Amount Input */}
+        <CoinDropdown
+          coins={coins}
+          selectedCoin={selectedCoin}
+          onSelect={setSelectedCoin}
+          exchangeRate={exchangeRate}
+          formatCurrency={formatCurrency}
+        />
+
         <AmountInput
-  selectedCountry={selectedCountry}
-  value={amount}
-  onChange={setAmount}
-  className="mb-4"
-/>
+          selectedCountry={selectedCountry}
+          value={amount}
+          onChange={setAmount}
+        />
 
-        {/* Conversion Display */}
         <ConversionDisplay
-  selectedCountry={selectedCountry}
-  selectedCoin={selectedCoin}
-  serviceFee={30}
-  amount={amount}
-  coinAmount={coinAmount}
-  exchangeRate={exchangeRate}
-  formatCurrency={(amount) => `${amount.toFixed(2)}`}
-/>
+          selectedCountry={selectedCountry}
+          selectedCoin={selectedCoin}
+          serviceFee={serviceFee}
+          amount={amount}
+          coinAmount={coinAmount}
+          exchangeRate={exchangeRate}
+          formatCurrency={(amt) => `${amt.toFixed(2)}`}
+        />
+
         <input
-  className="w-full border p-2 rounded mb-2"
-  placeholder="Your wallet address"
-  value={walletAddress}
-  onChange={(e) => setWalletAddress(e.target.value)}
-  required
-/>
+          className="w-full border p-2 rounded mb-2"
+          placeholder="Your wallet address"
+          value={walletAddress}
+          onChange={(e) => setWalletAddress(e.target.value)}
+          required
+        />
 
-        <button
-          onClick={async () => {
-            await createTransaction();
-            initializePayment(onSuccess, onClose);
-          }}
-          className="w-full bg-[#0047AB] text-white font-semibold py-3 rounded-full mt-4 hover:bg-blue-700 transition-colors disabled:opacity-50"
-          disabled={!amount || parseFloat(amount) <= serviceFee || !selectedCoin || !walletAddress}
-        >
-          Continue to Payment
-        </button>
-
+        {reference ? (
+          <PaystackButton
+            config={{
+              reference,
+              email: "user@example.com",
+              amount: parseFloat(amount) * 100,
+              publicKey: "your_paystack_public_key",
+            }}
+            onSuccess={onSuccess}
+            onClose={onClose}
+          />
+        ) : (
+          <button
+            onClick={createTransaction}
+            className="w-full bg-[#0047AB] text-white font-semibold py-3 rounded-full mt-4 hover:bg-blue-700 transition-colors disabled:opacity-50"
+            disabled={!amount || parseFloat(amount) <= serviceFee || !selectedCoin || !walletAddress}
+          >
+            Continue to Payment
+          </button>
+        )}
 
         <div className="text-xs text-gray-500 text-center">
           Includes {selectedCountry.currencySymbol}{serviceFee} service fee. Rates update in real-time.

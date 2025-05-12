@@ -16,7 +16,7 @@ import coins from "../coindata/coin.json" with { type: "json" };
       throw new ApiError({ statusCode: 400, message: "Missing required fields" });
     }
   
-    // Check transaction type
+    // Check transaction mode
     if (type !== "buy" && type !== "sell") {
       throw new ApiError({ statusCode: 400, message: "Transaction type must be 'buy' or 'sell'" });
     }
