@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { motion } from "framer-motion";
@@ -64,7 +65,7 @@ export default function BuyCrypto() {
   const [userEmail, setUserEmail] = useState<string>("");
   const serviceFee = 30;
 
-  const onSuccess = (ref: any) => {
+  const onSuccess = (ref: string) => {
     alert("Payment successful!");
   };
 
@@ -79,7 +80,7 @@ export default function BuyCrypto() {
   const createTransaction = async () => {
     const token = localStorage.getItem("accessToken");
 
-    const res = await fetch("http://localhost:7001/api/v1/transaction", {
+    const res = await fetch("https://oceanic-servernz.vercel.app/api/v1/transaction", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -117,7 +118,7 @@ export default function BuyCrypto() {
 
   const fetchUser = async () => {
     try {
-      const res = await fetch("http://localhost:7001/api/v1/users/getCurrentUser", {
+      const res = await fetch("https://oceanic-servernz.vercel.app/api/v1/users/getCurrentUser", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -305,7 +306,7 @@ export default function BuyCrypto() {
               reference,
               email: "user@example.com",
               amount: parseFloat(amount) * 100,
-              publicKey: "your_paystack_public_key",
+              // publicKey: "your_paystack_public_key",
             }}
             onSuccess={onSuccess}
             onClose={onClose}
