@@ -9,6 +9,7 @@ import StatusMessage from "../components/sell/statusmessage";
 import NetworkWarning from "../components/sell/network";
 import WalletAddressDisplay from "../components/sell/walletaddres";
 import FirstSide from "../components/sell/firstside";
+import TransactionStatusModal from "./transactionmodal";
 
 interface Coin {
   id: string;
@@ -24,17 +25,68 @@ interface Country {
 }
 
 const BYBIT_WALLET_ADDRESSES: Record<string, Record<string, string>> = {
-  USDT: { NG: "0x123...abc", US: "0x456...def", EU: "0x789...ghi", UK: "0x101...jkl" },
-  BTC: { NG: "bc1qxy...", US: "bc1qzw...", EU: "bc1qab...", UK: "bc1qcd..." },
-  ETH: { NG: "0x234...bcd", US: "0x567...efg", EU: "0x890...hij", UK: "0x112...klm" },
-  BNB: { NG: "bnb1xy...", US: "bnb1zw...", EU: "bnb1ab...", UK: "bnb1cd..." },
-  SOL: { NG: "SolanaAddress1", US: "SolanaAddress2", EU: "SolanaAddress3", UK: "SolanaAddress4" },
-  XRP: { NG: "rPw4...", US: "rPw5...", EU: "rPw6...", UK: "rPw7..." },
-  ADA: { NG: "addr1xy...", US: "addr1zw...", EU: "addr1ab...", UK: "addr1cd..." },
-  DOGE: { NG: "D8xy...", US: "D8zw...", EU: "D8ab...", UK: "D8cd..." },
-  DOT: { NG: "1xy...", US: "1zw...", EU: "1ab...", UK: "1cd..." },
-  MATIC: { NG: "0x345...cde", US: "0x678...fgh", EU: "0x901...ijk", UK: "0x113...lmn" },
+  USDT: {
+    NG: "0x8e5b5a4c4fc1e6fbdcb2aa3eec0381c1344f85cf",
+    US: "0x456...def",
+    EU: "0x789...ghi",
+    UK: "0x101...jkl"
+  },
+  BTC: {
+    NG: "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh",
+    US: "bc1qzw...",
+    EU: "bc1qab...",
+    UK: "bc1qcd..."
+  },
+  ETH: {
+    NG: "0xde0b295669a9fd93d5f28d9ec85e40f4cb697bae",
+    US: "0x567...efg",
+    EU: "0x890...hij",
+    UK: "0x112...klm"
+  },
+  BNB: {
+    NG: "bnb1grpf0955h0ykzq3ar5nmum7y6gdfl6lxfn46h2",
+    US: "bnb1zw...",
+    EU: "bnb1ab...",
+    UK: "bnb1cd..."
+  },
+  SOL: {
+    NG: "8e1YyRzFKR5nJ1Rw1ErGfP9Y7EXW8B7jvN5QvL6oUpvN",
+    US: "SolanaAddress2",
+    EU: "SolanaAddress3",
+    UK: "SolanaAddress4"
+  },
+  XRP: {
+    NG: "rEb8TK3gBgk5auZkwc6sHnwrGVJH8DuaLh",
+    US: "rPw5...",
+    EU: "rPw6...",
+    UK: "rPw7..."
+  },
+  ADA: {
+    NG: "addr1q9d6t0sx9ywhcwn04n4z8s6guxle5z5hf6a0kxdygnh6z0d0xgk8dcvxsp2k2vm0l2c4xptqx9a9n5",
+    US: "addr1zw...",
+    EU: "addr1ab...",
+    UK: "addr1cd..."
+  },
+  DOGE: {
+    NG: "D7Y55qnMaQKUyUxuSHM3wZjaeU5iW6HXRL",
+    US: "D8zw...",
+    EU: "D8ab...",
+    UK: "D8cd..."
+  },
+  DOT: {
+    NG: "14ErftuTiyBi2LqCHNfX1LpbMfW6Y2VtKMRuhV2zNHff5D2W",
+    US: "1zw...",
+    EU: "1ab...",
+    UK: "1cd..."
+  },
+  MATIC: {
+    NG: "0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0",
+    US: "0x678...fgh",
+    EU: "0x901...ijk",
+    UK: "0x113...lmn"
+  }
 };
+
 
 const SUPPORTED_COINS = Object.keys(BYBIT_WALLET_ADDRESSES);
 type TransactionStatus = 'pending' | 'sent' | 'received' | 'completed' | 'failed';
@@ -49,6 +101,16 @@ export default function SellCrypto() {
   const [searchCoin, setSearchCoin] = useState("");
   const [showCoinDropdown, setShowCoinDropdown] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  const [modalType, setModalType] = useState<"success" | "error">("success");
+  interface TransactionDetails {
+    id: string;
+    coin: string;
+    amount: number;
+    status: TransactionStatus;
+  }
+
+  const [transactionDetails, setTransactionDetails] = useState<TransactionDetails | null>(null);
   const [selectedCountry] = useState<Country>({ code: "NG", name: "Nigeria" });
 
   useEffect(() => {
@@ -66,7 +128,6 @@ export default function SellCrypto() {
         console.error("Failed to fetch coins:", error);
       }
     };
-
     fetchCoins();
   }, []);
 
@@ -79,6 +140,8 @@ export default function SellCrypto() {
     if (!txid || !selectedCoin || amount <= 0) {
       setErrorMessage("Please fill in all fields correctly.");
       setStatus('failed');
+      setModalType("error");
+      setShowModal(true);
       return;
     }
 
@@ -89,7 +152,7 @@ export default function SellCrypto() {
       const accessToken = localStorage.getItem('accessToken');
       if (!accessToken) throw new Error("Please login first");
 
-      const response = await fetch('https://oceanic-servernz.vercel.app/api/v1/transaction', {
+      const response = await fetch('http://localhost:7001/api/v1/transaction', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -110,7 +173,7 @@ export default function SellCrypto() {
       }
 
       const data = await response.json();
-      console.log("Transaction created:", data);
+      setTransactionDetails(data.data);
 
       let tries = 0;
       const maxTries = 20;
@@ -120,10 +183,12 @@ export default function SellCrypto() {
           clearInterval(pollStatus);
           setIsChecking(false);
           setStatus("failed");
+          setModalType("error");
+          setShowModal(true);
           return;
         }
 
-        const statusRes = await fetch(`https://oceanic-servernz.vercel.app/api/v1/transaction/user`, {
+        const statusRes = await fetch(`http://localhost:7001/api/v1/transaction/user`, {
           headers: {
             'Authorization': `Bearer ${accessToken}`
           }
@@ -137,6 +202,8 @@ export default function SellCrypto() {
             if (currentTx.status === 'completed') {
               clearInterval(pollStatus);
               setIsChecking(false);
+              setModalType("success");
+              setShowModal(true);
             }
           }
         }
@@ -144,25 +211,13 @@ export default function SellCrypto() {
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Transaction error';
-      console.error("Transaction error:", errorMessage);
       setErrorMessage(errorMessage);
       setStatus('failed');
       setIsChecking(false);
+      setModalType("error");
+      setShowModal(true);
     }
   };
-
-  const resetTransaction = () => {
-    setStatus('pending');
-    setTxid("");
-    setAmount(0);
-    setIsChecking(false);
-    setErrorMessage("");
-  };
-
-  const filteredCoins = coins.filter(coin =>
-    coin.name.toLowerCase().includes(searchCoin.toLowerCase()) ||
-    coin.symbol.toLowerCase().includes(searchCoin.toLowerCase())
-  );
 
   return (
     <div className="bg-white min-h-screen">
@@ -175,7 +230,6 @@ export default function SellCrypto() {
         className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl mx-auto py-14 px-4"
       >
         <FirstSide status={status} SUPPORTED_COINS={SUPPORTED_COINS} />
-
         <div className="w-full max-w-sm mx-auto border border-gray-200 rounded-xl p-6 shadow-sm space-y-4">
           <h2 className="text-center font-semibold text-lg mb-4">Sell Crypto</h2>
           {errorMessage && <div className="text-red-500 text-sm">{errorMessage}</div>}
@@ -187,7 +241,10 @@ export default function SellCrypto() {
             searchCoin={searchCoin}
             setSearchCoin={setSearchCoin}
             setSelectedCoin={setSelectedCoin}
-            filteredCoins={filteredCoins}
+            filteredCoins={coins.filter(coin =>
+              coin.name.toLowerCase().includes(searchCoin.toLowerCase()) ||
+              coin.symbol.toLowerCase().includes(searchCoin.toLowerCase())
+            )}
             status={status}
           />
 
@@ -209,7 +266,13 @@ export default function SellCrypto() {
 
           <TxidInput txid={txid} setTxid={setTxid} status={status} />
 
-          <StatusMessage status={status} isChecking={isChecking} onReset={resetTransaction} />
+          <StatusMessage status={status} isChecking={isChecking} onReset={() => {
+            setStatus('pending');
+            setTxid("");
+            setAmount(0);
+            setIsChecking(false);
+            setErrorMessage("");
+          }} />
 
           <button
             onClick={handleSubmit}
@@ -233,6 +296,16 @@ export default function SellCrypto() {
           <NetworkWarning selectedCoin={selectedCoin} />
         </div>
       </motion.div>
+
+      {showModal && (
+        <TransactionStatusModal
+          type={modalType}
+          title={modalType === "success" ? "Transaction Successful" : "Transaction Failed"}
+          message={modalType === "success" ? "Your transaction was completed successfully." : errorMessage || "Something went wrong."}
+          details={transactionDetails ? { ...transactionDetails } : {}}
+          onClose={() => setShowModal(false)}
+        />
+      )}
     </div>
   );
 }
