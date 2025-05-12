@@ -1,27 +1,28 @@
-"use client"
-import { setUser } from '@/action';
-import Link from 'next/link';
-import { useRouter } from 'next/router';
-import { useState } from 'react';
-import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import { useDispatch } from 'react-redux';
+"use client";
+
+import { setUser } from "@/action";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import { useState, useEffect } from "react";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { useDispatch } from "react-redux";
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState({ 
-    email: '', 
-    password: '', 
-    general: '' 
+  const [error, setError] = useState({
+    email: "",
+    password: "",
+    general: "",
   });
 
   const [showPassword, setShowPassword] = useState(false);
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+
   const router = useRouter();
   const dispatch = useDispatch();
-
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -29,13 +30,13 @@ export default function LoginPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
-    // Clear error when user starts typing
+
     if (error[name as keyof typeof error]) {
-      setError(prev => ({ ...prev, [name]: '' }));
+      setError((prev) => ({ ...prev, [name]: "" }));
     }
   };
 
@@ -48,63 +49,67 @@ export default function LoginPage() {
       isValid = false;
     }
 
-
     setError(newError);
     return isValid;
   };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Reset errors
-    setError({ 
-      email: '', 
-      password: '', 
-      general: '' 
+
+    setError({
+      email: "",
+      password: "",
+      general: "",
     });
 
-    // Validate form
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     try {
       setLoading(true);
-  
-      const response = await fetch('https://oceanic-servernz.vercel.app/api/v1/users/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: formData.email, password: formData.password }),
+
+      const response = await fetch("https://oceanic-servernz.vercel.app/api/v1/users/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
       });
-  
+
       const data = await response.json();
-      console.log("Login response:", data);
-  
+
       if (!response.ok || !data.data) {
         const errorMessage = data.message || data.error || "Login failed";
-        setError(prev => ({ ...prev, general: errorMessage }));
+        setError((prev) => ({ ...prev, general: errorMessage }));
         return;
       }
-  
-      localStorage.setItem('accessToken', data.data.accessToken);
-      localStorage.setItem('refreshToken', data.data.refreshToken);
-  
-      dispatch(setUser({
-        uid: data.data.user?._id,
-        email: data.data.user?.email,
-        username: data.data.user?.username,
-        role: data.data.user?.role,
-        fullname: data.data.user?.fullname,
-        createdAt: data.data.user?.createdAt,
-        phoneNumber: data.data.user?.phoneNumber,
-        lastLogin: new Date().toISOString()
-      }));
-  
+
+      localStorage.setItem("accessToken", data.data.accessToken);
+      localStorage.setItem("refreshToken", data.data.refreshToken);
+
+      // Fetch user data from /auth/me
+      const userRes = await fetch("http://localhost:7001/api/v1/users/getCurrentUser", {
+        headers: {
+          Authorization: `Bearer ${data.data.accessToken}`,
+        },
+      });
+
+      const userData = await userRes.json();
+
+      if (userRes.ok && userData?.data) {
+        dispatch(setUser({
+          uid: userData.data._id,
+          email: userData.data.email,
+          username: userData.data.username,
+          role: userData.data.role,
+          fullname: userData.data.fullname,
+          createdAt: userData.data.createdAt,
+          phoneNumber: userData.data.phoneNumber,
+          lastLogin: new Date().toISOString(),
+        }));
+      }
+
       router.push("/markets");
-  
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Login failed';
-      setError(prev => ({ ...prev, general: errorMessage }));
+      const errorMessage = err instanceof Error ? err.message : "Login failed";
+      setError((prev) => ({ ...prev, general: errorMessage }));
       console.error("Login error:", err);
     } finally {
       setLoading(false);
@@ -122,7 +127,7 @@ export default function LoginPage() {
                 height="80"
                 viewBox="0 0 24 24"
                 fill="none"
-                stroke="#ADD8E6"  
+                stroke="#ADD8E6"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -136,12 +141,9 @@ export default function LoginPage() {
           </div>
           <h2 className="text-[#201749] text-md lg:text-[42px] leading-[1.3] m-0 font-light">Sign in</h2>
           <hr className="border-t border-[#D5D2E5] my-4" />
-
           <p className="text-sm text-gray-600 mb-4 pt-7">Please check that you are visiting the correct URL</p>
           <div className="border border-[#D5D2E5] rounded-full inline-block mb-4">
-            <p className="text-blue-300 m-0 p-2">
-              https://app.oceanic.io/signin
-            </p>
+            <p className="text-blue-300 m-0 p-2">https://app.oceanic.io/signin</p>
           </div>
         </div>
 
@@ -152,33 +154,29 @@ export default function LoginPage() {
         )}
 
         <form onSubmit={handleLogin}>
-          {/* Email Field */}
           <div className="mb-4">
             <label className="text-sm block text-gray-700 mb-2">Email*</label>
             <input
               type="email"
               name="email"
               className={`w-full h-[50px] p-3 border text-sm rounded-lg focus:outline-none ${
-                error.email ? 'border-red-500' : 'border-[#D5D2E5]'
+                error.email ? "border-red-500" : "border-[#D5D2E5]"
               }`}
               placeholder="Email"
               value={formData.email}
               onChange={handleChange}
             />
-            {error.email && (
-              <p className="text-sm text-red-500 mt-1">{error.email}</p>
-            )}
+            {error.email && <p className="text-sm text-red-500 mt-1">{error.email}</p>}
           </div>
 
-          {/* Password Field */}
           <div className="mb-4">
             <label className="block mb-2 text-gray-700 text-sm">Password *</label>
             <div className="relative">
               <input
-                type={showPassword ? 'text' : 'password'}
+                type={showPassword ? "text" : "password"}
                 name="password"
                 className={`w-full p-3 h-[50px] text-sm border rounded-lg pr-10 focus:outline-none ${
-                  error.password ? 'border-red-500' : 'border-[#D5D2E5]'
+                  error.password ? "border-red-500" : "border-[#D5D2E5]"
                 }`}
                 placeholder="Password"
                 value={formData.password}
@@ -196,9 +194,7 @@ export default function LoginPage() {
                 )}
               </button>
             </div>
-            {error.password && (
-              <p className="text-sm text-red-500 mt-1">{error.password}</p>
-            )}
+            {error.password && <p className="text-sm text-red-500 mt-1">{error.password}</p>}
           </div>
 
           <button
@@ -208,20 +204,43 @@ export default function LoginPage() {
           >
             {loading ? (
               <>
-                <svg className="animate-spin h-5 w-5 mr-3 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v2a6 6 0 100 12v2a8 8 0 01-8-8z"></path>
+                <svg
+                  className="animate-spin h-5 w-5 mr-3 inline"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v2a6 6 0 100 12v2a8 8 0 01-8-8z"
+                  ></path>
                 </svg>
                 Logging in...
               </>
-            ) : 'Login'}
+            ) : (
+              "Login"
+            )}
           </button>
         </form>
 
         <div className="text-center text-sm lg:items-center items-start lg:flex-row flex flex-col lg:justify-between mt-4">
-          <Link href="/resetpassword" className="text-blue-900 hover:text-blue-700">Forgot Password?</Link>
+          <Link href="/resetpassword" className="text-blue-900 hover:text-blue-700">
+            Forgot Password?
+          </Link>
           <p className="mt-2 md:mt-0">
-            Not signed up yet? <Link href="/register" className="text-blue-300 hover:text-blue-400">Create Account</Link>
+            Not signed up yet?{" "}
+            <Link href="/register" className="text-blue-300 hover:text-blue-400">
+              Create Account
+            </Link>
           </p>
         </div>
       </div>
