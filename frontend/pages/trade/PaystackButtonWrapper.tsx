@@ -1,6 +1,7 @@
 "use client";
 
 import { usePaystackPayment } from "react-paystack";
+import { useEffect, useState } from "react";
 
 interface Props {
   config: {
@@ -13,12 +14,21 @@ interface Props {
 }
 
 export default function PaystackButtonWrapper({ config, onSuccess, onClose }: Props) {
-  const mergedConfig = {
+  const [isMounted, setIsMounted] = useState(false);
+  
+  // Initialize the hook unconditionally at the top level
+  const initializePayment = usePaystackPayment({
     ...config,
     publicKey: process.env.NEXT_PUBLIC_PAYSTACK_KEY!,
-  };
+  });
 
-  const initializePayment = usePaystackPayment(mergedConfig);
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return null;
+  }
 
   return (
     <button
