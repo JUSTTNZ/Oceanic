@@ -1,5 +1,5 @@
 
-type TransactionStatus = 'pending' | 'sent' | 'received' | 'completed' | 'failed';
+type TransactionStatus = 'pending' | 'sent' | 'received' | 'confirmed' | 'failed';
 
 interface TxidInputProps {
   txid: string;
