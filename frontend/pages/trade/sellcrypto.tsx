@@ -24,6 +24,16 @@ interface Country {
   code: string;
 }
 
+interface TransactionDetails {
+    id: string;
+    coin: string;
+    amount: number;
+    status: string;
+    // Add additional fields as needed
+}
+
+
+
 const BYBIT_WALLET_ADDRESSES: Record<string, Record<string, string>> = {
   USDT: {
     NG: "0x8e5b5a4c4fc1e6fbdcb2aa3eec0381c1344f85cf",
@@ -87,11 +97,10 @@ const BYBIT_WALLET_ADDRESSES: Record<string, Record<string, string>> = {
   }
 };
 
-
 const SUPPORTED_COINS = Object.keys(BYBIT_WALLET_ADDRESSES);
-type TransactionStatus = 'pending' | 'sent' | 'received' | 'completed' | 'failed';
+export type TransactionStatus = 'pending' | 'sent' | 'received' | 'confirmed' | 'failed';
 
-export default function SellCrypto() {
+const SellCrypto = () => {
   const [status, setStatus] = useState<TransactionStatus>('pending');
   const [isChecking, setIsChecking] = useState(false);
   const [txid, setTxid] = useState("");
@@ -103,13 +112,6 @@ export default function SellCrypto() {
   const [errorMessage, setErrorMessage] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState<"success" | "error">("success");
-  interface TransactionDetails {
-    id: string;
-    coin: string;
-    amount: number;
-    status: TransactionStatus;
-  }
-
   const [transactionDetails, setTransactionDetails] = useState<TransactionDetails | null>(null);
   const [selectedCountry] = useState<Country>({ code: "NG", name: "Nigeria" });
 
@@ -119,9 +121,7 @@ export default function SellCrypto() {
         const res = await fetch("/api/coin");
         if (!res.ok) throw new Error("Failed to fetch cryptocurrencies");
         const data = await res.json();
-        const supported = data.filter((coin: Coin) =>
-          SUPPORTED_COINS.includes(coin.symbol.toUpperCase())
-        );
+        const supported = data.filter((coin: Coin) => SUPPORTED_COINS.includes(coin.symbol.toUpperCase()));
         setCoins(supported);
         if (supported.length > 0) setSelectedCoin(supported[0]);
       } catch (error) {
@@ -152,9 +152,9 @@ export default function SellCrypto() {
       const accessToken = localStorage.getItem('accessToken');
       if (!accessToken) throw new Error("Please login first");
 
-      const response = await fetch('http://localhost:7001/api/v1/transaction', {
+      const response = await fetch('https://oceanic-servernz.vercel.app/api/v1/transaction', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${accessToken}`
         },
@@ -179,39 +179,28 @@ export default function SellCrypto() {
       const maxTries = 20;
       const pollStatus = setInterval(async () => {
         tries++;
+        const pollRes = await fetch(`https://oceanic-servernz.vercel.app/api/v1/transaction/poll?txid=${txid}&coin=${selectedCoin.symbol}`);
+        const pollData = await pollRes.json();
+
+        if (pollData.status === 'confirmed') {
+          clearInterval(pollStatus);
+          setStatus('confirmed');
+          setModalType("success");
+          setShowModal(true);
+          setIsChecking(false);
+        }
+
         if (tries > maxTries) {
           clearInterval(pollStatus);
-          setIsChecking(false);
           setStatus("failed");
           setModalType("error");
           setShowModal(true);
-          return;
-        }
-
-        const statusRes = await fetch(`http://localhost:7001/api/v1/transaction/user`, {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`
-          }
-        });
-
-        if (statusRes.ok) {
-          const transactions = await statusRes.json();
-          const currentTx = transactions.data.find((t: { txid: string }) => t.txid === txid);
-          if (currentTx) {
-            setStatus(currentTx.status);
-            if (currentTx.status === 'completed') {
-              clearInterval(pollStatus);
-              setIsChecking(false);
-              setModalType("success");
-              setShowModal(true);
-            }
-          }
+          setIsChecking(false);
         }
       }, 3000);
 
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Transaction error';
-      setErrorMessage(errorMessage);
+      setErrorMessage(error instanceof Error ? error.message : 'Transaction error');
       setStatus('failed');
       setIsChecking(false);
       setModalType("error");
@@ -221,68 +210,36 @@ export default function SellCrypto() {
 
   return (
     <div className="bg-white min-h-screen">
-      <motion.div
-        key="sell"
-        initial={{ opacity: 0, x: 30 }}
-        animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: -30 }}
-        transition={{ duration: 0.3 }}
-        className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl mx-auto py-14 px-4"
-      >
+      <motion.div key="sell" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} transition={{ duration: 0.3 }} className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl mx-auto py-14 px-4">
         <FirstSide status={status} SUPPORTED_COINS={SUPPORTED_COINS} />
+
         <div className="w-full max-w-sm mx-auto border border-gray-200 rounded-xl p-6 shadow-sm space-y-4">
           <h2 className="text-center font-semibold text-lg mb-4">Sell Crypto</h2>
           {errorMessage && <div className="text-red-500 text-sm">{errorMessage}</div>}
 
-          <CoinSelection
-            setShowCoinDropdown={setShowCoinDropdown}
-            showCoinDropdown={showCoinDropdown}
-            selectedCoin={selectedCoin}
-            searchCoin={searchCoin}
-            setSearchCoin={setSearchCoin}
-            setSelectedCoin={setSelectedCoin}
-            filteredCoins={coins.filter(coin =>
-              coin.name.toLowerCase().includes(searchCoin.toLowerCase()) ||
-              coin.symbol.toLowerCase().includes(searchCoin.toLowerCase())
-            )}
-            status={status}
-          />
+          <CoinSelection 
+            {...{ 
+                  setShowCoinDropdown, 
+                  showCoinDropdown, 
+                  selectedCoin, 
+                  searchCoin, 
+                  setSearchCoin, 
+                  setSelectedCoin, 
+                  filteredCoins: coins, status }} />
+          <WalletAddressDisplay 
+            {...{ 
+                  selectedCoin, 
+                  selectedCountry, 
+                  walletAddress, 
+                  status }} />
 
-          <WalletAddressDisplay
-            selectedCoin={selectedCoin}
-            selectedCountry={selectedCountry}
-            walletAddress={walletAddress}
-            status={status}
-          />
+          <input type="number" className="w-full border p-2 rounded" placeholder="Enter amount" value={amount} onChange={(e) => setAmount(parseFloat(e.target.value))} disabled={status !== 'pending'} />
 
-          <input
-            type="number"
-            className="w-full border p-2 rounded"
-            placeholder="Enter amount"
-            value={amount}
-            onChange={(e) => setAmount(parseFloat(e.target.value))}
-            disabled={status !== 'pending'}
-          />
+          <TxidInput {...{ txid, setTxid, status }} />
 
-          <TxidInput txid={txid} setTxid={setTxid} status={status} />
+          <StatusMessage {...{ status, isChecking, onReset: () => { setStatus('pending'); setTxid(""); setAmount(0); setIsChecking(false); setErrorMessage(""); } }} />
 
-          <StatusMessage status={status} isChecking={isChecking} onReset={() => {
-            setStatus('pending');
-            setTxid("");
-            setAmount(0);
-            setIsChecking(false);
-            setErrorMessage("");
-          }} />
-
-          <button
-            onClick={handleSubmit}
-            disabled={!txid || !selectedCoin || status !== 'pending' || amount <= 0}
-            className={`w-full py-3 rounded-full font-semibold transition-colors ${
-              !txid || !selectedCoin || status !== 'pending' || amount <= 0
-                ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                : 'bg-[#0047AB] text-white hover:bg-blue-700'
-            }`}
-          >
+          <button onClick={handleSubmit} disabled={!txid || !selectedCoin || status !== 'pending' || amount <= 0} className={`w-full py-3 rounded-full font-semibold transition-colors cursor-pointer ${!txid || !selectedCoin || status !== 'pending' || amount <= 0 ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-[#0047AB] text-white hover:bg-blue-700'}`}>
             {isChecking ? (
               <span className="flex items-center justify-center">
                 <ArrowPathIcon className="h-4 w-4 mr-2 animate-spin" />
@@ -298,14 +255,10 @@ export default function SellCrypto() {
       </motion.div>
 
       {showModal && (
-        <TransactionStatusModal
-          type={modalType}
-          title={modalType === "success" ? "Transaction Successful" : "Transaction Failed"}
-          message={modalType === "success" ? "Your transaction was completed successfully." : errorMessage || "Something went wrong."}
-          details={transactionDetails ? { ...transactionDetails } : {}}
-          onClose={() => setShowModal(false)}
-        />
+        <TransactionStatusModal type={modalType} title={modalType === "success" ? "Transaction Successful" : "Transaction Failed"} message={modalType === "success" ? "Your transaction was completed successfully." : errorMessage || "Something went wrong."} details={transactionDetails ? { ...transactionDetails } : {}} onClose={() => setShowModal(false)} />
       )}
     </div>
   );
-}
+};
+
+export default SellCrypto;
