@@ -1,12 +1,12 @@
 
 
   
-  type TransactionStatus = 'pending' | 'sent' | 'received' | 'completed' | 'failed';
+  type TransactionStatus = 'pending' | 'sent' | 'received' | 'confirmed' | 'failed';
 
   
   interface CryptoProps {
     SUPPORTED_COINS: string[];
-    status: TransactionStatus;
+    status?: TransactionStatus;
 
   }
   
@@ -56,7 +56,7 @@ export default function FirstSide ({ status = 'pending', SUPPORTED_COINS = [] }:
           {/* Step 3 */}
           <div className="flex items-start space-x-4">
             <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
-              status === 'completed' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'
+              status === 'confirmed' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'
             }`}>
               3
             </div>
