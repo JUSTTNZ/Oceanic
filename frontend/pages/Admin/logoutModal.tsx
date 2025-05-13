@@ -4,7 +4,7 @@ interface LogoutProps {
     setShowModal: () => void;
   }
 
-export const LogoutModal = ({ setShowModal}:LogoutProps) => {
+export default function LogoutModal ({ setShowModal}:LogoutProps) {
     const handleSignOut = async () => {
   
     };
