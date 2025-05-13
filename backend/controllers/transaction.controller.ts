@@ -85,8 +85,22 @@ import coins from "../coindata/coin.json" with { type: "json" };
     
     } catch (error) {
       console.error("Error creating transaction:", error);
-      throw new ApiError({ statusCode: 500, message: 'Something went wrong while creating transaction' });
-    }
+ // Handle both ApiError and other errors
+ if (error instanceof ApiError) {
+  throw error;
+}
+
+// Type-safe error message extraction
+const errorMessage = error instanceof Error 
+  ? error.message 
+  : 'Something went wrong while creating transaction';
+  
+throw new ApiError({ 
+  statusCode: 500, 
+  message: errorMessage
+});
+}
+    
 });
   
 
