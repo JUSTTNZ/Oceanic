@@ -6,7 +6,8 @@ import Sidebar from "./sidebar";
 import { RiMenu3Line } from "react-icons/ri";
 import { FaBell, FaChevronDown } from "react-icons/fa";
 import { useSelector } from "react-redux";
-import { LogoutModal } from "./logoutModal";
+import LogoutModal from "./logoutModal";
+
 
 interface RootState {
   user: {
@@ -105,7 +106,7 @@ export default function Header() {
       <Sidebar isOpen={isOpen} closeSidebar={() => setIsOpen(false)} />
 
       {showModal && (
-      <LogoutModal 
+      <LogoutModal
         showModal={showModal}
         setShowModal={() => setShowModal(false)}
       />
