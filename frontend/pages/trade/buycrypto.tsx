@@ -9,11 +9,19 @@ import CoinDropdown from "../components/buy/coin";
 import AmountInput from "../components/buy/amout";
 import ConversionDisplay from "../components/buy/conversion";
 import FirstSide from "../components/buy/firstside";
+// import { PaystackButton } from "react-paystack";
+const PaystackButton = dynamic(
+  () => import("react-paystack").then((mod) => mod.PaystackButton),
+  { 
+    ssr: false,
+    loading: () => <div className="w-full bg-[#0047AB] text-white font-semibold py-3 rounded-full mt-4 text-center">Loading payment...</div>
+  }
+);
 
 // Dynamically import the wrapper to avoid SSR crash
-const PaystackButton = dynamic(() => import("./PaystackButtonWrapper"), {
-  ssr: false,
-});
+// const PaystackButton = dynamic(() => import("./PaystackButtonWrapper"), {
+//   ssr: false,
+// });
 
 interface Coin {
   id: string;
@@ -49,6 +57,17 @@ interface ApiCountry {
   };
   currencies: Currency;
 }
+interface PaystackButtonProps {
+  reference: string;
+  email: string;
+  amount: number;
+  publicKey: string;
+  currency?: string;
+  onSuccess: (reference: string) => void;
+  onClose: () => void;
+  // Other Paystack button props...
+}
+
 
 export default function BuyCrypto() {
   const [coins, setCoins] = useState<Coin[]>([]);
@@ -80,7 +99,7 @@ export default function BuyCrypto() {
   const createTransaction = async () => {
     const token = localStorage.getItem("accessToken");
 
-    const res = await fetch("https://oceanic-servernz.vercel.app/api/v1/transaction", {
+    const res = await fetch("http://localhost:7001/api/v1/transaction", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -118,7 +137,7 @@ export default function BuyCrypto() {
 
   const fetchUser = async () => {
     try {
-      const res = await fetch("https://oceanic-servernz.vercel.app/api/v1/users/getCurrentUser", {
+      const res = await fetch("http://localhost:7001/api/v1/users/getCurrentUser", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -247,7 +266,13 @@ export default function BuyCrypto() {
       </div>
     );
   }
-
+  // const paystackConfig: PaystackConfig = {
+  //   reference,
+  //   email: "user@example.com",
+  //   amount: (parseFloat(amount) - serviceFee) * 100,
+  //   publicKey: process.env.NEXT_PUBLIC_PAYSTACK_KEY!,
+  // };
+  
   return (
     <motion.div
       key="buy"
@@ -302,14 +327,19 @@ export default function BuyCrypto() {
 
         {reference ? (
           <PaystackButton
-            config={{
-              reference,
-              email: "user@example.com",
-              amount: parseFloat(amount) * 100,
-              // publicKey: "your_paystack_public_key",
-            }}
-            onSuccess={onSuccess}
-            onClose={onClose}
+          reference={reference}
+    email={"user@example.com"}
+    amount={(parseFloat(amount) - serviceFee) * 100}
+    publicKey={process.env.NEXT_PUBLIC_PAYSTACK_KEY!}
+    onSuccess={(reference) => {
+      onSuccess(reference);
+    }}
+    onClose={() => {
+      onClose();
+     
+    }}
+
+           
           />
         ) : (
           <button
