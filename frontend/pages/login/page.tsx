@@ -85,7 +85,7 @@ export default function LoginPage() {
       localStorage.setItem("refreshToken", data.data.refreshToken);
 
       // Fetch user data from /auth/me
-      const userRes = await fetch("http://localhost:7001/api/v1/users/getCurrentUser", {
+      const userRes = await fetch("https://oceanic-servernz.vercel.app/api/v1/users/getCurrentUser", {
         headers: {
           Authorization: `Bearer ${data.data.accessToken}`,
         },
