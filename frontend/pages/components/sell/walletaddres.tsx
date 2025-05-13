@@ -16,7 +16,7 @@ interface Country {
   code: string;
 }
 
-type TransactionStatus = 'pending' | 'sent' | 'received' | 'completed' | 'failed';
+type TransactionStatus = 'pending' | 'sent' | 'received' | 'confirmed' | 'failed';
 
 interface WalletAddressDisplayProps {
   selectedCoin: Coin | null;

@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 
-type TransactionStatus = 'pending' | 'sent' | 'received' | 'completed' | 'failed';
+type TransactionStatus = 'pending' | 'sent' | 'received' | 'confirmed' | 'failed';
 
 interface StatusMessageProps {
   status: TransactionStatus;
@@ -13,7 +13,7 @@ const statusMessages = {
   pending: "Please send your crypto and submit the TXID",
   sent: "Waiting for transaction confirmation...",
   received: "Transaction received! Processing your payment...",
-  completed: "Payment completed! Funds have been sent to your bank account.",
+  confirmed: "Payment completed! Funds have been sent to your bank account.",
   failed: "Transaction not found. Please verify your TXID and try again."
 };
 
@@ -30,7 +30,7 @@ export default function StatusMessage({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
           className={`p-3 rounded-lg text-sm ${
-            status === 'completed' ? 'bg-green-50 text-green-700' :
+            status === 'confirmed' ? 'bg-green-50 text-green-700' :
             status === 'failed' ? 'bg-red-50 text-red-700' :
             'bg-blue-50 text-blue-700'
           }`}
@@ -39,7 +39,7 @@ export default function StatusMessage({
             {isChecking && <ArrowPathIcon className="h-4 w-4 animate-spin" />}
             <p>{statusMessages[status]}</p>
           </div>
-          {(status === 'completed' || status === 'failed') && (
+          {(status === 'confirmed' || status === 'failed') && (
             <button
               onClick={onReset}
               className="mt-2 text-sm underline hover:text-blue-600"
