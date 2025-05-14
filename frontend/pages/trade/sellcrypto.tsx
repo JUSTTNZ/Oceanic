@@ -94,7 +94,12 @@ const BYBIT_WALLET_ADDRESSES: Record<string, Record<string, string>> = {
     UK: "0x113...lmn"
   }
 };
-
+interface BankDetails {
+  accountNumber: string;
+  accountName: string;
+  bankName: string;
+  bankCode?: string;
+}
 const SUPPORTED_COINS = Object.keys(BYBIT_WALLET_ADDRESSES);
 export type TransactionStatus = 'pending' | 'sent' | 'received' | 'confirmed' | 'failed';
 
@@ -112,6 +117,13 @@ const SellCrypto = () => {
   const [modalType, setModalType] = useState<"success" | "error">("success");
   const [transactionDetails, setTransactionDetails] = useState<TransactionDetails | null>(null);
   const [selectedCountry] = useState<Country>({ code: "NG", name: "Nigeria" });
+  const [bankDetails, setBankDetails] = useState<BankDetails>({
+    accountNumber: "",
+    accountName: "",
+    bankName: "",
+    bankCode: ""
+  });
+  const [banksList, setBanksList] = useState<{name: string, code: string}[]>([]);
 
   useEffect(() => {
     const fetchCoins = async () => {
@@ -127,12 +139,31 @@ const SellCrypto = () => {
       }
     };
     fetchCoins();
-  }, []);
+
+    // Fetch banks list for the selected country
+    const fetchBanks = async () => {
+      try {
+        const response = await fetch(`/api/banks?country=${selectedCountry.code}`);
+        const data = await response.json();
+        setBanksList(data.banks || []);
+      } catch (error) {
+        console.error("Failed to fetch banks:", error);
+      }
+    };
+    fetchBanks();
+  }, [selectedCountry.code]);
 
   const walletAddress = selectedCoin
     ? BYBIT_WALLET_ADDRESSES[selectedCoin.symbol.toUpperCase()]?.[selectedCountry.code] ||
       "Wallet address not available for this country"
     : null;
+      const handleBankDetailsChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setBankDetails(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
 
   const handleSubmit = async () => {
     if (!txid || !selectedCoin || amount <= 0) {
@@ -142,7 +173,13 @@ const SellCrypto = () => {
       setShowModal(true);
       return;
     }
-
+ if (!bankDetails.accountNumber || !bankDetails.accountName || !bankDetails.bankName) {
+      setErrorMessage("Please provide your bank account details.");
+      setStatus('failed');
+      setModalType("error");
+      setShowModal(true);
+      return;
+    }
     try {
       setStatus('sent');
       setIsChecking(true);
@@ -263,17 +300,62 @@ const SellCrypto = () => {
           status={status}
         />
         
-          {/* <input 
-            type="number" 
-            className="w-full border p-2 rounded" 
-            placeholder="Enter amount" 
-            value={amount} 
-            onChange={(e) => setAmount(parseFloat(e.target.value))} 
-            disabled={status !== 'pending'} 
-          /> */}
-
           <TxidInput {...{ txid, setTxid, status }} />
+       <div className="space-y-4">
+        
+            <div>
+              <label htmlFor="bankName" className="block text-sm font-medium text-gray-100 mb-1">
+                Bank Name
+              </label>
+              <select
+                id="bankName"
+                name="bankName"
+                value={bankDetails.bankName}
+                onChange={handleBankDetailsChange}
+                className="w-full border border-gray-500 px-4 py-2 rounded-lg text-white text-md font-medium focus:border-blue-600 focus:outline-none "
+                disabled={status !== 'pending'}
+              >
+                <option value="">Select your bank</option>
+                {banksList.map(bank => (
+                  <option key={bank.code} value={bank.name}>
+                    {bank.name}
+                  </option>
+                ))}
+              </select>
+            </div>
 
+            <div>
+              <label htmlFor="accountNumber" className="block text-sm font-medium text-gray-100 mb-1">
+                Account Number
+              </label>
+              <input
+                type="text"
+                id="accountNumber"
+                name="accountNumber"
+                value={bankDetails.accountNumber}
+                onChange={handleBankDetailsChange}
+                placeholder="1234567890"
+                className="w-full border border-gray-500 px-4 py-2 rounded-lg text-white text-md font-medium focus:border-blue-600 focus:outline-none "
+                disabled={status !== 'pending'}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="accountName" className="block text-sm font-medium text-gray-100 mb-1">
+                Account Name
+              </label>
+              <input
+                type="text"
+                id="accountName"
+                name="accountName"
+                value={bankDetails.accountName}
+                onChange={handleBankDetailsChange}
+                placeholder="John Doe"
+                className="w-full border border-gray-500 px-4 py-2 rounded-lg text-white text-md font-medium focus:border-blue-600 focus:outline-none "
+                disabled={status !== 'pending'}
+              />
+            </div>
+          </div>
           <StatusMessage 
             {...{ 
               status, 
@@ -290,11 +372,14 @@ const SellCrypto = () => {
 
           <button 
             onClick={handleSubmit} 
-            disabled={!txid || !selectedCoin || status !== 'pending' || amount <= 0} 
-            className={`w-full py-3 rounded-full font-semibold transition-colors ${
-              !txid || !selectedCoin || status !== 'pending' || amount <= 1
+            disabled={!txid || !selectedCoin || status !== 'pending' || amount <= 0 || !bankDetails.accountNumber || !bankDetails.accountName } 
+            className={`
+              w-full py-3 rounded-full font-semibold transition-colors 
+              
+              ${
+              !txid || !selectedCoin || status !== 'pending' || amount <= 0 || !bankDetails.accountNumber || !bankDetails.accountName 
                 ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
-                : 'bg-[#0047AB] text-white hover:bg-blue-700'
+                : '              bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3 px-4  transition-all hover:shadow-lg hover:shadow-blue-500/20'
             }`}
           >
             {isChecking ? (
@@ -303,7 +388,7 @@ const SellCrypto = () => {
                 Processing...
               </span>
             ) : (
-              'Submit TXID'
+              'Submit Transaction'
             )}
           </button>
 
