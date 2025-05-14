@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/next"
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import { Inter } from "next/font/google";
@@ -16,6 +17,7 @@ export default function App({ Component, pageProps }: AppProps) {
           <Provider store={store}>
           <PersistGate loading={null} persistor={persistor}>
        <Component {...pageProps} />
+       <Analytics />
        </PersistGate>
        </Provider>
        </div>

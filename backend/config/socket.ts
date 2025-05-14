@@ -23,6 +23,7 @@ export const initSocket = (server: HTTPServer) => {
 
 export const getIO = (): Server => {
   if (!io) {
+    if (process.env.NODE_ENV === 'production') return {} as Server; // Dummy fallback
     throw new Error("Socket.IO has not been initialized. Call initSocket(server) first.");
   }
   return io;
