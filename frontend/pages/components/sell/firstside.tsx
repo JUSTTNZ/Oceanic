@@ -15,14 +15,14 @@ export default function FirstSide ({ status = 'pending', SUPPORTED_COINS = [] }:
 
     return(
         <div className="space-y-6 lg:px-0 px-2">
-        <h1 className="text-3xl md:text-5xl font-bold">
+        <h1 className="text-3xl md:text-5xl font-bold  bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
           Sell your crypto <br /> Instantly and securely.
         </h1>
-        <p className="text-gray-600 text-base">
+        <p className="text-gray-100 text-base">
           Follow these steps to sell your cryptocurrency:
         </p>
         
-        <div className="space-y-4">
+        <div className="space-y-4 text-white">
           {/* Step 1 */}
           <div className="flex items-start space-x-4">
             <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
@@ -31,7 +31,7 @@ export default function FirstSide ({ status = 'pending', SUPPORTED_COINS = [] }:
               1
             </div>
             <div>
-              <h3 className="font-medium">Select cryptocurrency and send to our wallet</h3>
+              <h3 className="font-medium text-white">Select cryptocurrency and send to our wallet</h3>
               <p className="text-sm text-gray-500">
                 Choose from {SUPPORTED_COINS.length} supported coins
               </p>
@@ -70,10 +70,10 @@ export default function FirstSide ({ status = 'pending', SUPPORTED_COINS = [] }:
         </div>
 
         <div className="pt-4">
-          <h4 className="font-medium text-gray-700">Supported Cryptocurrencies:</h4>
+          <h4 className="font-medium text-gray-100">Supported Cryptocurrencies:</h4>
           <div className="flex flex-wrap gap-2 mt-2">
             {SUPPORTED_COINS.map(symbol => (
-              <span key={symbol} className="px-3 py-1 bg-gray-100 rounded-full text-sm">
+              <span key={symbol} className="px-3 py-1 text-white bg-gray-800/30 border border-gray-700/20 rounded-xl p-5 hover:border-blue-500/30 transition-all backdrop-blur-sm shadow-lg hover:shadow-blue-500/10 rounded-full text-sm">
                 {symbol}
               </span>
             ))}

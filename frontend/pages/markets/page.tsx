@@ -61,7 +61,7 @@ export default function Markets() {
         const response = await fetch("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50&page=1&sparkline=true&price_change_percentage=1h,24h,7d");
         
         if (!response.ok) {
-          setError(`API request failed with status ${response.status}.`);
+          setError(`API request failed with status .`);
         }
         
         const data = await response.json();
@@ -123,7 +123,7 @@ export default function Markets() {
   };
 
   return (
-    <section className="bg-gray-50">
+    <section className="bg-gray-900">
       <Header />
       <div className="min-h-screen p-8 pt-30 pb-16 font-grotesk">
         <div className="max-w-7xl mx-auto">
@@ -138,16 +138,19 @@ export default function Markets() {
   </div>
 )}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-blue-500 mb-2"> Markets</h1>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent mb-2"> 
+              
+              Markets</h1>
+             
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center space-x-4">
-                <div className="bg-white px-4 py-2 rounded-lg shadow-sm">
+                <div className=" px-4 py-2 rounded-lg shadow-xl bg-gray-800/30 border border-gray-700/20  hover:border-blue-500/30 transition-all backdrop-blur-sm  hover:shadow-blue-500/10">
                   <p className="text-sm text-gray-500">Global Market Cap</p>
                   <p className="font-semibold text-blue-400">
                     {formatNumber(coins.reduce((sum, coin) => sum + coin.market_cap, 0))}
                   </p>
                 </div>
-                <div className="bg-white px-4 py-2 rounded-lg shadow-sm">
+                <div className=" px-4 py-2 rounded-lg shadow-xl  bg-gray-800/30 border border-gray-700/20  hover:border-blue-500/30 transition-all backdrop-blur-sm  hover:shadow-blue-500/10">
                   <p className="text-sm text-gray-500">24h Volume</p>
                   <p className="font-semibold text-blue-400">
                     {formatNumber(coins.reduce((sum, coin) => sum + coin.total_volume, 0))}
@@ -155,22 +158,22 @@ export default function Markets() {
                 </div>
               </div>
               
-              <div className="flex items-center space-x-2 bg-white px-3 py-2 rounded-lg shadow-sm">
+              <div className="flex items-center space-x-2  px-3 py-2 rounded-lg shadow-xl  bg-gray-800/30 border border-gray-700/20  hover:border-blue-500/30 transition-all backdrop-blur-sm  hover:shadow-blue-500/10">
                 <button 
                   onClick={() => setTimeRange('1h')}
-                  className={`px-3 py-1 rounded-md text-sm ${timeRange === '1h' ? 'bg-blue-100 text-blue-600' : 'text-gray-600'}`}
+                  className={`px-3 py-1 rounded-md text-sm ${timeRange === '1h' ? 'bg-blue-100 text-blue-600' : 'text-gray-300'}`}
                 >
                   1h
                 </button>
                 <button 
                   onClick={() => setTimeRange('24h')}
-                  className={`px-3 py-1 rounded-md text-sm ${timeRange === '24h' ? 'bg-blue-100 text-blue-600' : 'text-gray-600'}`}
+                  className={`px-3 py-1 rounded-md text-sm ${timeRange === '24h' ? 'bg-blue-100 text-blue-600' : 'text-gray-300'}`}
                 >
                   24h
                 </button>
                 <button 
                   onClick={() => setTimeRange('7d')}
-                  className={`px-3 py-1 rounded-md text-sm ${timeRange === '7d' ? 'bg-blue-100 text-blue-600' : 'text-gray-600'}`}
+                  className={`px-3 py-1 rounded-md text-sm ${timeRange === '7d' ? 'bg-blue-100 text-blue-600' : 'text-gray-300'}`}
                 >
                   7d
                 </button>
@@ -182,9 +185,9 @@ export default function Markets() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
          
             <div className="lg:col-span-2">
-              <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+              <div className="bg-gray-800 rounded-xl  overflow-hidden">
                
-                <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                <div className="px-6 py-4 border-b border-gray-600 flex items-center justify-between">
                   <div className="relative w-full max-w-md">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <FiSearch className="text-gray-400" />
@@ -192,7 +195,7 @@ export default function Markets() {
                     <input
                       type="text"
                       placeholder="Search coins..."
-                      className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                      className="block w-full pl-10 pr-3 py-2 border text-white border-gray-300 rounded-md leading-5 bg-gray-900 placeholder-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                     />
@@ -203,9 +206,9 @@ export default function Markets() {
                 </div>
 
                 
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+                <div className="overflow-x-auto scrollbar-hide">
+                  <table className="min-w-full divide-y divide-gray-600">
+                    <thead className="bg-gray-800">
                       <tr>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Asset
@@ -242,7 +245,7 @@ export default function Markets() {
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className=" divide-y divide-gray-600  bg-gray-800/30 border border-gray-700/20  hover:border-blue-500/30 transition-all backdrop-blur-sm  hover:shadow-blue-500/10">
                       {loading ? (
                         <tr>
                           <td colSpan={5} className="px-6 py-8 text-center">
@@ -267,7 +270,7 @@ export default function Markets() {
                         filteredCoins.map((coin) => (
                           <tr 
                             key={coin.id} 
-                            className={`hover:bg-gray-50 cursor-pointer ${selectedCoin?.id === coin.id ? 'bg-blue-50' : ''}`}
+                            className={`hover:bg-gray-900 cursor-point ${selectedCoin?.id === coin.id ? 'bg-gray-900' : ''}`}
                             onClick={() => setSelectedCoin(coin)}
                           >
                             <td className="px-6 py-4 whitespace-nowrap">
@@ -277,12 +280,12 @@ export default function Markets() {
                                   <Image className="h-8 w-8 rounded-full" width={10} height={10} src={coin.image} alt={coin.name} />
                                 </div>
                                 <div className="ml-4">
-                                  <div className="text-sm font-medium text-gray-900">{coin.name}</div>
+                                  <div className="text-sm font-medium text-gray-100">{coin.name}</div>
                                   <div className="text-sm text-gray-500">{coin.symbol.toUpperCase()}</div>
                                 </div>
                               </div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-gray-900">
+                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-gray-100">
                               ${coin.current_price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
@@ -320,9 +323,9 @@ export default function Markets() {
             
             <div className="lg:col-span-1">
               {selectedCoin ? (
-                <div className="bg-white rounded-xl shadow-sm overflow-hidden h-full lg:h-auto ">
-                  <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-                    <h2 className="text-lg font-semibold text-gray-900">Coin Details</h2>
+                <div className="bg-gray-800/30 border-gray-700/20  rounded-xl border overflow-hidden h-full lg:h-auto  hover:border-blue-500/30 transition-all backdrop-blur-sm shadow-lg hover:shadow-blue-500/10">
+                  <div className="px-6 py-4 border-b border-gray-600 flex items-center justify-between">
+                    <h2 className="text-lg font-semibold text-gray-100">Coin Details</h2>
                     <button 
                       onClick={() => toggleWatchlist(selectedCoin.id)}
                       className="text-gray-400 hover:text-yellow-500"
@@ -334,7 +337,7 @@ export default function Markets() {
                     <div className="flex items-center mb-6">
                       <Image className="h-12 w-12 rounded-full" width={12} height={12} src={selectedCoin.image} alt={selectedCoin.name} />
                       <div className="ml-4">
-                        <h3 className="text-lg font-bold text-gray-900">{selectedCoin.name}</h3>
+                        <h3 className="text-lg font-bold text-gray-100">{selectedCoin.name}</h3>
                         <p className="text-gray-500">{selectedCoin.symbol.toUpperCase()}</p>
                       </div>
                     </div>
@@ -342,7 +345,7 @@ export default function Markets() {
                     <div className="space-y-4">
                       <div>
                         <p className="text-sm text-gray-500 mb-1">Current Price</p>
-                        <p className="text-2xl font-bold text-gray-900">
+                        <p className="text-2xl font-bold text-gray-100">
                           ${selectedCoin.current_price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
                         </p>
                       </div>
@@ -400,7 +403,8 @@ export default function Markets() {
                       )}
 
                       <div className="pt-4">
-                        <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
+                        <button 
+                        className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3 px-4 rounded-lg transition-all hover:shadow-lg hover:shadow-blue-500/20 text-white font-medium py-2 px-4 rounded-md transition-colors"
                         onClick={handleTradeClick}
                         >
                           

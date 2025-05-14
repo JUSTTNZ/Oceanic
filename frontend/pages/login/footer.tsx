@@ -2,11 +2,11 @@ import { FaFacebookF, FaTwitter, FaInstagram, FaTelegramPlane } from "react-icon
 
 export default function Footer() {
   return (
-    <footer className="bg-white py-6 border-t border-gray-200 font-grotesk text-sm">
-      <div className="container mx-auto px-6 flex flex-col items-center text-gray-600 text-sm space-y-4 lg:space-y-0 lg:flex-row lg:justify-between">
+    <footer className="bg-gradient-to-b from-blue-600 to-blue-700 text-white py-6 border-t border-gray-900 font-grotesk text-sm">
+      <div className="container mx-auto px-6 flex flex-col items-center t text-sm space-y-4 lg:space-y-0 lg:flex-row lg:justify-between">
         
        
-        <p className="text-center lg:text-left">©{new Date().getFullYear()} Oceanic. All Rights Reserved.</p>
+        <p className="text-center text-white lg:text-left">©{new Date().getFullYear()} Oceanic. All Rights Reserved.</p>
 
         <div className="flex flex-wrap justify-center gap-3 text-center ">
           <a href="#" className="hover:text-blue-600">Blog</a>

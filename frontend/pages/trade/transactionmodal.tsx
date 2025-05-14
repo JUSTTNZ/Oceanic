@@ -11,6 +11,7 @@ import {
   ClockIcon,
   ArrowPathIcon,
 } from "@heroicons/react/24/outline";
+import { JSX } from "react";
 
 interface Props {
   type: "success" | "error";
@@ -37,7 +38,7 @@ const TransactionStatusModal = ({ type, title, message, details, onClose }: Prop
 
   return (
     <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex justify-center items-center px-4">
-      <div className="bg-white p-6 rounded-2xl w-full max-w-sm relative shadow-xl">
+      <div className="bg-gray-800 text-white p-6 rounded-2xl w-full max-w-sm relative shadow-xl">
         <motion.div
           className="relative flex justify-center items-center h-20 w-20 mx-auto mb-4"
         >
@@ -50,7 +51,7 @@ const TransactionStatusModal = ({ type, title, message, details, onClose }: Prop
         </motion.div>
 
         <h2 className="text-center text-xl font-bold mb-2">{title}</h2>
-        <p className="text-center text-sm text-gray-600">{message}</p>
+        <p className="text-center text-sm text-gray-100">{message}</p>
 
         {details && (
           <div className="mt-5 text-sm space-y-3">
@@ -58,8 +59,8 @@ const TransactionStatusModal = ({ type, title, message, details, onClose }: Prop
               <div key={key} className="flex items-start space-x-2">
                 <span>{iconMap[key.toLowerCase()] || <FingerPrintIcon className="h-5 w-5 text-gray-500" />}</span>
                 <div>
-                  <p className="font-medium capitalize text-gray-800">{key}</p>
-                  <p className="text-gray-600">{value}</p>
+                  <p className="font-medium capitalize text-gray-100">{key}</p>
+                  <p className="text-gray-200">{value}</p>
                 </div>
               </div>
             ))}
@@ -68,7 +69,7 @@ const TransactionStatusModal = ({ type, title, message, details, onClose }: Prop
 
         <button
           onClick={onClose}
-          className="mt-6 w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 text-sm font-medium rounded-lg"
+          className="mt-6 w-full px-4 py-2 bg-gray-900 hover:bg-gray-800 text-sm font-medium rounded-lg"
         >
           Close
         </button>

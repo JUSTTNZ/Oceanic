@@ -14,7 +14,7 @@ export default function CryptoExchangePage() {
 
 
   return (
-    <div className="bg-white min-h-screen pt-20  pb-10 font-grotesk">
+    <div className="bg-gray-900 min-h-screen pt-20  pb-10 font-grotesk">
       
       {/* Tab Switcher */}
       <div className="flex justify-center items-center space-x-4 py-4">

@@ -10,9 +10,9 @@ export default function LogoutModal ({ setShowModal}:LogoutProps) {
     };
     return(
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-        <div className="bg-gradient-to-b from-white to-gray-100 rounded-lg p-6 w-full max-w-sm shadow-lg">
+        <div className="bg-gray-900 rounded-lg p-6 w-full max-w-sm shadow-lg">
           <h2 className="text-lg font-semibold mb-4">Confirm Sign Out</h2>
-          <p className="text-sm text-gray-700 mb-6">Are you sure you want to sign out?</p>
+          <p className="text-sm text-gray-100 mb-6">Are you sure you want to sign out?</p>
           <div className="flex justify-end gap-4">
             <button
               onClick={setShowModal}
