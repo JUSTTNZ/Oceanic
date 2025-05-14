@@ -41,7 +41,8 @@ interface Coin {
   
     return (
       <div className="space-y-6 lg:px-0 px-2">
-        <h1 className="text-3xl md:text-5xl font-bold  bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
+        <h1 className="text-3xl md:text-5xl font-bold 
+         bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
           Buy Crypto Instantly <br /> With Local Currency
         </h1>
         <p className="text-gray-100 text-base">

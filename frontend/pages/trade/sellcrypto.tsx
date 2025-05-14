@@ -124,7 +124,7 @@ const SellCrypto = () => {
     bankCode: ""
   });
   const [banksList, setBanksList] = useState<{name: string, code: string}[]>([]);
-
+ console.log(transactionDetails)
   useEffect(() => {
     const fetchCoins = async () => {
       try {
