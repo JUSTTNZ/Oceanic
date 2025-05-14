@@ -41,14 +41,14 @@ export default function AmountInput({
 
   return (
     <div className={`space-y-2 ${className}`}>
-      <label className="text-sm font-medium text-gray-700">
+      <label className="text-sm font-medium text-gray-100">
         Amount in {selectedCountry?.currency || "USD"} ({selectedCountry?.currencySymbol || "$"})
       </label>
       <input
         type="text"
         placeholder="0.00"
-        className="border px-4 py-3 rounded-lg w-full text-right text-lg font-medium 
-                   focus:border-blue-300 focus:outline-none"
+        className="border border-gray-500 px-4 py-3 rounded-lg w-full text-white text-right text-lg font-medium 
+                   focus:border-blue-600 focus:outline-none"
         value={amount}
         onChange={handleChange}
         inputMode="decimal"
