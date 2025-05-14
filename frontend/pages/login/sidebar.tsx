@@ -50,13 +50,6 @@ export default function Sidebar({ isOpen, closeSidebar }: SidebarProps) {
             Markets
           </Link>
           <Link
-            href="/swap"
-            onClick={closeSidebar}
-            className="hover:bg-blue-400 px-3 py-2 rounded transition-colors duration-300"
-          >
-            Instant Swap
-          </Link>
-          <Link
             href="/blog"
             onClick={closeSidebar}
             className="hover:bg-blue-400 px-3 py-2 rounded transition-colors duration-300"
@@ -80,7 +73,7 @@ export default function Sidebar({ isOpen, closeSidebar }: SidebarProps) {
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 className="flex items-center justify-between bg-blue-600 px-3 py-2 rounded"
               >
-                O{user.username}
+                {user.username}
                 <FaChevronDown size={12} className="ml-2" />
               </button>
 
