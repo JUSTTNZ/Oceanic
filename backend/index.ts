@@ -20,7 +20,9 @@ connectDB()
 .then(() => {
     app.listen(PORT, () => {
         console.log(`Server is running on port ${PORT}`);
-        initSocket(server);
+        if (process.env.NODE_ENV !== 'production') {
+            initSocket(server); // only in development
+        }
     })
 })
 .catch((err) => {

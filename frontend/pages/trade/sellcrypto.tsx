@@ -152,7 +152,7 @@ const SellCrypto = () => {
       const accessToken = localStorage.getItem('accessToken');
       if (!accessToken) throw new Error("Please login first");
 
-      const response = await fetch('https://oceanic-servernz.vercel.app/api/v1/transaction', {
+      const response = await fetch('http://localhost:7001/api/v1/transaction', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -179,7 +179,7 @@ const SellCrypto = () => {
       const maxTries = 20;
       const pollStatus = setInterval(async () => {
         tries++;
-        const pollRes = await fetch(`https://oceanic-servernz.vercel.app/api/v1/transaction/poll?txid=${txid}&coin=${selectedCoin.symbol}`);
+        const pollRes = await fetch(`http://localhost:7001/api/v1/transaction/poll?txid=${txid}&coin=${selectedCoin.symbol}`);
         const pollData = await pollRes.json();
 
         if (pollData.status === 'confirmed') {
