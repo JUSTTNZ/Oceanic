@@ -6,7 +6,7 @@ let io: Server;
 export const initSocket = (server: HTTPServer) => {
   io = new Server(server, {
     cors: {
-      origin: '*',
+      origin: ['http://localhost:3000', 'https://oceanic-charts.vercel.app'],
       methods: ['GET', 'POST']
     }
   });
@@ -20,5 +20,12 @@ export const initSocket = (server: HTTPServer) => {
   });
 };
 
-export const getIO = () => io;
+
+export const getIO = (): Server => {
+  if (!io) {
+    throw new Error("Socket.IO has not been initialized. Call initSocket(server) first.");
+  }
+  return io;
+};
+
 export { io };
