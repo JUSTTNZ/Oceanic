@@ -11,6 +11,7 @@ import {
   ClockIcon,
   ArrowPathIcon,
 } from "@heroicons/react/24/outline";
+import { JSX } from "react";
 
 interface Props {
   type: "success" | "error";

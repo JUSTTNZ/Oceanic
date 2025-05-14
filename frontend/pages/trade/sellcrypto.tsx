@@ -112,6 +112,7 @@ const SellCrypto = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState<"success" | "error">("success");
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [transactionDetails, setTransactionDetails] = useState<TransactionDetails | null>(null);
   const [selectedCountry] = useState<Country>({ code: "NG", name: "Nigeria" });
 

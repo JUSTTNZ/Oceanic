@@ -56,7 +56,7 @@ export default function Header() {
 
   return (
     
-    <header className="fixed top-0 left-0 w-full bg-blue-400 text-white p-3 flex justify-between items-center px-8 z-50 shadow-md font-grotesk">
+    <header className="fixed top-0 left-0 w-full bg-gradient-to-r from-blue-600 to-blue-900 text-white p-3 flex justify-between items-center px-4 sm:px-8 z-50 shadow-md font-grotesk">
       <h1 className="text-xl font-bold">Oceanic</h1>
 
    
@@ -100,7 +100,7 @@ export default function Header() {
         <button 
           id="dropdownDefaultButton" 
           data-dropdown-toggle="dropdown" 
-          className="text-white bg-[#0047AB]  text-grotesk rounded-md text-sm px-5 py-2.5 text-center inline-flex items-center custom-class" 
+              className="text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-grotesk rounded-md text-sm px-5 py-2.5 text-center inline-flex items-center transition-all duration-300" 
           type="button"
           onClick={toggleDropdown}
         >
@@ -114,7 +114,7 @@ export default function Header() {
           ):(
 
             <>
-            <button className="bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold transition-transform duration-300">
+            <button className="bg-gradient-to-r from-white to-gray-100 text-blue-600 px-4 py-2 rounded-lg font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/20">
               <Link href={'/register'}>
             
                       Create Account
@@ -125,7 +125,7 @@ export default function Header() {
        {isDropDownOpen && (
         <div 
           id="dropdown" 
-                  className="z-10 absolute top-14 right-4 mt-2 bg-blue-500 text-white divide-y divide-gray-100 rounded-md shadow-sm w-44 "
+                     className="z-10 absolute top-14 right-4 mt-2 bg-gradient-to-b from-blue-600 to-blue-700 text-white divide-y divide-blue-400 rounded-md shadow-sm w-44"
         >
           <ul className="py-2 text-sm text-white" aria-labelledby="dropdownDefaultButton">
             <li>
@@ -143,9 +143,9 @@ export default function Header() {
 
             {showModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-sm shadow-lg">
+          <div className="bg-gray-900 rounded-lg p-6 w-full max-w-sm shadow-lg">
             <h2 className="text-lg font-semibold mb-4">Confirm Sign Out</h2>
-            <p className="text-sm text-gray-700 mb-6">Are you sure you want to sign out?</p>
+            <p className="text-sm text-gray-100 mb-6">Are you sure you want to sign out?</p>
             <div className="flex justify-end gap-4">
               <button
                 onClick={() => setShowModal(false)}
