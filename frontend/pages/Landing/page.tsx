@@ -2,10 +2,10 @@
 import Navbar from "./navbar";
 import Hero from "./hero";
 import CoinLive from "./coinprice";
-// import Footer from "./footer";
+import Footer from "./footer";
 import WhyOceanic from "./whyoceanic";
 import TestimonialSection from "./testmonial";
-import Footer from "../login/footer";
+
 
 interface LandingProps {
   coins: Coin[];
@@ -30,7 +30,6 @@ export default function Landing({ coins }: LandingProps) {
       <CoinLive coins={coins} />
       <WhyOceanic />
       <TestimonialSection />
-      {/* <Footer /> */}
       <Footer/>
     </div>
   );

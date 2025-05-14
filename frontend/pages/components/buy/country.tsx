@@ -36,15 +36,15 @@ export default function CountryDropdown({
 
   return (
     <div className={`space-y-2 ${className}`}>
-      <label className="text-sm font-medium text-gray-700">Country</label>
+      <label className="text-sm font-medium text-gray-100">Country</label>
       <div className="relative">
         <button
           onClick={() => setShowDropdown(!showDropdown)}
-          className="flex items-center justify-between w-full border px-4 py-3 rounded-lg text-sm hover:border-gray-400 focus:border-blue-300 focus:outline-none transition-colors"
+          className="flex items-center justify-between w-full border border-gray-500 px-4 py-3 rounded-lg text-sm hover:border-blue-600 focus:border-blue-600 focus:outline-none transition-colors"
           aria-expanded={showDropdown}
           aria-haspopup="listbox"
         >
-          <div className="flex items-center">
+          <div className="flex items-center text-white">
             <span className="mr-2">
               <Image 
                 src={safeSelectedCountry.flag} 
@@ -57,19 +57,19 @@ export default function CountryDropdown({
             <span>{safeSelectedCountry.name}</span>
           </div>
           <ChevronDownIcon 
-            className={`h-4 w-4 ml-2 transition-transform ${showDropdown ? 'rotate-180' : ''}`}
+            className={`h-4 w-4 ml-2 text-white transition-transform ${showDropdown ? 'rotate-180' : ''}`}
           />
         </button>
 
         {showDropdown && (
           <div 
-            className="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto scrollbar-hide"
+            className="absolute z-20 mt-1 w-full bg-gray-900 text-white border border-gray-800 rounded-lg shadow-lg max-h-60 overflow-y-auto scrollbar-hide"
             role="listbox"
           >
             {countries.map((country) => (
               <button
                 key={country.code}
-                className="flex items-center w-full px-4 py-2 text-sm hover:bg-gray-100 text-left"
+                className="flex items-center w-full px-4 py-2 text-sm hover:bg-gray-800 text-left"
                 onClick={() => {
                   onSelect(country);
                   setShowDropdown(false);

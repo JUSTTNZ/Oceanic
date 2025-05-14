@@ -3,7 +3,7 @@ import Footer from './footer';
 import Header from './header';
 import AdminConfrim from './page';
 
-const AdminPage = () => {
+export default function AdminPage ()  {
 
 
 
@@ -17,4 +17,3 @@ const AdminPage = () => {
   );
 };
 
-export default AdminPage;

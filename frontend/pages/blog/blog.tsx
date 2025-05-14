@@ -102,24 +102,24 @@ export default function CryptoBlog() {
   return (
     <section>
         <Header />
-        <div className="min-h-screen bg-[#f7f7fa] font-maven pt-20 lg:pt-30 pb-20 px-4">
+        <div className="min-h-screen bg-gray-900 font-maven pt-20 lg:pt-30 pb-20 px-4">
       <header className="text-center">
-        <h1 className="text-3xl md:text-4xl text-blue-900 font-bold">Crypto Blog</h1>
-        <p className="text-blue-900 text-sm md:text-base">Latest news and updates in the crypto world</p>
+        <h1 className="text-3xl md:text-4xl    bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent font-bold">Crypto Blog</h1>
+        <p className=" bg-gradient-to-r from-blue-500 to-blue-700 bg-clip-text text-transparent text-sm md:text-base">Latest news and updates in the crypto world</p>
       </header>
 
       <main className="lg:max-w-7xl p-4 mx-auto py-8 lg:px-20 md:px-10 ">
         <section>
-          <h2 className="text-2xl font-semibold mb-4 text-blue-800 text-center md:text-left">Featured Articles</h2>
+          <h2 className="text-2xl font-semibold mb-4          bg-gradient-to-r from-blue-700 to-blue-800 bg-clip-text text-transparent text-center md:text-left">Featured Articles</h2>
 
     
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
             {posts.map((post) => (
-              <div key={post.id} className="bg-white rounded-lg shadow-md overflow-hidden">
+              <div key={post.id} className="rounded-lg  overflow-hidden    bg-gray-800/30 border border-gray-700/20 rounded-xl text-white hover:border-blue-500/30 transition-all backdrop-blur-sm shadow-lg hover:shadow-blue-500/10">
                 <Image src={post.image} alt={post.title} width={400} height={250} className="w-full h-48 object-cover" />
                 <div className="p-4">
                   <h3 className="text-lg md:text-xl font-bold mb-2 text-blue-400">{post.title}</h3>
-                  <p className="mt-2 text-gray-700 text-sm md:text-base">{post.excerpt}</p>
+                  <p className="mt-2 text-gray-100 text-sm md:text-base">{post.excerpt}</p>
 
                   <div className="flex items-center gap-3 mt-4">
                     <Image src={post.authorImage} alt={post.author} width={40} height={40} className="w-10 h-10 rounded-full" />
@@ -137,7 +137,7 @@ export default function CryptoBlog() {
           <div className="flex justify-center mt-8">
             <button
               onClick={loadMorePosts}
-              className="bg-blue-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-600 transition w-full sm:w-auto"
+              className=" bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3 px-4  transition-all hover:shadow-lg hover:shadow-blue-500/20 text-white px-6 py-2 rounded-lg font-semibold transition w-full sm:w-auto"
             >
               Load More
             </button>

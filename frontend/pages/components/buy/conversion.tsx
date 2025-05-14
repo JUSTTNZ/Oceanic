@@ -22,7 +22,6 @@ interface ConversionDisplayProps {
 export default function ConversionDisplay({
   selectedCountry ,
   selectedCoin,
-  serviceFee,
   amount,
   coinAmount,
   exchangeRate,
@@ -52,28 +51,23 @@ export default function ConversionDisplay({
       : formatter.format(value);
   };
   return (
-    <div className="bg-gray-50 p-4 rounded-lg space-y-2">
+    <div className="bg-gray-800 text-white p-4 rounded-lg space-y-2">
+     
       <div className="flex justify-between items-center">
-        <span className="text-gray-600">Service Fee:</span>
-        <span className="font-medium">
-          {selectedCountry?.currencySymbol}{serviceFee}
-        </span>
-      </div>
-      <div className="flex justify-between items-center">
-        <span className="text-gray-600">You pay:</span>
+        <span className="text-gray-100">You pay:</span>
         <span className="font-semibold">
           {selectedCountry?.currencySymbol}
           {parseFloat(amount || "0").toLocaleString("en-US")}
         </span>
       </div>
       <div className="flex justify-between items-center">
-        <span className="text-gray-600">You receive:</span>
+        <span className="text-gray-100">You receive:</span>
         <span className="font-semibold">
           {coinAmount} {selectedCoin?.symbol?.toUpperCase() || "BTC"}
         </span>
       </div>
       {selectedCoin && (
-        <div className="pt-2 text-xs text-gray-500 border-t">
+        <div className="pt-2 text-xs text-gray-100 border-t">
           Rate: {formatCurrency(selectedCoin?.current_price * exchangeRate)} per{" "}
           {selectedCoin?.symbol?.toUpperCase() || "BTC"}
         </div>

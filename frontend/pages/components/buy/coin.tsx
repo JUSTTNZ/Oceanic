@@ -43,15 +43,15 @@ export default function CoinDropdown({
 
   return (
     <div className={`space-y-2 ${className}`}>
-      <label className="text-sm font-medium text-gray-700">Cryptocurrency</label>
+      <label className="text-sm font-medium text-gray-100">Cryptocurrency</label>
       <div className="relative">
         <button
           onClick={() => setShowDropdown(!showDropdown)}
-          className="flex items-center justify-between w-full border px-4 py-3 rounded-lg text-sm hover:border-gray-400 focus:border-blue-300 focus:outline-none transition-colors"
+          className="flex items-center justify-between w-full border border-gray-500 px-4 py-3 rounded-lg text-sm hover:border-gray-600 focus:border-blue-600 focus:outline-none transition-colors"
           aria-expanded={showDropdown}
           aria-haspopup="listbox"
         >
-          <div className="flex items-center">
+          <div className="flex items-center text-white">
             <Image 
               src={selectedCoin.image} 
               alt={selectedCoin.name} 
@@ -64,20 +64,20 @@ export default function CoinDropdown({
             </span>
           </div>
           <ChevronDownIcon 
-            className={`h-4 w-4 ml-2 transition-transform ${showDropdown ? 'rotate-180' : ''}`}
+            className={`h-4 w-4 ml-2 text-white transition-transform ${showDropdown ? 'rotate-180' : ''}`}
           />
         </button>
 
         {showDropdown && (
           <div 
-            className="absolute z-10 mt-1 w-full bg-white border border-gray-200  rounded-lg shadow-lg"
+            className="absolute z-10 mt-1 w-full bg-gray-900 text-white border border-gray-800  rounded-lg shadow-lg"
             role="listbox"
           >
-            <div className="p-2 border-b border-blue-300">
+            <div className="p-2 border-b border-blue-600">
               <input
                 type="text"
                 placeholder="Search coins..."
-                className="w-full px-3 py-2 text-sm border rounded-md focus:border-blue-300 focus:outline-none"
+                className="w-full px-3 py-2 text-sm border rounded-md focus:border-blue-600 focus:outline-none"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 autoFocus
@@ -88,7 +88,7 @@ export default function CoinDropdown({
                 filteredCoins.map((coin) => (
                   <button
                     key={coin.id}
-                    className="flex items-center w-full px-4 py-2 text-sm hover:bg-gray-100 text-left"
+                    className="flex items-center w-full px-4 py-2 text-sm hover:bg-gray-800 text-left"
                     onClick={() => {
                       onSelect(coin);
                       setShowDropdown(false);
@@ -111,7 +111,7 @@ export default function CoinDropdown({
                   </button>
                 ))
               ) : (
-                <div className="px-4 py-2 text-sm text-gray-500">
+                <div className="px-4 py-2 text-sm text-gray-100">
                   No coins found
                 </div>
               )}

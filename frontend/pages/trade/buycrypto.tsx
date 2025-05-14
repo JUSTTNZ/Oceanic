@@ -9,11 +9,20 @@ import CoinDropdown from "../components/buy/coin";
 import AmountInput from "../components/buy/amout";
 import ConversionDisplay from "../components/buy/conversion";
 import FirstSide from "../components/buy/firstside";
+import WalletAddressBuy from "../components/buy/walletaddress";
+// import { PaystackButton } from "react-paystack";
+const PaystackButton = dynamic(
+  () => import("react-paystack").then((mod) => mod.PaystackButton),
+  { 
+    ssr: false,
+    loading: () => <div className="w-full bg-[#0047AB] text-white font-semibold py-3 rounded-full mt-4 text-center">Loading payment...</div>
+  }
+);
 
 // Dynamically import the wrapper to avoid SSR crash
-const PaystackButton = dynamic(() => import("./PaystackButtonWrapper"), {
-  ssr: false,
-});
+// const PaystackButton = dynamic(() => import("./PaystackButtonWrapper"), {
+//   ssr: false,
+// });
 
 interface Coin {
   id: string;
@@ -49,6 +58,17 @@ interface ApiCountry {
   };
   currencies: Currency;
 }
+interface PaystackButtonProps {
+  reference: string;
+  email: string;
+  amount: number;
+  publicKey: string;
+  currency?: string;
+  onSuccess: (reference: string) => void;
+  onClose: () => void;
+  // Other Paystack button props...
+}
+
 
 export default function BuyCrypto() {
   const [coins, setCoins] = useState<Coin[]>([]);
@@ -63,7 +83,7 @@ export default function BuyCrypto() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string>("");
-  const serviceFee = 30;
+  const serviceFee = 50;
 
   const onSuccess = (ref: string) => {
     alert("Payment successful!");
@@ -143,7 +163,8 @@ export default function BuyCrypto() {
     const fetchCoins = async () => {
       try {
         const response = await fetch("/api/coin");
-        if (!response.ok) throw new Error("Failed to fetch coins");
+        if (!response.ok) 
+          setError("Failed to fetch coins");
         const data = await response.json();
         setCoins(data);
         setSelectedCoin(data[0]);
@@ -160,7 +181,8 @@ export default function BuyCrypto() {
     const fetchCountries = async () => {
       try {
         const response = await fetch("/api/country");
-        if (!response.ok) throw new Error("Failed to fetch countries");
+        if (!response.ok) 
+          setError("Failed to fetch countries");
         const data = await response.json();
 
         const formatted = data
@@ -194,7 +216,8 @@ export default function BuyCrypto() {
 
       try {
         const response = await fetch("/api/rate");
-        if (!response.ok) throw new Error("Failed to fetch rate");
+        if (!response.ok) 
+          setError("Failed to fetch rate");
         const data = await response.json();
         setExchangeRate(data.conversion_rates[selectedCountry.currency] || 1);
       } catch {
@@ -247,7 +270,13 @@ export default function BuyCrypto() {
       </div>
     );
   }
-
+  // const paystackConfig: PaystackConfig = {
+  //   reference,
+  //   email: "user@example.com",
+  //   amount: (parseFloat(amount) - serviceFee) * 100,
+  //   publicKey: process.env.NEXT_PUBLIC_PAYSTACK_KEY!,
+  // };
+  
   return (
     <motion.div
       key="buy"
@@ -259,8 +288,8 @@ export default function BuyCrypto() {
     >
       <FirstSide coins={coins} selectedCountry={selectedCountry} exchangeRate={exchangeRate} />
 
-      <div className="w-full max-w-sm mx-auto border border-gray-200 rounded-xl p-6 md:shadow-xl shadow-2xl space-y-4">
-        <h2 className="text-center font-semibold text-lg mb-4">Buy Crypto</h2>
+      <div className="w-full max-w-sm mx-auto   p-6 md:shadow-xl shadow-2xl space-y-4 bg-gray-800/30 border border-gray-700/20 rounded-xl hover:border-blue-500/30 transition-all backdrop-blur-sm hover:shadow-blue-500/10">
+        <h2 className="text-center font-semibold text-lg mb-4 bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">Buy Crypto</h2>
 
         <CountryDropdown
           countries={countries}
@@ -275,13 +304,17 @@ export default function BuyCrypto() {
           exchangeRate={exchangeRate}
           formatCurrency={formatCurrency}
         />
-
+    <WalletAddressBuy
+          walletAddress={walletAddress}
+          setWalletAddress={setWalletAddress}
+         
+         />
         <AmountInput
           selectedCountry={selectedCountry}
           value={amount}
           onChange={setAmount}
         />
-
+      
         <ConversionDisplay
           selectedCountry={selectedCountry}
           selectedCoin={selectedCoin}
@@ -292,38 +325,37 @@ export default function BuyCrypto() {
           formatCurrency={(amt) => `${amt.toFixed(2)}`}
         />
 
-        <input
-          className="w-full border p-2 rounded mb-2"
-          placeholder="Your wallet address"
-          value={walletAddress}
-          onChange={(e) => setWalletAddress(e.target.value)}
-          required
-        />
+    
 
         {reference ? (
           <PaystackButton
-            config={{
-              reference,
-              email: "user@example.com",
-              amount: parseFloat(amount) * 100,
-              // publicKey: "your_paystack_public_key",
-            }}
-            onSuccess={onSuccess}
-            onClose={onClose}
+          reference={reference}
+    email={"user@example.com"}
+    amount={(parseFloat(amount) - serviceFee) * 100}
+    publicKey={process.env.NEXT_PUBLIC_PAYSTACK_KEY!}
+    onSuccess={(reference) => {
+      onSuccess(reference);
+    }}
+    onClose={() => {
+      onClose();
+     
+    }}
+
+           
           />
         ) : (
           <button
             onClick={createTransaction}
-            className="w-full bg-[#0047AB] text-white font-semibold py-3 rounded-full mt-4 hover:bg-blue-700 transition-colors disabled:opacity-50"
+            className="w-full bg-[#0047AB] text-white font-semibold py-3 rounded-full mt-4 hover:bg-blue-700 transition-colors disabled:opacity-50
+                                   bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3 px-4  transition-all hover:shadow-lg hover:shadow-blue-500/20
+            "
             disabled={!amount || parseFloat(amount) <= serviceFee || !selectedCoin || !walletAddress}
           >
             Continue to Payment
           </button>
         )}
 
-        <div className="text-xs text-gray-500 text-center">
-          Includes {selectedCountry.currencySymbol}{serviceFee} service fee. Rates update in real-time.
-        </div>
+      
       </div>
     </motion.div>
   );
