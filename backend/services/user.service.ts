@@ -17,7 +17,7 @@ class UserService {
     this._User = User;
   }
 
-  async register(userObject: IUserRegister): Promise<typeof User> {
+  async register(userObject: IUserRegister): Promise<UserWithoutPassword> {
     try {
       const { email, username } = userObject;
 
@@ -60,7 +60,10 @@ class UserService {
       // Return user without password
       const userWithoutPassword = user.toObject();
       delete (userWithoutPassword as { password?: string }).password;
-      return userWithoutPassword as UserWithoutPassword;
+      return {
+        ...userWithoutPassword,
+        _id: userWithoutPassword._id.toString()
+      } as UserWithoutPassword;
 
     } catch (error: unknown) {
       if (error instanceof Error) {
