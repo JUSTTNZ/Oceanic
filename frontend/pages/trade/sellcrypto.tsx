@@ -169,8 +169,10 @@ const SellCrypto = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
+        setErrorMessage(errorData.message || 'Transaction failed');
         throw new Error(errorData.message || 'Transaction failed');
       }
+
 
       const data = await response.json();
       setTransactionDetails(data.data);
@@ -194,6 +196,7 @@ const SellCrypto = () => {
           clearInterval(pollStatus);
           setStatus("failed");
           setModalType("error");
+          setErrorMessage(`${amount} ${selectedCoin.symbol.toUpperCase()} is pending. We are yet to confirm your transaction.`);
           setShowModal(true);
           setIsChecking(false);
         }
@@ -233,29 +236,71 @@ const SellCrypto = () => {
                   walletAddress, 
                   status }} />
 
-          <input type="number" className="w-full border p-2 rounded" placeholder="Enter amount" value={amount} onChange={(e) => setAmount(parseFloat(e.target.value))} disabled={status !== 'pending'} />
+          <input 
+            type="number" 
+            className="w-full border p-2 rounded" 
+            placeholder="Enter amount" 
+            value={amount} 
+            onChange={(e) => 
+            setAmount(parseFloat(e.target.value))} 
+            disabled={status !== 'pending'} />
 
           <TxidInput {...{ txid, setTxid, status }} />
 
-          <StatusMessage {...{ status, isChecking, onReset: () => { setStatus('pending'); setTxid(""); setAmount(0); setIsChecking(false); setErrorMessage(""); } }} />
+          <StatusMessage 
+            {...{ 
+              status, 
+              isChecking, 
+              onReset: () => 
+              { 
+                setStatus('pending'); 
+                setTxid(""); 
+                setAmount(0); 
+                setIsChecking(false); 
+                setErrorMessage(""); 
+              } 
+            }} 
+          />
 
-          <button onClick={handleSubmit} disabled={!txid || !selectedCoin || status !== 'pending' || amount <= 0} className={`w-full py-3 rounded-full font-semibold transition-colors cursor-pointer ${!txid || !selectedCoin || status !== 'pending' || amount <= 0 ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-[#0047AB] text-white hover:bg-blue-700'}`}>
+          <button 
+            onClick={handleSubmit} 
+            disabled={!txid || !selectedCoin || status !== 'pending' || amount <= 0} 
+            className={`w-full py-3 rounded-full font-semibold transition-colors cursor-pointer ${!txid || !selectedCoin || status !== 'pending' || amount <= 0 ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-[#0047AB] text-white hover:bg-blue-700'}`}>
             {isChecking ? (
               <span className="flex items-center justify-center">
-                <ArrowPathIcon className="h-4 w-4 mr-2 animate-spin" />
-                Processing...
+                <ArrowPathIcon 
+                  className="h-4 w-4 mr-2 animate-spin" />
+                  Processing...
               </span>
             ) : (
               'Submit TXID'
             )}
           </button>
 
-          <NetworkWarning selectedCoin={selectedCoin} />
+          <NetworkWarning 
+            selectedCoin={selectedCoin} 
+          />
         </div>
       </motion.div>
 
       {showModal && (
-        <TransactionStatusModal type={modalType} title={modalType === "success" ? "Transaction Successful" : "Transaction Failed"} message={modalType === "success" ? "Your transaction was completed successfully." : errorMessage || "Something went wrong."} details={transactionDetails ? { ...transactionDetails } : {}} onClose={() => setShowModal(false)} />
+        <TransactionStatusModal
+          type={modalType}
+          title={modalType === "success" ? "Transaction Successful" : "Transaction Failed"}
+          message={
+            modalType === "success"
+              ? "Your transaction was completed successfully."
+              : `${amount} ${selectedCoin?.symbol.toUpperCase()} is pending. We are yet to confirm your transaction.`
+          }
+          details={{
+            coin: selectedCoin?.symbol || "",
+            amount,
+            status,
+            txid
+          }}
+          onClose={() => setShowModal(false)}
+        />
+
       )}
     </div>
   );
