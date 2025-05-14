@@ -11,7 +11,7 @@ const generateAccessAndRefreshToken = async (userId: string): Promise<TokenPair>
     const user = await User.findById(userId);
 
     if (!user) {
-      throw new ApiError(404, "User not found");
+      throw new ApiError({ statusCode: 404, message: "User not found" });
     }
 
     const accessToken = user.generateAccessToken();
@@ -24,7 +24,7 @@ const generateAccessAndRefreshToken = async (userId: string): Promise<TokenPair>
   } catch (error: any) {
     // Optional: log the real error somewhere
     console.error("Token generation error:", error);
-    throw new ApiError(403, "Something went wrong while generating access and refresh token");
+    throw new ApiError({ statusCode: 403, message: "Something went wrong while generating access and refresh token" });
   }
 };
 
