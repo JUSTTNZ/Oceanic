@@ -33,11 +33,11 @@ export default function CoinSelection({
 }: CoinSelectionProps) {
   return (
     <div className="space-y-2">
-      <label className="text-sm font-medium text-gray-700">Cryptocurrency</label>
-      <div className="relative">
+      <label className="text-sm font-medium text-gray-100 ">Cryptocurrency</label>
+      <div className="relative mt-2">
         <button
           onClick={() => setShowCoinDropdown(!showCoinDropdown)}
-          className="flex items-center justify-between w-full border px-4 py-3 rounded-lg text-sm focus:border-blue-300 focus:outline-none"
+          className="flex items-center text-white justify-between w-full border border-gray-500 px-4 py-3 rounded-lg text-sm focus:border-blue-600 focus:outline-none"
           disabled={status !== 'pending'}
         >
           {selectedCoin ? (
@@ -63,13 +63,13 @@ export default function CoinSelection({
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg"
+              className="absolute z-10 mt-1 w-full bg-gray-900 text-white border border-gray-800 rounded-lg shadow-lg"
             >
-              <div className="p-2 border-b border-blue-300">
+              <div className="p-2 border-b border-blue-600">
                 <input
                   type="text"
                   placeholder="Search coins..."
-                  className="w-full px-3 py-2 text-sm border rounded-md focus:border-blue-300 focus:outline-none"
+                  className="w-full px-3 py-2 text-sm border rounded-md focus:border-blue-600 focus:outline-none"
                   value={searchCoin}
                   onChange={(e) => setSearchCoin(e.target.value)}
                   autoFocus
@@ -80,7 +80,7 @@ export default function CoinSelection({
                   filteredCoins.map((coin) => (
                     <button
                       key={coin.id}
-                      className="flex items-center w-full px-4 py-2 text-sm hover:bg-blue-100"
+                      className="flex items-center w-full px-4 py-2 text-sm hover:bg-gray-800"
                       onClick={() => {
                         setSelectedCoin(coin);
                         setShowCoinDropdown(false);
@@ -98,7 +98,7 @@ export default function CoinSelection({
                     </button>
                   ))
                 ) : (
-                  <div className="px-4 py-2 text-sm text-gray-500">
+                  <div className="px-4 py-2 text-sm text-gray-100">
                     No coins found
                   </div>
                 )}

@@ -58,7 +58,7 @@ export default function WalletAddressDisplay({
   return (
     <div className={`space-y-2 ${className}`}>
       <div className="flex justify-between items-center">
-        <label className="text-sm font-medium text-gray-700">
+        <label className="text-sm font-medium text-gray-100">
           Our {selectedCoin.symbol.toUpperCase()} Address
         </label>
         <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
@@ -66,7 +66,7 @@ export default function WalletAddressDisplay({
         </span>
       </div>
       
-      <div className="relative flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+      <div className="relative flex items-center justify-between bg-gray-900 text-white p-3 rounded-lg">
         {selectedCoin.image && (
           <div className="mr-2">
             <Image 

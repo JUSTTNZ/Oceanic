@@ -10,6 +10,7 @@ import NetworkWarning from "../components/sell/network";
 import WalletAddressDisplay from "../components/sell/walletaddres";
 import FirstSide from "../components/sell/firstside";
 import TransactionStatusModal from "./transactionmodal";
+import AmountInputSell from "../components/sell/amout";
 
 interface Coin {
   id: string;
@@ -25,14 +26,11 @@ interface Country {
 }
 
 interface TransactionDetails {
-    id: string;
-    coin: string;
-    amount: number;
-    status: string;
-    // Add additional fields as needed
+  id: string;
+  coin: string;
+  amount: number;
+  status: string;
 }
-
-
 
 const BYBIT_WALLET_ADDRESSES: Record<string, Record<string, string>> = {
   USDT: {
@@ -112,7 +110,6 @@ const SellCrypto = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState<"success" | "error">("success");
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [transactionDetails, setTransactionDetails] = useState<TransactionDetails | null>(null);
   const [selectedCountry] = useState<Country>({ code: "NG", name: "Nigeria" });
 
@@ -153,7 +150,7 @@ const SellCrypto = () => {
       const accessToken = localStorage.getItem('accessToken');
       if (!accessToken) throw new Error("Please login first");
 
-      const response = await fetch('http://localhost:7001/api/v1/transaction', {
+      const response = await fetch('https://oceanic-servernz.vercel.app/api/v1/transaction', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -171,9 +168,7 @@ const SellCrypto = () => {
       if (!response.ok) {
         const errorData = await response.json();
         setErrorMessage(errorData.message || 'Transaction failed');
-        throw new Error(errorData.message || 'Transaction failed');
       }
-
 
       const data = await response.json();
       setTransactionDetails(data.data);
@@ -182,7 +177,7 @@ const SellCrypto = () => {
       const maxTries = 20;
       const pollStatus = setInterval(async () => {
         tries++;
-        const pollRes = await fetch(`http://localhost:7001/api/v1/transaction/poll?txid=${txid}&coin=${selectedCoin.symbol}`);
+        const pollRes = await fetch(`https://oceanic-servernz.vercel.app/api/v1/transaction/poll?txid=${txid}&coin=${selectedCoin.symbol}`);
         const pollData = await pollRes.json();
 
         if (pollData.status === 'confirmed') {
@@ -213,38 +208,69 @@ const SellCrypto = () => {
   };
 
   return (
-    <div className="bg-white min-h-screen">
-      <motion.div key="sell" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} transition={{ duration: 0.3 }} className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl mx-auto py-14 px-4">
+    <div className="min-h-screen">
+      <motion.div 
+        key="sell" 
+        initial={{ opacity: 0, x: 30 }} 
+        animate={{ opacity: 1, x: 0 }} 
+        exit={{ opacity: 0, x: -30 }} 
+        transition={{ duration: 0.3 }} 
+        className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl mx-auto py-14 px-4"
+      >
         <FirstSide status={status} SUPPORTED_COINS={SUPPORTED_COINS} />
-
-        <div className="w-full max-w-sm mx-auto border border-gray-200 rounded-xl p-6 shadow-sm space-y-4">
-          <h2 className="text-center font-semibold text-lg mb-4">Sell Crypto</h2>
-          {errorMessage && <div className="text-red-500 text-sm">{errorMessage}</div>}
+      <div className="w-full max-w-sm mx-auto   p-6 md:shadow-xl shadow-2xl space-y-4 bg-gray-800/30 border border-gray-700/20 rounded-xl hover:border-blue-500/30 transition-all backdrop-blur-sm hover:shadow-blue-500/10">
+          <h2 className="text-center font-semibold text-lg mb-4  bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">Sell Crypto</h2>
+          
+          {errorMessage && (
+            <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-4">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-red-700">{errorMessage}</p>
+                </div>
+              </div>
+            </div>
+          )}
 
           <CoinSelection 
             {...{ 
-                  setShowCoinDropdown, 
-                  showCoinDropdown, 
-                  selectedCoin, 
-                  searchCoin, 
-                  setSearchCoin, 
-                  setSelectedCoin, 
-                  filteredCoins: coins, status }} />
+              setShowCoinDropdown, 
+              showCoinDropdown, 
+              selectedCoin, 
+              searchCoin, 
+              setSearchCoin, 
+              setSelectedCoin, 
+              filteredCoins: coins, 
+              status 
+            }} 
+          />
+
           <WalletAddressDisplay 
             {...{ 
-                  selectedCoin, 
-                  selectedCountry, 
-                  walletAddress, 
-                  status }} />
-
-          <input 
+              selectedCoin, 
+              selectedCountry, 
+              walletAddress, 
+              status 
+            }} 
+          />
+        <AmountInputSell 
+          amount={amount}
+          setAmount={setAmount}
+          status={status}
+        />
+        
+          {/* <input 
             type="number" 
             className="w-full border p-2 rounded" 
             placeholder="Enter amount" 
             value={amount} 
-            onChange={(e) => 
-            setAmount(parseFloat(e.target.value))} 
-            disabled={status !== 'pending'} />
+            onChange={(e) => setAmount(parseFloat(e.target.value))} 
+            disabled={status !== 'pending'} 
+          /> */}
 
           <TxidInput {...{ txid, setTxid, status }} />
 
@@ -252,8 +278,7 @@ const SellCrypto = () => {
             {...{ 
               status, 
               isChecking, 
-              onReset: () => 
-              { 
+              onReset: () => { 
                 setStatus('pending'); 
                 setTxid(""); 
                 setAmount(0); 
@@ -266,21 +291,23 @@ const SellCrypto = () => {
           <button 
             onClick={handleSubmit} 
             disabled={!txid || !selectedCoin || status !== 'pending' || amount <= 0} 
-            className={`w-full py-3 rounded-full font-semibold transition-colors cursor-pointer ${!txid || !selectedCoin || status !== 'pending' || amount <= 0 ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-[#0047AB] text-white hover:bg-blue-700'}`}>
+            className={`w-full py-3 rounded-full font-semibold transition-colors ${
+              !txid || !selectedCoin || status !== 'pending' || amount <= 1
+                ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
+                : 'bg-[#0047AB] text-white hover:bg-blue-700'
+            }`}
+          >
             {isChecking ? (
               <span className="flex items-center justify-center">
-                <ArrowPathIcon 
-                  className="h-4 w-4 mr-2 animate-spin" />
-                  Processing...
+                <ArrowPathIcon className="h-4 w-4 mr-2 animate-spin" />
+                Processing...
               </span>
             ) : (
               'Submit TXID'
             )}
           </button>
 
-          <NetworkWarning 
-            selectedCoin={selectedCoin} 
-          />
+          <NetworkWarning selectedCoin={selectedCoin} />
         </div>
       </motion.div>
 
@@ -301,7 +328,6 @@ const SellCrypto = () => {
           }}
           onClose={() => setShowModal(false)}
         />
-
       )}
     </div>
   );

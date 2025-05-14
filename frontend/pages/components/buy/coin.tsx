@@ -111,7 +111,7 @@ export default function CoinDropdown({
                   </button>
                 ))
               ) : (
-                <div className="px-4 py-2 text-sm text-gray-500">
+                <div className="px-4 py-2 text-sm text-gray-100">
                   No coins found
                 </div>
               )}
