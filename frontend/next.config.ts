@@ -79,6 +79,38 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+            {
+        protocol: 'https',
+        hostname: 'dam.mediacorp.sg',
+        port: '',
+        pathname: '/**',
+      },
+      // Add the new hostname here
+      {
+        protocol: 'https',
+        hostname: 'www.americanbankingnews.com',
+        port: '',
+        pathname: '/**', // Allow any path
+      },
+      {
+        protocol: 'https',
+        hostname: 'techbullion.com',
+        port: '',
+        pathname: '/**', // Allow any path
+      },
+      {
+        protocol: 'https',
+        hostname: 'media.cnn.com',
+        port: '',
+        pathname: '/**', // Allow any path
+      },
+
+   {
+        protocol: 'https',
+        hostname: 'www.marketbeat.com',
+        port: '',
+        pathname: '/**',
+      },
 {
   protocol: 'https',
   hostname: 'dam.mediacorp.sg',
