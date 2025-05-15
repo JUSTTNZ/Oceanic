@@ -2,6 +2,7 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import hero from '../../public/Images/hero.webp'
+import Link from "next/link";
 
 export default function Hero() {
 
@@ -39,7 +40,12 @@ export default function Hero() {
           <p className="text-base sm:text-lg text-gray-600 mb-8">Oceanic makes it simple to trade cryptocurrency securely and globally. Join us and start today!</p>
           <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0">
             <input type="email" placeholder="Your e-mail" className="border border-gray-300 px-4 py-3 rounded-md focus:outline-none w-full sm:w-64" />
-            <button className="bg-[#0047AB] text-white px-6 py-3 rounded-md hover:bg-[#0047AB]">Get Started</button>
+            <button  className="bg-[#0047AB] text-white px-6 py-3 rounded-md hover:bg-[#0047AB]">
+              <Link href={'/register'}>
+                  Get Started
+              </Link>
+          
+              </button>
           </div>
         </div>
         
