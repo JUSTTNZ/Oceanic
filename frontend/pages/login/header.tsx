@@ -57,7 +57,7 @@ export default function Header() {
   return (
     
     <header className="fixed top-0 left-0 w-full bg-gradient-to-r from-blue-600 to-blue-900 text-white p-3 flex justify-between items-center px-4 sm:px-8 z-50 shadow-md font-grotesk">
-      <h1 className="text-3xl md:text-4l font-grotesk font-bold">Oceanic-Charts</h1>
+      <h1 className="text-3xl md:text-4l font-grotesk font-bold">Oceanic Charts</h1>
 
    
       <nav className="hidden lg:flex gap-6">
