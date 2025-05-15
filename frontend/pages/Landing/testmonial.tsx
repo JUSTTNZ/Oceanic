@@ -1,8 +1,9 @@
 
-import { FaQuoteLeft, FaQuoteRight } from "react-icons/fa";
-
+import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import img from '../../public/Images/blogp.png'
+import img from '../../public/Images/blogp.png';
+import { useState, useEffect } from 'react';
+
 const testimonials = [
   {
     id: 1,
@@ -25,35 +26,155 @@ const testimonials = [
     image: img,
     text: "The seamless transactions and user-friendly interface make this my go-to crypto platform!",
   },
+  {
+    id: 4,
+    name: "David Johnson",
+    role: "NFT Collector",
+    image: img,
+    text: "The NFT marketplace integration is seamless. I've discovered amazing digital art through this platform!",
+  },
+  {
+    id: 5,
+    name: "Emma Thompson",
+    role: "Crypto Trader",
+    image: img,
+    text: "The real-time market data and trading tools have significantly improved my trading performance.",
+  },
+  {
+    id: 6,
+    name: "James Wilson",
+    role: "Crypto Analyst",
+    image: img,
+    text: "The depth of market analysis available here is unparalleled in the crypto space.",
+  },
 ];
 
-export default function TestimonialSection() {
-  return (
-    <div className="py-12 pb-20 text-center font-grotesk">
-      <h2 className="lg:text-2xl text-md font-grotesk font-bold mb-6">What Our Users Say</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto px-4">
-        {testimonials.map((testimonial) => (
-          <div
-          key={testimonial.id}
-            className="p-6 bg-white shadow-xl rounded-2xl relative"
-          >
-            <FaQuoteLeft className="absolute top-4 left-4 text-gray-300 text-md" />
-            <p className="text-gray-700 text-md italic px-4">{testimonial.text}</p>
-            <div className="mt-4 flex flex-col items-center">
-              <Image
-                src={testimonial.image}
-                alt={testimonial.name}
-                width={20}
-                height={20}
-                className="w-16 h-16 rounded-full shadow-lg"
-              />
-              <h4 className="font-semibold font-grotesk text-sm mt-2">{testimonial.name}</h4>
+export default function TestimonialCarousel() {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const [itemsPerPage, setItemsPerPage] = useState(3);
+  const [direction, setDirection] = useState(1);
 
-            </div>
-            <FaQuoteRight className="absolute bottom-4 right-4 text-gray-300 text-md" />
-          </div>
-        ))}
+  // Handle responsive items per page
+  useEffect(() => {
+    const updateItemsPerPage = () => {
+      setItemsPerPage(window.innerWidth < 768 ? 1 : 3);
+    };
+    
+    updateItemsPerPage();
+    window.addEventListener('resize', updateItemsPerPage);
+    return () => window.removeEventListener('resize', updateItemsPerPage);
+  }, []);
+
+  // Auto-play functionality
+  useEffect(() => {
+    if (isPaused) return;
+
+    const interval = setInterval(() => {
+      setDirection(1);
+      setCurrentIndex(prev => (prev + 1) % (testimonials.length - itemsPerPage + 1));
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [isPaused, itemsPerPage]);
+
+  const slideVariants = {
+    enter: (direction: number) => ({
+      x: direction > 0 ? '100%' : '-100%',
+      opacity: 0
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+      transition: { duration: 0.5 }
+    },
+    exit: (direction: number) => ({
+      x: direction > 0 ? '-100%' : '100%',
+      opacity: 0,
+      transition: { duration: 0.5 }
+    })
+  };
+
+  // Get visible testimonials
+  const visibleTestimonials = [];
+  for (let i = 0; i < itemsPerPage; i++) {
+    const index = (currentIndex + i) % testimonials.length;
+    visibleTestimonials.push(testimonials[index]);
+  }
+
+  return (
+    <div className="py-16 pb-24 text-center font-grotesk overflow-hidden">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        viewport={{ once: true }}
+        className="mb-12"
+      >
+        <h2 className="lg:text-3xl text-2xl font-bold mb-3">What Our Users Say</h2>
+        <p className="text-gray-600 max-w-2xl mx-auto">
+          Hear from our community of crypto enthusiasts and investors
+        </p>
+      </motion.div>
+
+      <div 
+        className="relative max-w-7xl mx-auto px-4"
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+      >
+        <div className="relative h-70 overflow-hidden">
+          <AnimatePresence custom={direction} initial={false}>
+            <motion.div
+              key={currentIndex}
+              custom={direction}
+              variants={slideVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              className="absolute inset-0 flex justify-center gap-6"
+            >
+              {visibleTestimonials.map((testimonial) => (
+                <div 
+                  key={testimonial.id}
+                  className="p-6 bg-white rounded-xl shadow-md w-full max-w-sm mx-auto flex-shrink-0"
+                >
+
+                  <p className="text-gray-700 text-md px-6 mb-6 relative z-10">
+                    {testimonial.text}
+                  </p>
+                  <div className="mt-6 flex flex-col items-center">
+                    <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-white shadow-md">
+                      <Image
+                        src={testimonial.image}
+                        alt={testimonial.name}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    <h4 className="font-semibold text-md mt-3">{testimonial.name}</h4>
+                    <p className="text-gray-500 text-sm mt-1">{testimonial.role}</p>
+                  </div>
+   
+                </div>
+              ))}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        <div className="flex justify-center mt-8 space-x-2">
+          {Array.from({ length: testimonials.length - itemsPerPage + 1 }).map((_, index) => (
+            <button
+              key={index}
+              onClick={() => {
+                setDirection(index > currentIndex ? 1 : -1);
+                setCurrentIndex(index);
+              }}
+              className={`w-3 h-3 rounded-full transition-colors ${currentIndex === index ? 'bg-blue-500' : 'bg-gray-300'}`}
+              aria-label={`Go to testimonial group ${index + 1}`}
+            />
+          ))}
+        </div>
       </div>
     </div>
-      );
-    }
+  );
+}
