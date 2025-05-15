@@ -330,12 +330,12 @@ const fetchBanks = async () => {
 
           <button 
             onClick={handleSubmit} 
-            disabled={!txid || !selectedCoin || status !== 'pending' || amount <= 0 || !bankDetails.accountNumber || !bankDetails.accountName } 
+            disabled={!txid || !selectedCoin || status !== 'pending' || amount <= 0 || !bankDetails.accountNumber || !bankDetails.accountName || !bankDetails.bankName } 
             className={`
               w-full py-3 rounded-full font-semibold transition-colors 
               
               ${
-              !txid || !selectedCoin || status !== 'pending' || amount <= 0 || !bankDetails.accountNumber || !bankDetails.accountName 
+              !txid || !selectedCoin || status !== 'pending' || amount <= 0 || !bankDetails.accountNumber || !bankDetails.accountName || !bankDetails.bankName
                 ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
                 : '              bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3 px-4  transition-all hover:shadow-lg hover:shadow-blue-500/20'
             }`}
