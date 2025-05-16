@@ -50,6 +50,10 @@ export default function ConversionDisplay({
       ? formatter.format(value).replace(safeCountry.currency, safeCountry.currencySymbol)
       : formatter.format(value);
   };
+    // Calculate the adjusted rate (add 50 Naira to the original rate)
+  const adjustedRate = (selectedCoin?.current_price || 0) * exchangeRate + 50;
+
+
   return (
     <div className="bg-gray-800 text-white p-4 rounded-lg space-y-2">
      
@@ -68,7 +72,7 @@ export default function ConversionDisplay({
       </div>
       {selectedCoin && (
         <div className="pt-2 text-xs text-gray-100 border-t">
-          Rate: {formatCurrency(selectedCoin?.current_price * exchangeRate)} per{" "}
+   Rate: {formatCurrency(adjustedRate)} per{" "}
           {selectedCoin?.symbol?.toUpperCase() || "BTC"}
         </div>
       )}
