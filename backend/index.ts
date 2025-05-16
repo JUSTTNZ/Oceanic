@@ -4,7 +4,7 @@ import connectDB from './config/db.js'
 
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import { initSocket } from './config/socket.js';
+//import { initSocket } from './config/socket.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -20,9 +20,9 @@ connectDB()
 .then(() => {
     app.listen(PORT, () => {
         console.log(`Server is running on port ${PORT}`);
-        if (process.env.NODE_ENV !== 'production') {
-            initSocket(server); // only in development
-        }
+        // if (process.env.NODE_ENV !== 'production') {
+        //     initSocket(server); // only in development
+        // }
     })
 })
 .catch((err) => {

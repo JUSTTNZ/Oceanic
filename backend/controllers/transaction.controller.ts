@@ -2,7 +2,7 @@ import { asyncHandler } from "../utils/AsyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Transaction } from "../models/transaction.model.js";
-import { getIO } from '../config/socket.js';
+//import { getIO } from '../config/socket.js';
 import { CoinWallet } from "../models/coinWallet.model.js";
 import coins from "../coindata/coin.json" with { type: "json" };
 
@@ -74,11 +74,11 @@ import coins from "../coindata/coin.json" with { type: "json" };
     // Save transaction
     const transaction = await Transaction.create(data);
   
-    const io = getIO();
-    io.emit("transaction_created", {
-      user: req.user._id,
-      transaction,
-    });
+    // const io = getIO();
+    // io.emit("transaction_created", {
+    //   user: req.user._id,
+    //   transaction,
+    // });
   
     res.status(201).json(new ApiResponse(201, "Transaction created successfully", transaction));
     console.log("Transaction created:", transaction);
@@ -164,12 +164,12 @@ const updateTransactionStatus = asyncHandler(async (req, res) => {
   transaction.status = status;
   await transaction.save();
 
-  const io = getIO();
-  io.emit('transaction_updated', {
-    user: transaction.userId,
-    txid,
-    status
-  });
+  // const io = getIO();
+  // io.emit('transaction_updated', {
+  //   user: transaction.userId,
+  //   txid,
+  //   status
+  // });
 
   return res.status(200).json(new ApiResponse(200, 'Transaction status updated', transaction));
 });
