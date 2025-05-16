@@ -1,19 +1,12 @@
 import { useState, useEffect } from "react";
 
-interface Country {
-  currency: string;
-  currencySymbol: string;
-}
-
 interface AmountInputProps {
-  selectedCountry?: Country; // ✅ Made optional to prevent undefined errors
   value: string;
   onChange: (value: string) => void;
   className?: string;
 }
 
 export default function AmountInput({
-  selectedCountry = { currency: "USD", currencySymbol: "$" }, // ✅ Default fallback
   value,
   onChange,
   className = "",
@@ -34,25 +27,23 @@ export default function AmountInput({
     setAmount(value);
   }, [value]);
 
-  // ✅ Prevents rendering before data is available
-  if (!selectedCountry) {
-    return <p>Loading...</p>;
-  }
-
   return (
     <div className={`space-y-2 ${className}`}>
       <label className="text-sm font-medium text-gray-100">
-        Amount in {selectedCountry?.currency || "USD"} ({selectedCountry?.currencySymbol || "$"})
+        Amount in USDT (USD)
       </label>
-      <input
-        type="text"
-        placeholder="0.00"
-        className="border border-gray-500 px-4 py-3 rounded-lg w-full text-white text-right text-lg font-medium 
-                   focus:border-blue-600 focus:outline-none"
-        value={amount}
-        onChange={handleChange}
-        inputMode="decimal"
-      />
+      <div className="relative">
+        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">$</span>
+        <input
+          type="text"
+          placeholder="0.00"
+          className="border border-gray-500 px-4 py-3 pl-8 rounded-lg w-full text-white text-right text-lg font-medium 
+                     focus:border-blue-600 focus:outline-none bg-gray-800"
+          value={amount}
+          onChange={handleChange}
+          inputMode="decimal"
+        />
+      </div>
     </div>
   );
 }

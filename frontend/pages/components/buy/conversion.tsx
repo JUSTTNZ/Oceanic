@@ -3,77 +3,80 @@ interface Coin {
   name: string;
   symbol: string;
   image: string;
-  current_price: number;
+  current_price: number; // Price in USD (same as USDT)
 }
 
 interface ConversionDisplayProps {
   selectedCountry?: {
     currencySymbol: string;
     currency?: string;
-  }; // ✅ Made optional to avoid undefined errors
+  };
   selectedCoin?: Coin | null;
   serviceFee: number;
-  amount: string;
+  amount: string; // USDT (dollar) amount
   coinAmount: number;
-  exchangeRate: number;
-  formatCurrency: (amount: number) => string;
+  exchangeRate: number; // Local currency to USD rate
 }
 
 export default function ConversionDisplay({
-  selectedCountry ,
+  selectedCountry,
   selectedCoin,
   amount,
   coinAmount,
   exchangeRate,
-  // formatCurrency,
 }: ConversionDisplayProps) {
   
-  // ✅ Prevent rendering if essential data is missing
   if (!selectedCountry) {
     return <p>Loading...</p>;
   }
-  const safeCountry = selectedCountry || { name: "your country", currency: "USD", currencySymbol: "$" };
-  
-  const formatCurrency = (value: number): string => {
-    if (!safeCountry.currency) {
-      return value.toFixed(2);
-    }
 
+  const safeCountry = selectedCountry || { currency: "USD", currencySymbol: "$" };
+  
+  const formatCurrency = (value: number, currency: string = safeCountry.currency || 'USD'): string => {
     const formatter = new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: safeCountry.currency,
+      currency,
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     });
 
-    return safeCountry.currencySymbol
-      ? formatter.format(value).replace(safeCountry.currency, safeCountry.currencySymbol)
-      : formatter.format(value);
+    if (currency === safeCountry.currency && safeCountry.currencySymbol) {
+      return formatter.format(value).replace(currency, safeCountry.currencySymbol);
+    }
+    return formatter.format(value);
   };
-    // Calculate the adjusted rate (add 50 Naira to the original rate)
-  const adjustedRate = (selectedCoin?.current_price || 0) * exchangeRate + 50;
 
+  // Calculate amounts with +50 gain
+  const adjustedExchangeRate = exchangeRate + 50;
+  const usdAmount = parseFloat(amount || "0");
+  const localCurrencyAmount = usdAmount * adjustedExchangeRate;
 
   return (
     <div className="bg-gray-800 text-white p-4 rounded-lg space-y-2">
-     
       <div className="flex justify-between items-center">
-        <span className="text-gray-100">You pay:</span>
-        <span className="font-semibold">
-          {selectedCountry?.currencySymbol}
-          {parseFloat(amount || "0").toLocaleString("en-US")}
-        </span>
+        <span className="text-gray-100">Amount in {selectedCountry.currencySymbol}:</span>
+        <div className="text-right">
+          <span className="font-semibold block">
+            {formatCurrency(localCurrencyAmount)}
+          </span>
+          
+        </div>
       </div>
+      
       <div className="flex justify-between items-center">
         <span className="text-gray-100">You receive:</span>
-        <span className="font-semibold">
-          {coinAmount} {selectedCoin?.symbol?.toUpperCase() || "BTC"}
-        </span>
+        <div className="text-right">
+          <span className="font-semibold block">
+            {coinAmount.toFixed(8)} {selectedCoin?.symbol?.toUpperCase() || "BTC"}
+          </span>
+        </div>
       </div>
+      
       {selectedCoin && (
-        <div className="pt-2 text-xs text-gray-100 border-t">
-   Rate: {formatCurrency(adjustedRate)} per{" "}
-          {selectedCoin?.symbol?.toUpperCase() || "BTC"}
+        <div className="pt-2 text-xs text-gray-100 border-t space-y-1">
+          <div>
+            Exchange Rate: $1 = {formatCurrency(adjustedExchangeRate)} 
+          </div>
         </div>
       )}
     </div>
