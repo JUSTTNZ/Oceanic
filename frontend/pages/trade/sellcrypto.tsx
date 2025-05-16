@@ -24,6 +24,8 @@ interface Coin {
 interface Country {
   name: string;
   code: string;
+  currency:string;
+  currencySymbol: string;
 }
 
 interface TransactionDetails {
@@ -117,7 +119,12 @@ const SellCrypto = () => {
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState<"success" | "error">("success");
   const [transactionDetails, setTransactionDetails] = useState<TransactionDetails | null>(null);
-  const [selectedCountry] = useState<Country>({ code: "NG", name: "Nigeria" });
+const [selectedCountry] = useState<Country>({ 
+  code: "NG", 
+  name: "Nigeria", 
+  currency: "NGN",  
+  currencySymbol: "₦"  
+});
   const [bankDetails, setBankDetails] = useState<BankDetails>({
     accountNumber: "",
     accountName: "",
@@ -126,7 +133,8 @@ const SellCrypto = () => {
   });
   const [banksList, setBanksList] = useState<{name: string, code: string}[]>([]);
 
-
+// rate
+  const [exchangeRate, setExchangeRate] = useState<number>(0);
  console.log(transactionDetails)
   useEffect(() => {
     const fetchCoins = async () => {
@@ -143,7 +151,7 @@ const SellCrypto = () => {
     };
     fetchCoins();
 
-  
+
 const fetchBanks = async () => {
   try {
     const response = await fetch(`/api/banks?country=${selectedCountry.name.toLowerCase()}`);
@@ -162,6 +170,22 @@ const fetchBanks = async () => {
 
     fetchBanks();
   }, [selectedCountry.code, selectedCountry.name]);
+  useEffect(() => {
+    const fetchExchangeRate = async () => {
+      if (!selectedCountry.name) return;
+
+      try {
+        const response = await fetch("/api/rate");
+        if (!response.ok) 
+          setErrorMessage("Failed to fetch rate");
+        const data = await response.json();
+        setExchangeRate(data.conversion_rates[selectedCountry.currency] || 1);
+      } catch {
+        setExchangeRate(1);
+      }
+    };
+    fetchExchangeRate();
+  }, [selectedCountry.name]);
 
   const walletAddress = selectedCoin
     ? BYBIT_WALLET_ADDRESSES[selectedCoin.symbol.toUpperCase()]?.[selectedCountry.code] ||
@@ -258,7 +282,9 @@ const fetchBanks = async () => {
         transition={{ duration: 0.3 }} 
         className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl mx-auto py-14 px-4"
       >
-        <FirstSide status={status} SUPPORTED_COINS={SUPPORTED_COINS} />
+        <FirstSide status={status}
+           SUPPORTED_COINS={coins.filter(coin => SUPPORTED_COINS.includes(coin.symbol.toUpperCase()))} 
+         exchangeRate={exchangeRate} selectedCountry={selectedCountry} />
       <div className="w-full max-w-sm mx-auto   p-6 md:shadow-xl shadow-2xl space-y-4 bg-gray-800/30 border border-gray-700/20 rounded-xl hover:border-blue-500/30 transition-all backdrop-blur-sm hover:shadow-blue-500/10">
           <h2 className="text-center font-semibold text-lg mb-4  bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">Sell Crypto</h2>
           
