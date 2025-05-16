@@ -310,7 +310,7 @@ export default function BuyCrypto() {
          
          />
         <AmountInput
-          selectedCountry={selectedCountry}
+         
           value={amount}
           onChange={setAmount}
         />
@@ -322,7 +322,7 @@ export default function BuyCrypto() {
           amount={amount}
           coinAmount={coinAmount}
           exchangeRate={exchangeRate}
-          formatCurrency={(amt) => `${amt.toFixed(2)}`}
+          
         />
 
     
@@ -347,7 +347,7 @@ export default function BuyCrypto() {
           <button
             onClick={createTransaction}
             className="w-full bg-[#0047AB] text-white font-semibold py-3 rounded-full mt-4 hover:bg-blue-700 transition-colors disabled:opacity-50
-                                   bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3 px-4  transition-all hover:shadow-lg hover:shadow-blue-500/20
+              bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3 px-4  transition-all hover:shadow-lg hover:shadow-blue-500/20
             "
             disabled={!amount || parseFloat(amount) <= serviceFee || !selectedCoin || !walletAddress}
           >
