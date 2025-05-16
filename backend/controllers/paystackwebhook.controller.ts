@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import { Transaction } from '../models/transaction.model.js';
 import { sendAdminEmail } from '../utils/mailer.js';
 import { sendUserNotification } from '../utils/notification.js';
-import { io } from '../config/socket.js';
+//import { io } from '../config/socket.js';
 
 export const handlePaystackWebhook = async (req: Request, res: Response) => {
   const secret = process.env.PAYSTACK_SECRET_KEY;
@@ -66,15 +66,15 @@ export const handlePaystackWebhook = async (req: Request, res: Response) => {
       `
     });
 
-    io.emit('transaction_updated', {
-      user: transaction.userId,
-      txid: transaction.txid,
-      status: transaction.status,
-      type: transaction.type,
-      coin: transaction.coin,
-      amount: transaction.amount,
-      country: transaction.country
-    });
+    // io.emit('transaction_updated', {
+    //   user: transaction.userId,
+    //   txid: transaction.txid,
+    //   status: transaction.status,
+    //   type: transaction.type,
+    //   coin: transaction.coin,
+    //   amount: transaction.amount,
+    //   country: transaction.country
+    // });
 
     res.status(200).json({ success: true });
   } catch (error) {
