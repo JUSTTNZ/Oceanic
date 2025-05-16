@@ -34,68 +34,96 @@ interface TransactionDetails {
   amount: number;
   status: string;
 }
-
-const BYBIT_WALLET_ADDRESSES: Record<string, Record<string, string>> = {
-  USDT: {
-    NG: "0x8e5b5a4c4fc1e6fbdcb2aa3eec0381c1344f85cf",
-    US: "0x456...def",
-    EU: "0x789...ghi",
-    UK: "0x101...jkl"
-  },
-  BTC: {
-    NG: "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh",
-    US: "bc1qzw...",
-    EU: "bc1qab...",
-    UK: "bc1qcd..."
-  },
-  ETH: {
-    NG: "0xde0b295669a9fd93d5f28d9ec85e40f4cb697bae",
-    US: "0x567...efg",
-    EU: "0x890...hij",
-    UK: "0x112...klm"
-  },
-  BNB: {
-    NG: "bnb1grpf0955h0ykzq3ar5nmum7y6gdfl6lxfn46h2",
-    US: "bnb1zw...",
-    EU: "bnb1ab...",
-    UK: "bnb1cd..."
-  },
-  SOL: {
-    NG: "8e1YyRzFKR5nJ1Rw1ErGfP9Y7EXW8B7jvN5QvL6oUpvN",
-    US: "SolanaAddress2",
-    EU: "SolanaAddress3",
-    UK: "SolanaAddress4"
-  },
-  XRP: {
-    NG: "rEb8TK3gBgk5auZkwc6sHnwrGVJH8DuaLh",
-    US: "rPw5...",
-    EU: "rPw6...",
-    UK: "rPw7..."
-  },
-  ADA: {
-    NG: "addr1q9d6t0sx9ywhcwn04n4z8s6guxle5z5hf6a0kxdygnh6z0d0xgk8dcvxsp2k2vm0l2c4xptqx9a9n5",
-    US: "addr1zw...",
-    EU: "addr1ab...",
-    UK: "addr1cd..."
-  },
-  DOGE: {
-    NG: "D7Y55qnMaQKUyUxuSHM3wZjaeU5iW6HXRL",
-    US: "D8zw...",
-    EU: "D8ab...",
-    UK: "D8cd..."
-  },
-  DOT: {
-    NG: "14ErftuTiyBi2LqCHNfX1LpbMfW6Y2VtKMRuhV2zNHff5D2W",
-    US: "1zw...",
-    EU: "1ab...",
-    UK: "1cd..."
-  },
-  MATIC: {
-    NG: "0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0",
-    US: "0x678...fgh",
-    EU: "0x901...ijk",
-    UK: "0x113...lmn"
-  }
+interface WalletAddress {
+  address: string;
+  network: string;
+  note?: string;
+}
+const BYBIT_WALLET_ADDRESSES: Record<string, WalletAddress[]> = {
+  USDT: [
+    {
+      address: "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t",
+      network: "TRC20",
+      note: "Tron Network (Recommended - Low Fees)"
+    },
+    {
+      address: "0x8e5b5a4c4fc1e6fbdcb2aa3eec0381c1344f85cf",
+      network: "ERC20",
+      note: "Ethereum Network (Higher Fees)"
+    },
+    {
+      address: "TYgG3S22bqxfKF2Q5ZhWpQvDq5W4dXbm1D",
+      network: "TRC20 (Legacy)",
+      note: "Old Tron address"
+    }
+  ],
+  BTC: [
+    {
+      address: "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh",
+      network: "BTC",
+      note: "Native SegWit (Recommended)"
+    },
+    {
+      address: "3FZbgi29cpjq2GjdwV8eyHuJJnkLtktZc5",
+      network: "BTC (Legacy)",
+      note: "Bitcoin Legacy Address"
+    }
+  ],
+  ETH: [
+    {
+      address: "0xde0b295669a9fd93d5f28d9ec85e40f4cb697bae",
+      network: "ETH"
+    }
+  ],
+  BNB: [
+    {
+      address: "bnb1grpf0955h0ykzq3ar5nmum7y6gdfl6lxfn46h2",
+      network: "BEP2",
+      note: "Binance Chain"
+    },
+    {
+      address: "0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0",
+      network: "BEP20",
+      note: "Binance Smart Chain"
+    }
+  ],
+  SOL: [
+    {
+      address: "8e1YyRzFKR5nJ1Rw1ErGfP9Y7EXW8B7jvN5QvL6oUpvN",
+      network: "SOL"
+    }
+  ],
+  XRP: [
+    {
+      address: "rEb8TK3gBgk5auZkwc6sHnwrGVJH8DuaLh",
+      network: "XRP",
+      note: "Include Destination Tag: 12345678"
+    }
+  ],
+  ADA: [
+    {
+      address: "addr1q9d6t0sx9ywhcwn04n4z8s6guxle5z5hf6a0kxdygnh6z0d0xgk8dcvxsp2k2vm0l2c4xptqx9a9n5",
+      network: "ADA"
+    }
+  ],
+  DOGE: [
+    {
+      address: "D7Y55qnMaQKUyUxuSHM3wZjaeU5iW6HXRL",
+      network: "DOGE"
+    }
+  ],
+  DOT: [
+    {
+      address: "14ErftuTiyBi2LqCHNfX1LpbMfW6Y2VtKMRuhV2zNHff5D2W",
+      network: "DOT"
+    }
+  ],
+  MATIC: [
+    {
+      address: "0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0",
+      network: "MATIC"
+    }
+  ]
 };
 interface BankDetails {
   accountNumber: string;
@@ -187,11 +215,9 @@ const fetchBanks = async () => {
     fetchExchangeRate();
   }, [selectedCountry.name]);
 
-  const walletAddress = selectedCoin
-    ? BYBIT_WALLET_ADDRESSES[selectedCoin.symbol.toUpperCase()]?.[selectedCountry.code] ||
-      "Wallet address not available for this country"
-    : null;
-
+const walletAddresses = selectedCoin
+  ? BYBIT_WALLET_ADDRESSES[selectedCoin.symbol.toUpperCase()] || []
+  : null;
 
   const handleSubmit = async () => {
     if (!txid || !selectedCoin || amount <= 0) {
@@ -316,14 +342,14 @@ const fetchBanks = async () => {
             }} 
           />
 
-          <WalletAddressDisplay 
-            {...{ 
-              selectedCoin, 
-              selectedCountry, 
-              walletAddress, 
-              status 
-            }} 
-          />
+       <WalletAddressDisplay
+  selectedCoin={selectedCoin}
+  selectedCountry={selectedCountry}
+   walletAddresses={walletAddresses || []}
+  status={status}
+/>
+
+          
         <AmountInputSell 
           amount={amount}
           setAmount={setAmount}
