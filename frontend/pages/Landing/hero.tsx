@@ -36,7 +36,7 @@ export default function Hero() {
     <section className="bg-white  relative overflow-hidden font-grotesk">
       <div className="max-w-7xl mx-auto px-6 lg:py-24 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
         <div>
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-[#0047AB] mb-6 leading-tight">Buy and sell <br /> crypto with ease</h1>
+          <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold text-[#0047AB] mb-6 leading-tight">Buy and sell <br /> crypto with ease</h1>
           <p className="text-base sm:text-lg text-gray-900 mb-2">Trade smarter, faster, and without borders. At Oceanic Charts, we’re building a secure gateway to digital finance for everyone — everywhere.</p>
           <p className="text-base sm:text-lg text-gray-900 mb-8">Your crypto journey starts here. Oceanic Charts empowers you to trade securely, access global markets, and grow your portfolio with confidence.</p>
           {/* Input and Button */}
