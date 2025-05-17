@@ -254,6 +254,9 @@ const getCurrentUser = async (req: Request, res: Response) => {
         email: user.email,
         username: user.username,
         fullname: user.fullname,
+        role:user.role,
+        createdAt:user.createdAt,
+        phoneNUmber:user.phoneNumber
       },
     });
   } catch (error) {
