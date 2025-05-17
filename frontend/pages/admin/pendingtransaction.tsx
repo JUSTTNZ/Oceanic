@@ -118,7 +118,7 @@ export default function AdminPendingPage() {
                     <span>Confirm</span>
                   </button>
                   <button
-                    onClick={() => handleUpdateStatus(tx.txid, "rejected")}
+                    //onClick={() => handleUpdateStatus(tx.txid, "rejected")}
                     className="flex-1 flex items-center justify-center space-x-2 bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white py-3 px-4 rounded-lg transition-all hover:shadow-lg hover:shadow-red-500/20"
                   >
                     <FaTimes />

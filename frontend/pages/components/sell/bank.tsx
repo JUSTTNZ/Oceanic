@@ -13,13 +13,15 @@ interface BankDetails {
   bankCode?: string;
 }
 
-interface BanksProps {
-  banksList: Bank[];
+// ...other imports
+ interface BanksProps {
   bankDetails: BankDetails;
+  banksList: { name: string; code: string }[];
   setBankDetails: React.Dispatch<React.SetStateAction<BankDetails>>;
-  className?: string;
-  status: string;
+  status: TransactionStatus;
+  bankErrors: { accountNumber?: string; accountName?: string };
 }
+
 
 export default function Banks({
   banksList,

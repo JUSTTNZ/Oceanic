@@ -159,6 +159,8 @@ const [selectedCountry] = useState<Country>({
     bankName: "",
     bankCode: ""
   });
+  const [bankErrors, setBankErrors] = useState<{ accountNumber?: string; accountName?: string }>({});
+
   const [banksList, setBanksList] = useState<{name: string, code: string}[]>([]);
 
 // rate
@@ -220,83 +222,117 @@ const walletAddresses = selectedCoin
   : null;
 
   const handleSubmit = async () => {
-    if (!txid || !selectedCoin || amount <= 0) {
-      setErrorMessage("Please fill in all fields correctly.");
-      setStatus('failed');
-      setModalType("error");
-      setShowModal(true);
+  const errors: { accountNumber?: string; accountName?: string } = {};
+
+  // Validate required fields
+  if (!txid || !selectedCoin || amount <= 0) {
+    setErrorMessage("Please fill in all transaction fields correctly.");
+    setStatus('failed');
+    setModalType("error");
+    setShowModal(true);
+    return;
+  }
+
+  // Validate bank fields
+  if (!bankDetails.accountNumber || !bankDetails.accountName || !bankDetails.bankName) {
+    setErrorMessage("Please provide your bank account details.");
+    setStatus('failed');
+    setModalType("error");
+    setShowModal(true);
+    return;
+  }
+
+  // Validate account number (must be 11 digits)
+  if (!/^\d{11}$/.test(bankDetails.accountNumber)) {
+    errors.accountNumber = "Account number must be exactly 11 digits.";
+  }
+
+  // Validate account name (must be two words)
+  if (!/^[A-Za-z]+ [A-Za-z]+$/.test(bankDetails.accountName.trim())) {
+    errors.accountName = "Enter full name (first and last name).";
+  }
+
+  if (Object.keys(errors).length > 0) {
+    setBankErrors(errors); // You must define useState for this
+    setErrorMessage("Please correct the highlighted bank details.");
+    setStatus('failed');
+    setModalType("error");
+    setShowModal(true);
+    return;
+  }
+
+  setBankErrors({}); // Clear old errors
+
+  try {
+    setStatus('sent');
+    setIsChecking(true);
+
+    const accessToken = localStorage.getItem('accessToken');
+    if (!accessToken) {
+      setErrorMessage("Please login first.");
       return;
     }
- if (!bankDetails.accountNumber || !bankDetails.accountName || !bankDetails.bankName) {
-      setErrorMessage("Please provide your bank account details.");
-      setStatus('failed');
-      setModalType("error");
-      setShowModal(true);
-      return;
+
+    const response = await fetch('https://oceanic-servernz.vercel.app/api/v1/transaction', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`
+      },
+      body: JSON.stringify({
+        coin: selectedCoin.symbol,
+        amount,
+        txid,
+        type: "sell",
+        country: selectedCountry.code,
+        bankName: bankDetails.bankName,
+        accountName: bankDetails.accountName,
+        accountNumber: bankDetails.accountNumber,
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Transaction failed');
     }
-    try {
-      setStatus('sent');
-      setIsChecking(true);
 
-      const accessToken = localStorage.getItem('accessToken');
-      if (!accessToken) setErrorMessage("Please login first");
+    const data = await response.json();
+    setTransactionDetails(data.data);
 
-      const response = await fetch('https://oceanic-servernz.vercel.app/api/v1/transaction', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`
-        },
-        body: JSON.stringify({
-          coin: selectedCoin.symbol,
-          amount,
-          txid,
-          type: "sell",
-          country: selectedCountry.code
-        })
-      });
+    // Start polling
+    let tries = 0;
+    const maxTries = 20;
+    const pollStatus = setInterval(async () => {
+      tries++;
+      const pollRes = await fetch(`https://oceanic-servernz.vercel.app/api/v1/transaction/poll?txid=${txid}&coin=${selectedCoin.symbol}`);
+      const pollData = await pollRes.json();
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        setErrorMessage(errorData.message || 'Transaction failed');
+      if (pollData.status === 'confirmed') {
+        clearInterval(pollStatus);
+        setStatus('confirmed');
+        setModalType("success");
+        setShowModal(true);
+        setIsChecking(false);
       }
 
-      const data = await response.json();
-      setTransactionDetails(data.data);
+      if (tries > maxTries) {
+        clearInterval(pollStatus);
+        setStatus("failed");
+        setModalType("error");
+        setErrorMessage(`${amount} ${selectedCoin.symbol.toUpperCase()} is pending. We are yet to confirm your transaction.`);
+        setShowModal(true);
+        setIsChecking(false);
+      }
+    }, 3000);
+  } catch (error) {
+    setErrorMessage(error instanceof Error ? error.message : 'Transaction error');
+    setStatus('failed');
+    setIsChecking(false);
+    setModalType("error");
+    setShowModal(true);
+  }
+};
 
-      let tries = 0;
-      const maxTries = 20;
-      const pollStatus = setInterval(async () => {
-        tries++;
-        const pollRes = await fetch(`https://oceanic-servernz.vercel.app/api/v1/transaction/poll?txid=${txid}&coin=${selectedCoin.symbol}`);
-        const pollData = await pollRes.json();
-
-        if (pollData.status === 'confirmed') {
-          clearInterval(pollStatus);
-          setStatus('confirmed');
-          setModalType("success");
-          setShowModal(true);
-          setIsChecking(false);
-        }
-
-        if (tries > maxTries) {
-          clearInterval(pollStatus);
-          setStatus("failed");
-          setModalType("error");
-          setErrorMessage(`${amount} ${selectedCoin.symbol.toUpperCase()} is pending. We are yet to confirm your transaction.`);
-          setShowModal(true);
-          setIsChecking(false);
-        }
-      }, 3000);
-
-    } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Transaction error');
-      setStatus('failed');
-      setIsChecking(false);
-      setModalType("error");
-      setShowModal(true);
-    }
-  };
 
   return (
     <div className="min-h-screen">
@@ -359,13 +395,13 @@ const walletAddresses = selectedCoin
           <TxidInput {...{ txid, setTxid, status }} />
       
           <Banks 
-          bankDetails={bankDetails}
-          banksList={banksList}
-          setBankDetails={setBankDetails}
-          status={status}
-
-
+            bankDetails={bankDetails}
+            banksList={banksList}
+            setBankDetails={setBankDetails}
+            status={status}
+            bankErrors={bankErrors}
           />
+
           <StatusMessage 
             {...{ 
               status, 

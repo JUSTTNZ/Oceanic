@@ -9,7 +9,7 @@ import coins from "../coindata/coin.json" with { type: "json" };
 // Create Transaction (Buy or Sell)
   const createTransaction = asyncHandler(async (req, res) => {
     try{
-    const { coin, amount, txid, type, walletAddressUsed, country } = req.body;
+    const { coin, amount, txid, type, walletAddressUsed, country, bankName, accountName, accountNumber  } = req.body;
   
     // Validate common required fields
     if (!coin || !amount || !txid || !type || !country) {
@@ -37,6 +37,9 @@ import coins from "../coindata/coin.json" with { type: "json" };
       txid,
       type,
       country,
+      bankName, 
+      accountName, 
+      accountNumber 
     };
   
     // If it's a buy, require user's wallet address
@@ -67,6 +70,12 @@ import coins from "../coindata/coin.json" with { type: "json" };
         console.log("✅ Found wallet in MongoDB:", walletInfo.walletAddress);
         data.walletAddressSentTo = walletInfo.walletAddress;
       }
+    }
+
+    if (type === "sell") {
+      data.bankName = bankName;
+      data.accountName = accountName;
+      data.accountNumber = accountNumber;
     }
     
     

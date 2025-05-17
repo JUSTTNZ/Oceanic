@@ -1,4 +1,4 @@
-// models/transaction.model.ts
+// Enhanced transaction.model.ts with bank details
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface ITransaction extends Document {
@@ -6,11 +6,14 @@ export interface ITransaction extends Document {
   coin: string;
   amount: number;
   txid: string;
-  status: 'pending' | 'confirmed' | 'paid';
+  status: 'pending' | 'confirmed';
   type: 'buy' | 'sell';
   walletAddressSentTo?: string;
   walletAddressUsed?: string;
   country: string;
+  bankName?: string;
+  accountName?: string;
+  accountNumber?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -27,7 +30,10 @@ const TransactionSchema = new mongoose.Schema({
   country: { type: String, required: true },
   walletAddressUsed: { type: String },
   walletAddressSentTo: { type: String },
-  status: { type: String, enum: ['pending', 'confirmed', 'paid'], default: 'pending' },
+  bankName: { type: String },
+  accountName: { type: String },
+  accountNumber: { type: String },
+  status: { type: String, enum: ['pending', 'confirmed'], default: 'pending' },
 }, { timestamps: true });
 
 export const Transaction = mongoose.model<ITransaction>('Transaction', TransactionSchema);
