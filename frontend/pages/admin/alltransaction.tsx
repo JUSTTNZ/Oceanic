@@ -54,12 +54,12 @@ export default function AllTransactionsPage() {
     fetchTransactions();
   }, []);
 
-  const sortedTransactions = [...transactions].sort((a, b) => {
-    const order = sortDirection === "asc" ? 1 : -1;
-    const valA = a[sortField];
-    const valB = b[sortField];
-    return valA > valB ? order : valA < valB ? -order : 0;
-  });
+const sortedTransactions = [...transactions].sort((a, b) => {
+  const order = sortDirection === "asc" ? 1 : -1;
+  const valA = a[sortField]!; // Note the ! operator
+  const valB = b[sortField]!; // Note the ! operator
+  return valA > valB ? order : valA < valB ? -order : 0;
+});
 
   const toggleSort = (field: keyof Transaction) => {
     if (field === sortField) {
