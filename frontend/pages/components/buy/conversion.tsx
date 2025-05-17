@@ -13,6 +13,7 @@ interface ConversionDisplayProps {
   };
   selectedCoin?: Coin | null;
   serviceFee: number;
+  localCurrencyAmount: string;
   amount: string; // USDT (dollar) amount
   coinAmount: number;
   exchangeRate: number; // Local currency to USD rate
@@ -49,7 +50,7 @@ export default function ConversionDisplay({
   // Calculate amounts with +50 gain
   const adjustedExchangeRate = exchangeRate + 50;
   const usdAmount = parseFloat(amount || "0");
-  const localCurrencyAmount = usdAmount * adjustedExchangeRate;
+  const calculatedLocalCurrencyAmount = usdAmount * adjustedExchangeRate;
 
   return (
     <div className="bg-gray-800 text-white p-4 rounded-lg space-y-2">
@@ -57,7 +58,7 @@ export default function ConversionDisplay({
         <span className="text-gray-100">Amount in {selectedCountry.currencySymbol}:</span>
         <div className="text-right">
           <span className="font-semibold block">
-            {formatCurrency(localCurrencyAmount)}
+            {formatCurrency(calculatedLocalCurrencyAmount)}
           </span>
           
         </div>

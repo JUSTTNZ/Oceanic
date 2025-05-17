@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+
 "use client";
 
 import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState, useEffect} from "react";
 import dynamic from "next/dynamic";
 import CountryDropdown from "../components/buy/country";
 import CoinDropdown from "../components/buy/coin";
@@ -10,19 +11,18 @@ import AmountInput from "../components/buy/amout";
 import ConversionDisplay from "../components/buy/conversion";
 import FirstSide from "../components/buy/firstside";
 import WalletAddressBuy from "../components/buy/walletaddress";
-// import { PaystackButton } from "react-paystack";
+
 const PaystackButton = dynamic(
   () => import("react-paystack").then((mod) => mod.PaystackButton),
-  { 
+  {
     ssr: false,
-    loading: () => <div className="w-full bg-[#0047AB] text-white font-semibold py-3 rounded-full mt-4 text-center">Loading payment...</div>
+    loading: () => (
+      <div className="w-full bg-[#0047AB] text-white font-semibold py-3 rounded-full mt-4 text-center">
+        Loading payment...
+      </div>
+    ),
   }
 );
-
-// Dynamically import the wrapper to avoid SSR crash
-// const PaystackButton = dynamic(() => import("./PaystackButtonWrapper"), {
-//   ssr: false,
-// });
 
 interface Coin {
   id: string;
@@ -58,17 +58,6 @@ interface ApiCountry {
   };
   currencies: Currency;
 }
-interface PaystackButtonProps {
-  reference: string;
-  email: string;
-  amount: number;
-  publicKey: string;
-  currency?: string;
-  onSuccess: (reference: string) => void;
-  onClose: () => void;
-  // Other Paystack button props...
-}
-
 
 export default function BuyCrypto() {
   const [coins, setCoins] = useState<Coin[]>([]);
@@ -83,8 +72,10 @@ export default function BuyCrypto() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string>("");
+  const [loadingPayment, setLoadingPayment] = useState(false);
   const serviceFee = 50;
 
+  
   const onSuccess = (ref: string) => {
     alert("Payment successful!");
   };
@@ -97,9 +88,11 @@ export default function BuyCrypto() {
     return "tx_" + Math.random().toString(36).substr(2, 9);
   }
 
-  const createTransaction = async () => {
-    const token = localStorage.getItem("accessToken");
+  const handleCreateTransaction = async () => {
+  setLoadingPayment(true);
+  const token = localStorage.getItem("accessToken");
 
+  try {
     const res = await fetch("https://oceanic-servernz.vercel.app/api/v1/transaction", {
       method: "POST",
       headers: {
@@ -118,60 +111,60 @@ export default function BuyCrypto() {
 
     const data = await res.json();
 
-    if (!res.ok) {
+    if (!res.ok || !data?.data?.txid) {
       alert("Failed to create transaction.");
-      return;
-    }
-
-    if (!data?.data?.txid) {
-      alert("Invalid transaction response.");
+      setLoadingPayment(false);
       return;
     }
 
     setReference(data.data.txid);
-  };
+  } catch (err) {
+    console.error(err);
+    alert("Something went wrong.");
+  } finally {
+    setLoadingPayment(false);
+  }
+};
+
 
   useEffect(() => {
-  const token = localStorage.getItem("accessToken");
+    const token = localStorage.getItem("accessToken");
+    if (!token) return;
 
-  if (!token) return;
+    const fetchUser = async () => {
+      try {
+        const res = await fetch("https://oceanic-servernz.vercel.app/api/v1/users/getCurrentUser", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-  const fetchUser = async () => {
-    try {
-      const res = await fetch("https://oceanic-servernz.vercel.app/api/v1/users/getCurrentUser", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+        const data = await res.json();
 
-      const data = await res.json();
-
-      if (res.ok) {
-        setUserEmail(data.data.email);
-      } else {
-        console.error("Failed to fetch user email:", data.message);
+        if (res.ok) {
+          setUserEmail(data.data.email);
+        } else {
+          console.error("Failed to fetch user email:", data.message);
+        }
+      } catch (err) {
+        console.error("Error fetching user info:", err);
       }
-    } catch (err) {
-      console.error("Error fetching user info:", err);
-    }
-  };
+    };
 
-  fetchUser();
-}, []);
+    fetchUser();
+  }, []);
 
   useEffect(() => {
     const fetchCoins = async () => {
       try {
         const response = await fetch("/api/coin");
-        if (!response.ok) 
-          setError("Failed to fetch coins");
+        if (!response.ok) setError("Failed to fetch coins");
         const data = await response.json();
         setCoins(data);
         setSelectedCoin(data[0]);
       } catch (err) {
         setError("Failed to fetch cryptocurrencies");
         console.log(err);
-        
       }
     };
     fetchCoins();
@@ -181,8 +174,7 @@ export default function BuyCrypto() {
     const fetchCountries = async () => {
       try {
         const response = await fetch("/api/country");
-        if (!response.ok) 
-          setError("Failed to fetch countries");
+        if (!response.ok) setError("Failed to fetch countries");
         const data = await response.json();
 
         const formatted = data
@@ -204,7 +196,6 @@ export default function BuyCrypto() {
       } catch (err) {
         setError("Failed to fetch countries");
         console.log(err);
-        
       }
     };
     fetchCountries();
@@ -216,8 +207,7 @@ export default function BuyCrypto() {
 
       try {
         const response = await fetch("/api/rate");
-        if (!response.ok) 
-          setError("Failed to fetch rate");
+        if (!response.ok) setError("Failed to fetch rate");
         const data = await response.json();
         setExchangeRate(data.conversion_rates[selectedCountry.currency] || 1);
       } catch {
@@ -238,13 +228,20 @@ export default function BuyCrypto() {
     }
   }, [amount, selectedCoin, exchangeRate, selectedCountry]);
 
+
+  const adjustedExchangeRate = exchangeRate + 50;
+  const usdAmount = parseFloat(amount || "0");
+  const calculatedLocalCurrencyAmount = usdAmount * adjustedExchangeRate;
+
   const formatCurrency = (value: number) => {
     if (!selectedCountry) return value.toString();
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: selectedCountry.currency,
       minimumFractionDigits: 2,
-    }).format(value).replace(selectedCountry.currency, selectedCountry.currencySymbol);
+    })
+      .format(value)
+      .replace(selectedCountry.currency, selectedCountry.currencySymbol);
   };
 
   if (loading) {
@@ -270,13 +267,7 @@ export default function BuyCrypto() {
       </div>
     );
   }
-  // const paystackConfig: PaystackConfig = {
-  //   reference,
-  //   email: "user@example.com",
-  //   amount: (parseFloat(amount) - serviceFee) * 100,
-  //   publicKey: process.env.NEXT_PUBLIC_PAYSTACK_KEY!,
-  // };
-  
+
   return (
     <motion.div
       key="buy"
@@ -291,11 +282,7 @@ export default function BuyCrypto() {
       <div className="w-full max-w-sm mx-auto   p-6 md:shadow-xl shadow-2xl space-y-4 bg-gray-800/30 border border-gray-700/20 rounded-xl hover:border-blue-500/30 transition-all backdrop-blur-sm hover:shadow-blue-500/10">
         <h2 className="text-center font-semibold text-lg mb-4 bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">Buy Crypto</h2>
 
-        <CountryDropdown
-          countries={countries}
-          selectedCountry={selectedCountry}
-          onSelect={setSelectedCountry}
-        />
+        <CountryDropdown countries={countries} selectedCountry={selectedCountry} onSelect={setSelectedCountry} />
 
         <CoinDropdown
           coins={coins}
@@ -320,34 +307,35 @@ export default function BuyCrypto() {
           selectedCoin={selectedCoin}
           serviceFee={serviceFee}
           amount={amount}
+          localCurrencyAmount={calculatedLocalCurrencyAmount.toString()}
           coinAmount={coinAmount}
           exchangeRate={exchangeRate}
           
         />
 
-    
-
-        {reference ? (
+        {loadingPayment ? (
+          <div className="flex items-center justify-center gap-2 text-blue-600 font-medium">
+            <span className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></span>
+            Checking payment...
+          </div>
+        ) : reference ? (
           <PaystackButton
-          reference={reference}
-    email={"user@example.com"}
-    amount={(parseFloat(amount) - serviceFee) * 100}
-    publicKey={process.env.NEXT_PUBLIC_PAYSTACK_KEY!}
-    onSuccess={(reference) => {
-      onSuccess(reference);
-    }}
-    onClose={() => {
-      onClose();
-     
-    }}
-
-           
+            key={reference} // ensures button is remounted with updated reference
+            reference={reference}
+            email={userEmail || "user@example.com"}
+            amount={calculatedLocalCurrencyAmount * 100}
+            publicKey={process.env.NEXT_PUBLIC_PAYSTACK_KEY!}
+            onSuccess={onSuccess}
+            onClose={onClose}
+            className="w-full bg-[#0047AB] text-white font-semibold py-3 rounded-full hover:bg-blue-700 transition-colors"
+            text="Pay with Paystack"
+            disabled={loadingPayment}
           />
         ) : (
           <button
-            onClick={createTransaction}
+            onClick={handleCreateTransaction}
             className="w-full bg-[#0047AB] text-white font-semibold py-3 rounded-full mt-4 hover:bg-blue-700 transition-colors disabled:opacity-50
-              bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3 px-4  transition-all hover:shadow-lg hover:shadow-blue-500/20
+              bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700  px-4  hover:shadow-lg hover:shadow-blue-500/20
             "
             disabled={!amount || parseFloat(amount) <= serviceFee || !selectedCoin || !walletAddress}
           >
@@ -355,7 +343,6 @@ export default function BuyCrypto() {
           </button>
         )}
 
-      
       </div>
     </motion.div>
   );
