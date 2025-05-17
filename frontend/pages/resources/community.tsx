@@ -61,6 +61,7 @@ export default function CommunityPage() {
             <a
               href="https://chat.whatsapp.com/dummy-whatsapp-link"
               target="_blank"
+              rel="noopener"
               className="flex items-center gap-2 px-4 py-2 rounded-full bg-green-50 border border-green-600 text-green-700 hover:bg-green-100"
             >
               <FaWhatsapp /> WhatsApp Group (+234 000 0000)
@@ -68,6 +69,7 @@ export default function CommunityPage() {
             <a
               href="https://t.me/oceaniccharts"
               target="_blank"
+              rel="noopener"
               className="flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 border border-blue-600 text-blue-700 hover:bg-blue-100"
             >
               <FaTelegramPlane /> Telegram Channel
@@ -75,6 +77,7 @@ export default function CommunityPage() {
             <a
               href="https://discord.gg/oceaniccharts"
               target="_blank"
+              rel="noopener"
               className="flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-50 border border-indigo-600 text-indigo-700 hover:bg-indigo-100"
             >
               <FaDiscord /> Join Discord

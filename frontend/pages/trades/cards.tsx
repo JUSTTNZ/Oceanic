@@ -70,14 +70,16 @@ export default function CardsPage() {
 
         {/* How It Works */}
         <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-8">
-          {[
-            [WalletIcon, "Connect Wallet", "Link your Oceanic wallet to your card in seconds."],
-            [AdjustmentsHorizontalIcon, "Choose Token", "Decide which token will be used for transactions."],
-            [ArrowPathIcon, "Auto Convert", "We convert your crypto to fiat at point-of-sale."],
-            [CreditCardIcon, "Swipe or Tap", "Use it just like any debit card — worldwide."],
-            [EyeIcon, "Track in Real-Time", "See every transaction instantly from your dashboard."],
-            [LockClosedIcon, "Freeze or Resume", "Instantly control card access for added security."],
-          ].map(([Icon, title, desc], idx) => (
+          {(
+            [
+              [WalletIcon, "Connect Wallet", "Link your Oceanic wallet to your card in seconds."],
+              [AdjustmentsHorizontalIcon, "Choose Token", "Decide which token will be used for transactions."],
+              [ArrowPathIcon, "Auto Convert", "We convert your crypto to fiat at point-of-sale."],
+              [CreditCardIcon, "Swipe or Tap", "Use it just like any debit card — worldwide."],
+              [EyeIcon, "Track in Real-Time", "See every transaction instantly from your dashboard."],
+              [LockClosedIcon, "Freeze or Resume", "Instantly control card access for added security."],
+            ] as [React.ComponentType<React.SVGProps<SVGSVGElement>>, string, string][]
+          ).map(([Icon, title, desc], idx) => (
             <div key={idx} className="bg-gray-50 p-6 rounded-lg shadow">
               <Icon className="h-8 w-8 text-[#0047AB] mb-3" />
               <h3 className="text-lg font-semibold">{title}</h3>
@@ -90,13 +92,15 @@ export default function CardsPage() {
         <div className="max-w-7xl mx-auto space-y-8">
           <h2 className="text-3xl font-bold text-center">Why Choose Oceanic Cards?</h2>
           <div className="grid md:grid-cols-2 gap-8">
-            {[
-              [GlobeAltIcon, "Spend Globally", "Accepted at 60M+ merchants and ATMs worldwide."],
-              [ShieldCheckIcon, "Security First", "Protected by encryption, PINs, and 2FA control."],
-              [CurrencyDollarIcon, "Zero Monthly Fees", "Only pay when you spend. No hidden charges."],
-              [DevicePhoneMobileIcon, "Mobile Access", "Manage everything from the Oceanic app."],
-              [BuildingLibraryIcon, "Fully Regulated", "Compliant with global and local authorities."],
-            ].map(([Icon, title, desc], i) => (
+            {(
+              [
+                [GlobeAltIcon, "Spend Globally", "Accepted at 60M+ merchants and ATMs worldwide."],
+                [ShieldCheckIcon, "Security First", "Protected by encryption, PINs, and 2FA control."],
+                [CurrencyDollarIcon, "Zero Monthly Fees", "Only pay when you spend. No hidden charges."],
+                [DevicePhoneMobileIcon, "Mobile Access", "Manage everything from the Oceanic app."],
+                [BuildingLibraryIcon, "Fully Regulated", "Compliant with global and local authorities."],
+              ] as [React.ComponentType<React.SVGProps<SVGSVGElement>>, string, string][]
+            ).map(([Icon, title, desc], i) => (
               <div key={i} className="flex gap-4 items-start">
                 <div className="p-3 rounded-full bg-[#0047AB]/10">
                   <Icon className="h-7 w-7 text-[#0047AB]" />

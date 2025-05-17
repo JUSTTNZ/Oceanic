@@ -35,9 +35,6 @@ export default function CryptoBlog() {
   const [page, setPage] = useState<number>(1);
 
   useEffect(() => {
-    fetchPosts();
-  }, [page]);
-
   const fetchPosts = async () => {
     try {
       setLoading(true);
@@ -55,18 +52,19 @@ export default function CryptoBlog() {
         throw new Error("No news data available");
       }
 
-      const formattedPosts: NewsArticle[] = data.results.map((item: NewsApiResult, index: number) => ({
-        id: index + 1 + posts.length,
-        title: item.title,
-        excerpt: item.description || "No description available",
-        date: new Date(item.pubDate).toLocaleDateString(),
-        image: item.image_url || Img,
-        author: item.source_id || "Unknown Source",
-        authorImage: item.source_icon || author,
-        link: item.link,
-      }));
-
-      setPosts(prevPosts => [...prevPosts, ...formattedPosts]);
+      setPosts(prevPosts => [
+        ...prevPosts,
+        ...data.results.map((item: NewsApiResult, index: number) => ({
+          id: index + 1 + prevPosts.length,
+          title: item.title,
+          excerpt: item.description || "No description available",
+          date: new Date(item.pubDate).toLocaleDateString(),
+          image: item.image_url || Img,
+          author: item.source_id || "Unknown Source",
+          authorImage: item.source_icon || author,
+          link: item.link,
+        })),
+      ]);
       setError(null);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "An unknown error occurred";
@@ -77,6 +75,8 @@ export default function CryptoBlog() {
     }
   };
 
+  fetchPosts();
+}, [page]);
   const loadMorePosts = () => {
     if (!loading) setPage(prev => prev + 1);
   };

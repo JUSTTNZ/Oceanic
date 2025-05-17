@@ -66,13 +66,15 @@ export default function InstantSwapPage() {
 
         {/* Features */}
         <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {[
-            [ArrowsRightLeftIcon, "Swap in One Tap", "No charts or order books. Just tap to convert."],
-            [ClockIcon, "Near-Instant Speed", "Average execution time: <7 seconds."],
-            [CurrencyDollarIcon, "Live Rates & Fee Clarity", "See fees and conversion rates before you confirm."],
-            [ShieldCheckIcon, "Secure & Audited", "Built with fully audited smart contracts and no custodial risk."],
-            [GlobeAltIcon, "Global & Accessible", "Supports multi-chain assets — available worldwide."],
-          ].map(([Icon, title, desc], idx) => (
+          {(
+            [
+              [ArrowsRightLeftIcon, "Swap in One Tap", "No charts or order books. Just tap to convert."],
+              [ClockIcon, "Near-Instant Speed", "Average execution time: <7 seconds."],
+              [CurrencyDollarIcon, "Live Rates & Fee Clarity", "See fees and conversion rates before you confirm."],
+              [ShieldCheckIcon, "Secure & Audited", "Built with fully audited smart contracts and no custodial risk."],
+              [GlobeAltIcon, "Global & Accessible", "Supports multi-chain assets — available worldwide."],
+            ] as [React.ElementType, string, string][]
+          ).map(([Icon, title, desc], idx) => (
             <div key={idx} className="bg-gray-50 p-6 rounded-lg shadow hover:shadow-lg transition">
               <Icon className="h-8 w-8 text-[#0047AB] mb-3" />
               <h3 className="text-lg font-semibold">{title}</h3>

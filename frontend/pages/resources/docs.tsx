@@ -14,7 +14,7 @@ const docs = [
   {
     icon: CodeBracketIcon,
     title: "API Reference",
-    description: "View full documentation for Oceanic's REST endpoints including authentication, requests, and responses.",
+    description: "View full documentation for Oceanic&#39;s REST endpoints including authentication, requests, and responses.",
   },
   {
     icon: KeyIcon,
@@ -86,7 +86,7 @@ export default function DocsPage() {
           <ExclamationCircleIcon className="h-10 w-10 text-yellow-600 mx-auto" />
           <h2 className="text-2xl font-bold text-yellow-800">Docs Coming Soon</h2>
           <p className="text-gray-800">
-            We're preparing a complete developer portal with guides, API references, authentication, and webhook integrations.
+            We&#39;re preparing a complete developer portal with guides, API references, authentication, and webhook integrations.
             Stay tuned — your toolbox is almost ready.
           </p>
         </div>

@@ -15,10 +15,10 @@ export default function CareersPage() {
       <Head>
         <title>Careers | Oceanic Charts</title>
         <meta
-          name="description"
-          content="We're hiring! Join Oceanic Charts to build the future of accessible crypto finance. Explore open roles and grow your career with us."
+            name="description"
+            content="We&#39;re hiring! Join Oceanic Charts to build the future of accessible crypto finance. Explore open roles and grow your career with us."
         />
-      </Head>
+     </Head>
 
       <section className="bg-white text-gray-900 px-6 md:px-20 py-16 space-y-24">
         {/* Hero */}
@@ -60,19 +60,19 @@ export default function CareersPage() {
         {/* Open Roles (Coming Soon) */}
         <div className="max-w-4xl mx-auto bg-yellow-50 border border-yellow-300 rounded-xl p-8 text-center space-y-4 shadow">
           <ExclamationCircleIcon className="h-10 w-10 text-yellow-600 mx-auto" />
-          <h2 className="text-2xl font-bold text-yellow-800">We're Preparing Our Hiring Portal</h2>
+          <h2 className="text-2xl font-bold text-yellow-800">We&#39;re Preparing Our Hiring Portal</h2>
           <p className="text-gray-800 text-sm">
             Our careers portal is launching soon with engineering, design, marketing, and support roles.  
-            If you're passionate about crypto, fintech, or community building — we want to meet you.
+            If you&#39;re passionate about crypto, fintech, or community building — we want to meet you.
           </p>
         </div>
 
         {/* Closing CTA */}
         <div className="text-center max-w-xl mx-auto space-y-4 pt-10">
           <StarIcon className="h-8 w-8 text-[#0047AB] mx-auto" />
-          <h3 className="text-xl font-semibold">Your Dream Role Isn’t Listed?</h3>
+          <h3 className="text-xl font-semibold">Your Dream Role Isn&#39;t Listed?</h3>
           <p className="text-gray-600">
-            Send us a message anyway — we’re always open to exceptional people.  
+            Send us a message anyway — we&#39;re always open to exceptional people.  
             Reach out at <a href="#" className="text-[#0047AB] underline">careers@oceanic.com</a>
           </p>
         </div>
