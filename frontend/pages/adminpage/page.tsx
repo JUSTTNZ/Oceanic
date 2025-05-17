@@ -1,4 +1,18 @@
 "use client";
+interface Transaction {
+  txid: string; // Transaction ID (format: alphanumeric with optional hyphens)
+  amount: number;
+  coin: string;
+  type: 'deposit' | 'withdrawal' | 'transfer';
+  status: 'pending' | 'confirmed' | 'failed';
+  walletAddressUsed: string;
+  createdAt: string; // ISO 8601 date string
+  userId?: {
+    email: string;
+    username: string;
+    fullname: string;
+  };
+}
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -26,10 +40,12 @@ export default function AdminDashboard() {
         });
 
         const data = await res.json();
-        const pending = data.data.filter((txid: any) => txid.status === "pending");
+        const pending = data.data.filter((txid: Transaction) => txid.status === "pending");
         setPendingCount(pending.length);
       } catch (err) {
-        setError("Failed to load transactions");
+        const errorMessage = err instanceof Error ? err.message : "Failed to load transactions";
+        setError(errorMessage);
+        console.error("Fetch error:", err);
       } finally {
         setLoading(false);
       }
