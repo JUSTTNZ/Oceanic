@@ -297,7 +297,22 @@ const walletAddresses = selectedCoin
       setShowModal(true);
     }
   };
+    const safeCountry = selectedCountry || { currency: "USD", currencySymbol: "$" };
+  
+    const formatCurrency = (value: number, currency: string = safeCountry.currency || 'USD'): string => {
+    const formatter = new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
 
+    if (currency === safeCountry.currency && safeCountry.currencySymbol) {
+      return formatter.format(value).replace(currency, safeCountry.currencySymbol);
+    }
+    return formatter.format(value);
+  };
+ const adjustedExchangeRate = exchangeRate - 50;
   return (
     <div className="min-h-screen">
       <motion.div 
@@ -313,7 +328,8 @@ const walletAddresses = selectedCoin
          exchangeRate={exchangeRate} selectedCountry={selectedCountry} />
       <div className="w-full max-w-sm mx-auto   p-6 md:shadow-xl shadow-2xl space-y-4 bg-gray-800/30 border border-gray-700/20 rounded-xl hover:border-blue-500/30 transition-all backdrop-blur-sm hover:shadow-blue-500/10">
           <h2 className="text-center font-semibold text-lg mb-4  bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">Sell Crypto</h2>
-          
+           
+    
           {errorMessage && (
             <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-4">
               <div className="flex">
@@ -355,7 +371,8 @@ const walletAddresses = selectedCoin
           setAmount={setAmount}
           status={status}
         />
-        
+       
+      
           <TxidInput {...{ txid, setTxid, status }} />
       
           <Banks 
@@ -366,6 +383,17 @@ const walletAddresses = selectedCoin
 
 
           />
+              
+          <div className="pt-4 pb-2 px-4 bg-gray-700/20 rounded-lg border border-gray-600/30">
+  <div className="flex items-center justify-between text-sm">
+    <span className="text-gray-300">Exchange Rate:</span>
+    <span className="font-medium text-blue-400">
+      $1 = {formatCurrency(adjustedExchangeRate)}
+    </span>
+  </div>
+ 
+</div>
+        
           <StatusMessage 
             {...{ 
               status, 
