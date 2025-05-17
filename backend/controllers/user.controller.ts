@@ -242,7 +242,7 @@ const changeUserCurrentPassword = asyncHandler(async(req,res) => {
 
 const getCurrentUser = async (req: Request, res: Response) => {
   try {
-    const user = await User.findById(req.user.id).select("email username fullname");
+    const user = await User.findById(req.user.id).select("email username fullname role createdAt phoneNumber");
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -256,7 +256,7 @@ const getCurrentUser = async (req: Request, res: Response) => {
         fullname: user.fullname,
         role:user.role,
         createdAt:user.createdAt,
-        phoneNUmber:user.phoneNumber
+        phoneNumber:user.phoneNumber
       },
     });
   } catch (error) {
