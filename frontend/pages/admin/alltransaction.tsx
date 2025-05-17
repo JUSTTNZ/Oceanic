@@ -43,7 +43,7 @@ export default function AllTransactionsPage() {
         });
 
         const data = await res.json();
-        setTransactions(data.data);
+        setTransactions(Array.isArray(data.data) ? data.data : []);
       } catch (err) {
         setError("Failed to fetch transactions");
         console.error(err);
@@ -54,13 +54,14 @@ export default function AllTransactionsPage() {
     fetchTransactions();
   }, []);
 
-const sortedTransactions = [...transactions].sort((a, b) => {
-  const order = sortDirection === "asc" ? 1 : -1;
-  const valA = a[sortField]!; // Note the ! operator
-  const valB = b[sortField]!; // Note the ! operator
-  return valA > valB ? order : valA < valB ? -order : 0;
-});
-
+const sortedTransactions = Array.isArray(transactions)
+  ? [...transactions].sort((a, b) => {
+      const order = sortDirection === "asc" ? 1 : -1;
+      const valA = a[sortField]!;
+      const valB = b[sortField]!;
+      return valA > valB ? order : valA < valB ? -order : 0;
+    })
+  : [];
   const toggleSort = (field: keyof Transaction) => {
     if (field === sortField) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");

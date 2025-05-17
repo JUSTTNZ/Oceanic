@@ -213,7 +213,7 @@ const fetchBanks = async () => {
       }
     };
     fetchExchangeRate();
-  }, [selectedCountry.name]);
+  }, [selectedCountry.name, selectedCountry.currency]);
 
 const walletAddresses = selectedCoin
   ? BYBIT_WALLET_ADDRESSES[selectedCoin.symbol.toUpperCase()] || []

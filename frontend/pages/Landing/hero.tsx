@@ -33,11 +33,13 @@ export default function Hero() {
   };
 }, []);
   return (
-    <section className="bg-white relative overflow-hidden font-grotesk">
+    <section className="bg-white  relative overflow-hidden font-grotesk">
       <div className="max-w-7xl mx-auto px-6 lg:py-24 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
         <div>
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-[#0047AB] mb-6 leading-tight">Buy and sell <br /> crypto with ease</h1>
-          <p className="text-base sm:text-lg text-gray-600 mb-8">Oceanic makes it simple to trade cryptocurrency securely and globally. Join us and start today!</p>
+          <p className="text-base sm:text-lg text-gray-900 mb-2">Trade smarter, faster, and without borders. At Oceanic Charts, we’re building a secure gateway to digital finance for everyone — everywhere.</p>
+          <p className="text-base sm:text-lg text-gray-900 mb-8">Your crypto journey starts here. Oceanic Charts empowers you to trade securely, access global markets, and grow your portfolio with confidence.</p>
+          {/* Input and Button */}
           <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0">
             <input type="email" placeholder="Your e-mail" className="border border-gray-300 px-4 py-3 rounded-md focus:outline-none w-full sm:w-64" />
             <button  className="bg-[#0047AB] text-white px-6 py-3 rounded-md hover:bg-[#0047AB]">
@@ -53,8 +55,8 @@ export default function Hero() {
           <Image
             src={hero}
             alt="Phone Mockup"
-            width={400}
-            height={700}
+            width={600}
+            height={800}
             className={`mx-auto ${inView ? "animate-bounce-once" : ""}`}
           />
 

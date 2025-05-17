@@ -5,38 +5,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronDownIcon,
   ChevronUpIcon,
-  CreditCardIcon,
-  RocketLaunchIcon,
-  LockClosedIcon,
-  Squares2X2Icon,
-  UsersIcon,
-  BookOpenIcon,
-  BriefcaseIcon,
 } from "@heroicons/react/24/outline";
+import { megaMenus } from "../../lib/navLinks";
 
 export default function Navbar() {
   const [hoverItem, setHoverItem] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [openSection, setOpenSection] = useState<string | null>(null);
-
-  const megaMenus = {
-    Trade: [
-      { icon: CreditCardIcon, title: "Cards", desc: "Spend money globally with a card that does it all." },
-      { icon: RocketLaunchIcon, title: "Instant Swap", desc: "Buy your favourite cryptocurrency in 2 mins or less." },
-      { icon: LockClosedIcon, title: "Buy/Sell", desc: "Trade cryptocurrencies instantly with deep liquidity and competitive rates." },
-      { icon: Squares2X2Icon, title: "P2P", desc: "Securely buy and sell crypto directly with other users." },
-    ],
-    Resources: [
-      { icon: UsersIcon, title: "Community", desc: "Connect with other traders and stay updated on the latest trends." },
-      { icon: RocketLaunchIcon, title: "Tutorials", desc: "Step-by-step guides to help you navigate crypto trading with ease." },
-      { icon: BookOpenIcon, title: "Docs", desc: "Comprehensive technical documentation for developers and traders." },
-    ],
-    Company: [
-      { icon: BriefcaseIcon, title: "About Us", desc: "Learn more about Oceanic and our mission to revolutionize trading." },
-      { icon: BookOpenIcon, title: "Careers", desc: "Join our team and build a future in the world of crypto and finance." },
-      { icon: RocketLaunchIcon, title: "Blog", desc: "Stay informed with the latest news, insights, and market trends." },
-    ],
-  };
 
   const toggleSection = (menu: string) => {
     setOpenSection(openSection === menu ? null : menu);
@@ -84,20 +59,17 @@ export default function Navbar() {
                             exit={{ opacity: 0, x: -10 }}
                             transition={{ duration: 0.3, delay: idx * 0.1 }}
                           >
-                            <Link href="../sell">
+                            <Link href={item.href}>
                               <item.icon className="h-10 w-10 text-[#0047AB] mb-4" />
-                            </Link>
-                            <Link href="../sell">
                               <h3 className="text-lg font-semibold group-hover:text-[#0047AB] mb-3">
                                 {item.title}
                               </h3>
+                              <p className="text-sm text-gray-600">{item.desc}</p>
                             </Link>
-                            <p className="text-sm text-gray-600">{item.desc}</p>
                           </motion.div>
                         ))}
                       </div>
                     </div>
-                    
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -108,12 +80,11 @@ export default function Navbar() {
         {/* Desktop buttons */}
         <div className="hidden md:flex space-x-8 items-center">
           <Link href={"/login"}>
-          <button className="text-[#0047AB] text-lg cursor-pointer">Sign in</button>
+            <button className="text-[#0047AB] text-lg cursor-pointer">Sign in</button>
           </Link>
-         <Link href="/register" >
-         <button className="text-white bg-[#0047AB] px-6 py-2 text-lg rounded-md hover:bg-[#459af5] cursor-pointer z-20">Get Started</button>
-         </Link>
-
+          <Link href="/register">
+            <button className="text-white bg-[#0047AB] px-6 py-2 text-lg rounded-md hover:bg-[#459af5] cursor-pointer z-20">Get Started</button>
+          </Link>
         </div>
 
         {/* Mobile Hamburger */}
@@ -129,7 +100,6 @@ export default function Navbar() {
       {/* Mobile Collapsible Menu */}
       <AnimatePresence>
         {isOpen && (
-          
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -137,7 +107,6 @@ export default function Navbar() {
             transition={{ duration: 0.3 }}
             className="md:hidden px-6 pb-6 space-y-6"
           >
-            
             {Object.keys(megaMenus).map((menu) => (
               <div key={menu}>
                 <div onClick={() => toggleSection(menu)} className="flex justify-between items-center cursor-pointer py-2 font-semibold">
@@ -158,27 +127,28 @@ export default function Navbar() {
                       className="space-y-4 font-thin pl-4 py-2 bg-gray-50 rounded"
                     >
                       {megaMenus[menu as keyof typeof megaMenus].map((item, idx) => (
-                        <p key={idx} className="text-sm text-gray-700 hover:text-[#0047AB] cursor-pointer">{item.title}</p>
+                        <Link key={idx} href={item.href}>
+                          <p className="text-sm text-gray-700 hover:text-[#0047AB] cursor-pointer">{item.title}</p>
+                        </Link>
                       ))}
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
             ))}
-              <div className="pt-4 space-y-4">
-    <Link href="/login">
-      <button className="w-full text-[#0047AB] text-lg border mb-4 border-[#0047AB] py-2 rounded-md">
-        Sign in
-      </button>
-    </Link>
-    <Link href="/register">
-      <button className="w-full bg-[#0047AB] text-white text-lg py-2 rounded-md hover:bg-[#459af5]">
-        Get Started
-      </button>
-    </Link>
-  </div>
+            <div className="pt-4 space-y-4">
+              <Link href="/login">
+                <button className="w-full text-[#0047AB] text-lg border mb-4 border-[#0047AB] py-2 rounded-md">
+                  Sign in
+                </button>
+              </Link>
+              <Link href="/register">
+                <button className="w-full bg-[#0047AB] text-white text-lg py-2 rounded-md hover:bg-[#459af5]">
+                  Get Started
+                </button>
+              </Link>
+            </div>
           </motion.div>
-          
         )}
       </AnimatePresence>
     </header>
