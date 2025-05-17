@@ -20,7 +20,7 @@ export default function Navbar() {
   return (
     <header className="bg-white text-black relative z-50 font-grotesk">
       <div className="flex justify-between items-center px-6 py-6 font-bold">
-        <h1 className={` text-3xl md:text-4l `}>Oceanic <span className="text-[#0047AB]">Charts</span></h1>
+        <h1 className={` text-2xl md:text-4l `}>Oceanic <span className="text-[#0047AB]">Charts</span></h1>
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex text-xl space-x-12 font-semibold">

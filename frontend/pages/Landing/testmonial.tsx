@@ -104,7 +104,7 @@ export default function TestimonialCarousel() {
   }
 
   return (
-    <div className="py-16 pb-24 text-center font-grotesk overflow-hidden">
+    <div className="py-16 pb-24 text-center font-grotesk overflow-hidden bg-[#1c1c3b]  text-white">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -112,8 +112,8 @@ export default function TestimonialCarousel() {
         viewport={{ once: true }}
         className="mb-12"
       >
-        <h2 className="lg:text-3xl text-2xl font-bold mb-3">What Our Users Say</h2>
-        <p className="text-gray-600 max-w-2xl mx-auto">
+        <h2 className="md:text-3xl text-2xl font-bold mb-3">What Our Users Say</h2>
+        <p className="text-gray-100 text-md max-w-2xl mx-auto">
           Hear from our community of crypto enthusiasts and investors
         </p>
       </motion.div>
@@ -137,10 +137,10 @@ export default function TestimonialCarousel() {
               {visibleTestimonials.map((testimonial) => (
                 <div 
                   key={testimonial.id}
-                  className="p-6 bg-white rounded-xl shadow-md w-full max-w-sm mx-auto flex-shrink-0"
+                  className="p-6 bg-gradient-to-b from-blue-800 to-blue-900 text-white  rounded-xl shadow-md w-full max-w-sm mx-auto flex-shrink-0"
                 >
 
-                  <p className="text-gray-700 text-md px-6 mb-6 relative z-10">
+                  <p className="text-gray-100 text-md px-6 mb-6 relative z-10">
                     {testimonial.text}
                   </p>
                   <div className="mt-6 flex flex-col items-center">
@@ -153,7 +153,7 @@ export default function TestimonialCarousel() {
                       />
                     </div>
                     <h4 className="font-semibold text-md mt-3">{testimonial.name}</h4>
-                    <p className="text-gray-500 text-sm mt-1">{testimonial.role}</p>
+                    <p className="text-gray-300 text-sm mt-1">{testimonial.role}</p>
                   </div>
    
                 </div>
