@@ -1,6 +1,7 @@
 "use client";
 
 import { setUser } from "@/action";
+
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState,  } from "react";
@@ -74,7 +75,7 @@ export default function LoginPage() {
       });
 
       const data = await response.json();
-
+ console.log(data)
       if (!response.ok || !data.data) {
         const errorMessage = data.message || data.error || "Login failed";
         setError((prev) => ({ ...prev, general: errorMessage }));
@@ -83,7 +84,7 @@ export default function LoginPage() {
 
       localStorage.setItem("accessToken", data.data.accessToken);
       localStorage.setItem("refreshToken", data.data.refreshToken);
-
+      
       // Fetch user data from /auth/me
       const userRes = await fetch("https://oceanic-servernz.vercel.app/api/v1/users/getCurrentUser", {
         headers: {
@@ -91,9 +92,11 @@ export default function LoginPage() {
         },
       });
 
+      console.log(userRes)
       const userData = await userRes.json();
 
       if (userRes.ok && userData?.data) {
+        console.log(userData)
         dispatch(setUser({
           uid: userData.data._id,
           email: userData.data.email,
@@ -105,8 +108,12 @@ export default function LoginPage() {
           lastLogin: new Date().toISOString(),
         }));
       }
-
-      router.push("/markets");
+      console.log(data.user?.role)
+if (userData.data.role === "admin" || userData.data.role === "superadmin") {
+  router.push("/adminpage");
+} else  {
+  router.push("/markets");  
+}
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Login failed";
       setError((prev) => ({ ...prev, general: errorMessage }));

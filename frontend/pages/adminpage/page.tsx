@@ -103,7 +103,7 @@ export default function AdminDashboard() {
               exit={{ opacity: 0, x: -30 }}
               transition={{ duration: 0.3 }}
             >
-              <Link href="/admin/pending" className="block bg-gray-800/30 hover:border-blue-500 border border-gray-700/20 rounded-xl p-6 transition-all backdrop-blur-sm shadow hover:shadow-blue-500/10">
+              <Link href="#" className="block bg-gray-800/30 hover:border-blue-500 border border-gray-700/20 rounded-xl p-6 transition-all backdrop-blur-sm shadow hover:shadow-blue-500/10">
                 <h2 className="text-xl font-semibold mb-2 text-white">Pending Approvals</h2>
                 <p className="text-gray-400 text-sm">Review and confirm new buy/sell transactions.</p>
               </Link>
@@ -117,7 +117,7 @@ export default function AdminDashboard() {
               exit={{ opacity: 0, x: -30 }}
               transition={{ duration: 0.3 }}
             >
-              <Link href="/admin/all" className="block bg-gray-800/30 hover:border-blue-500 border border-gray-700/20 rounded-xl p-6 transition-all backdrop-blur-sm shadow hover:shadow-blue-500/10">
+              <Link href="#" className="block bg-gray-800/30 hover:border-blue-500 border border-gray-700/20 rounded-xl p-6 transition-all backdrop-blur-sm shadow hover:shadow-blue-500/10">
                 <h2 className="text-xl font-semibold mb-2 text-white">All Transactions</h2>
                 <p className="text-gray-400 text-sm">Browse full history of crypto trades made on Oceanic Charts.</p>
               </Link>
