@@ -1,134 +1,118 @@
-import { useState } from 'react';
-import { FaCheck, FaTimes, } from 'react-icons/fa';
+"use client";
 
-const AdminConfirm = () => {
-  const [pendingTx, setPendingTx] = useState([
-    {
-      id: "txn-9264",
-      user: "crypto_wizard_42",
-      amount: "5 BTC",
-      wallet: "bc1qxy2kg...0wlh",
-      time: "2 mins ago",
-      status: "pending"
-    },
-    {
-      id: "txn-7153",
-      user: "degen_trader",
-      amount: "12.8 ETH",
-      wallet: "0xAbC12345Ef...90d",
-      time: "5 mins ago",
-      status: "pending"
-    },
-    {
-      id: "txn-9265",
-      user: "bitcoin_maxi",
-      amount: "3.2 BTC",
-      wallet: "bc1qdef456...1xyz",
-      time: "10 mins ago",
-      status: "pending"
-    },
-    {
-      id: "txn-7154",
-      user: "eth_whale",
-      amount: "24.5 ETH",
-      wallet: "0xDef67890Ab...12c",
-      time: "15 mins ago",
-      status: "pending"
-    },
-    {
-      id: "txn-9266",
-      user: "altcoin_king",
-      amount: "1500 SOL",
-      wallet: "Hs1Zw9kLp...3mn",
-      time: "20 mins ago",
-      status: "pending"
-    },
-    {
-      id: "txn-7155",
-      user: "nft_guru",
-      amount: "8.5 ETH",
-      wallet: "0xNft12345Gh...67i",
-      time: "25 mins ago",
-      status: "pending"
-    }
-  ]);
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { BellIcon } from "@heroicons/react/24/outline";
+import { AnimatePresence, motion } from "framer-motion";
+import AllTransaction from '../admin/alltransaction'
+import PendingTransaction from '../admin/pendingtransaction'
 
-  const handleConfirm = (id: string) => {
-    setPendingTx(pendingTx.filter(tx => tx.id !== id));
-  };
+export default function AdminDashboard() {
+  const [pendingCount, setPendingCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"pending" | "all">("pending");
 
-  const handleReject = (id: string) => {
-    setPendingTx(pendingTx.filter(tx => tx.id !== id));
-  };
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return;
+
+    const fetchPendingTransactions = async () => {
+      try {
+        const res = await fetch("https://oceanic-servernz.vercel.app/api/v1/transaction/admin", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await res.json();
+        const pending = data.data.filter((txid: any) => txid.status === "pending");
+        setPendingCount(pending.length);
+      } catch (err) {
+        setError("Failed to load transactions");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPendingTransactions();
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100 font-grotesk pt-20">
-      {/* Transaction Stream */}
-      <main className="container mx-auto px-4 sm:px-6 py-8">
-        <div className="mx-auto">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
-              Pending Approvals
-            </h2>
-            <span className="text-xs bg-gray-800/50 text-gray-300 px-3 py-1 rounded-full backdrop-blur-sm">
-              {pendingTx.length} requests
-            </span>
+    <div className="min-h-screen bg-gray-900 text-white py-20 px-6 font-grotesk">
+      <div className="max-w-4xl mx-auto">
+        <div className="flex justify-between items-center mb-12">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
+            Admin Dashboard
+          </h1>
+          <div className="relative">
+            <BellIcon className="h-7 w-7 text-blue-500" />
+            {pendingCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-600 text-xs text-white px-1.5 py-0.5 rounded-full">
+                {pendingCount}
+              </span>
+            )}
           </div>
-
-          {pendingTx.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="mx-auto w-24 h-24 bg-gray-800/50 rounded-full flex items-center justify-center mb-4 backdrop-blur-sm border border-gray-700/30">
-                <FaCheck className="text-blue-400 text-3xl" />
-              </div>
-              <h3 className="text-xl font-medium mb-1 text-white">All clear!</h3>
-              <p className="text-gray-400">No pending transactions</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
-              {pendingTx.map(tx => (
-                <div 
-                  key={tx.id} 
-                  className="bg-gray-800/30 border border-gray-700/20 rounded-xl p-5 hover:border-blue-500/30 transition-all backdrop-blur-sm shadow-lg hover:shadow-blue-500/10"
-                >
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h3 className="font-medium text-blue-300">@{tx.user}</h3>
-                      <p className="text-xs text-gray-400 mt-1">{tx.wallet}</p>
-                    </div>
-                    <span className="text-xs bg-gray-800/50 text-gray-300 px-2 py-1 rounded-full backdrop-blur-sm">
-                      {tx.time}
-                    </span>
-                  </div>
-                  
-                  <div className="mb-6">
-                    <p className="text-2xl font-bold text-white">{tx.amount}</p>
-                    <p className="text-xs text-gray-400 mt-1">Transaction ID: {tx.id}</p>
-                  </div>
-                  
-                  <div className="flex space-x-3">
-                    <button
-                      onClick={() => handleConfirm(tx.id)}
-                      className="flex-1 flex items-center justify-center space-x-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3 px-4 rounded-lg transition-all hover:shadow-lg hover:shadow-blue-500/20"
-                    >
-                      <FaCheck />
-                      <span>Confirm</span>
-                    </button>
-                    <button
-                      onClick={() => handleReject(tx.id)}
-                      className="flex-1 flex items-center justify-center space-x-2 bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white py-3 px-4 rounded-lg transition-all hover:shadow-lg hover:shadow-red-500/20"
-                    >
-                      <FaTimes />
-                      <span>Reject</span>
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
-      </main>
+
+        <div className="flex justify-center items-center space-x-4 py-4">
+          <button
+            onClick={() => setActiveTab("pending")}
+            className={`px-6 py-2 rounded-full font-semibold transition-all duration-300 border-2 ${
+              activeTab === "pending"
+                ? "bg-[rgba(0,71,171,0.2)] text-[#0047AB] border-[#0047AB]"
+                : "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-300"
+            }`}
+          >
+            Pending
+          </button>
+          <button
+            onClick={() => setActiveTab("all")}
+            className={`px-6 py-2 rounded-full font-semibold transition-all duration-300 border-2 ${
+              activeTab === "all"
+                ? "bg-[rgba(0,71,171,0.2)] text-[#0047AB] border-[#0047AB]"
+                : "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-300"
+            }`}
+          >
+            All
+          </button>
+        </div>
+
+        <AnimatePresence mode="wait">
+          {activeTab === "pending" ? (
+            <motion.div
+              key="pending"
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -30 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Link href="/admin/pending" className="block bg-gray-800/30 hover:border-blue-500 border border-gray-700/20 rounded-xl p-6 transition-all backdrop-blur-sm shadow hover:shadow-blue-500/10">
+                <h2 className="text-xl font-semibold mb-2 text-white">Pending Approvals</h2>
+                <p className="text-gray-400 text-sm">Review and confirm new buy/sell transactions.</p>
+              </Link>
+              <PendingTransaction />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="all"
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -30 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Link href="/admin/all" className="block bg-gray-800/30 hover:border-blue-500 border border-gray-700/20 rounded-xl p-6 transition-all backdrop-blur-sm shadow hover:shadow-blue-500/10">
+                <h2 className="text-xl font-semibold mb-2 text-white">All Transactions</h2>
+                <p className="text-gray-400 text-sm">Browse full history of crypto trades made on Oceanic Charts.</p>
+              </Link>
+              <AllTransaction />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {loading && <p className="mt-6 text-gray-400">Loading data...</p>}
+        {error && <p className="mt-6 text-red-500">{error}</p>}
+      </div>
     </div>
   );
-};
-
-export default AdminConfirm;
+}
