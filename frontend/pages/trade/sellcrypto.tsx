@@ -386,7 +386,7 @@ const walletAddresses = selectedCoin
               
           <div className="pt-4 pb-2 px-4 bg-gray-700/20 rounded-lg border border-gray-600/30">
   <div className="flex items-center justify-between text-sm">
-    <span className="text-gray-300">Exchange Rate:</span>
+    <span className="text-gray-300">Oceanic Rate:</span>
     <span className="font-medium text-blue-400">
       $1 = {formatCurrency(adjustedExchangeRate)}
     </span>
