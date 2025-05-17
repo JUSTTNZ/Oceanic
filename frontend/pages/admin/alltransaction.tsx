@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+//import { motion } from "framer-motion";
+import { FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
 
 interface Transaction {
   txid: string;
@@ -18,16 +19,24 @@ interface Transaction {
   };
 }
 
+const statusColors: Record<string, string> = {
+  confirmed: "bg-green-100 text-green-800",
+  pending: "bg-yellow-100 text-yellow-800",
+  failed: "bg-red-100 text-red-800",
+};
+
 export default function AllTransactionsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [sortField, setSortField] = useState<keyof Transaction>("createdAt");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
   useEffect(() => {
     const fetchTransactions = async () => {
       const token = localStorage.getItem("accessToken");
       try {
-        const res = await fetch("https://oceanic-servernz.vercel.app/api/v1/admin", {
+        const res = await fetch("https://oceanic-servernz.vercel.app/api/v1/transaction/admin", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -45,6 +54,27 @@ export default function AllTransactionsPage() {
     fetchTransactions();
   }, []);
 
+  const sortedTransactions = [...transactions].sort((a, b) => {
+    const order = sortDirection === "asc" ? 1 : -1;
+    const valA = a[sortField];
+    const valB = b[sortField];
+    return valA > valB ? order : valA < valB ? -order : 0;
+  });
+
+  const toggleSort = (field: keyof Transaction) => {
+    if (field === sortField) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDirection("asc");
+    }
+  };
+
+  const renderSortIcon = (field: keyof Transaction) => {
+    if (field !== sortField) return <FaSort className="ml-1 text-gray-400" />;
+    return sortDirection === "asc" ? <FaSortUp className="ml-1" /> : <FaSortDown className="ml-1" />;
+  };
+
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 font-grotesk pt-20 px-4">
       <div className="max-w-6xl mx-auto">
@@ -59,41 +89,37 @@ export default function AllTransactionsPage() {
         ) : transactions.length === 0 ? (
           <p className="text-gray-400">No transactions available.</p>
         ) : (
-          <div className="space-y-4">
-            {transactions.map((tx) => (
-              <motion.div
-                key={tx.txid}
-                className="bg-gray-800/30 border border-gray-700/20 rounded-lg p-4 backdrop-blur-sm shadow hover:shadow-blue-500/10"
-                whileHover={{ scale: 1.01 }}
-              >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h4 className="text-white font-semibold">{tx.txid}</h4>
-                    <p className="text-gray-400 text-sm">{tx.createdAt}</p>
-                    <p className="text-sm mt-1">{tx.userId?.email || "No user data"}</p>
-                  </div>
-                  <span
-                    className={`px-3 py-1 text-xs rounded-full font-semibold ${
-                      tx.status === "pending"
-                        ? "bg-yellow-500/10 text-yellow-300"
-                        : tx.status === "confirmed"
-                        ? "bg-green-500/10 text-green-300"
-                        : "bg-red-500/10 text-red-300"
-                    }`}
-                  >
-                    {tx.status.toUpperCase()}
-                  </span>
-                </div>
-
-                <div className="mt-3">
-                  <p className="text-white text-lg font-bold">
-                    {tx.amount} {tx.coin.toUpperCase()}
-                  </p>
-                  <p className="text-gray-400 text-sm">Type: {tx.type}</p>
-                  <p className="text-gray-400 text-sm">Wallet: {tx.walletAddressUsed}</p>
-                </div>
-              </motion.div>
-            ))}
+          <div className="overflow-x-auto rounded-lg shadow border border-gray-700">
+            <table className="min-w-full divide-y divide-gray-700">
+              <thead className="bg-gray-800">
+                <tr>
+                  <th className="px-4 py-2 text-left text-sm font-semibold cursor-pointer" onClick={() => toggleSort("txid")}>TxID {renderSortIcon("txid")}</th>
+                  <th className="px-4 py-2 text-left text-sm font-semibold cursor-pointer" onClick={() => toggleSort("createdAt")}>Date {renderSortIcon("createdAt")}</th>
+                  <th className="px-4 py-2 text-left text-sm font-semibold cursor-pointer" onClick={() => toggleSort("type")}>Type {renderSortIcon("type")}</th>
+                  <th className="px-4 py-2 text-left text-sm font-semibold cursor-pointer" onClick={() => toggleSort("status")}>Status {renderSortIcon("status")}</th>
+                  <th className="px-4 py-2 text-right text-sm font-semibold cursor-pointer" onClick={() => toggleSort("amount")}>Amount {renderSortIcon("amount")}</th>
+                  <th className="px-4 py-2 text-left text-sm font-semibold">Wallet</th>
+                  <th className="px-4 py-2 text-left text-sm font-semibold">User</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-700">
+                {sortedTransactions.map((tx) => (
+                  <tr key={tx.txid} className="hover:bg-gray-800/50">
+                    <td className="px-4 py-3 text-sm text-blue-300 font-mono truncate max-w-xs">{tx.txid}</td>
+                    <td className="px-4 py-3 text-sm text-gray-300">{new Date(tx.createdAt).toLocaleString()}</td>
+                    <td className="px-4 py-3 text-sm text-blue-500 capitalize">{tx.type}</td>
+                    <td className="px-4 py-3">
+                      <span className={`text-xs px-2 py-1 rounded-full font-semibold ${statusColors[tx.status] || "bg-gray-200 text-gray-700"}`}>
+                        {tx.status.toUpperCase()}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-right text-white font-semibold">{tx.amount} {tx.coin.toUpperCase()}</td>
+                    <td className="px-4 py-3 text-sm text-gray-400 font-mono truncate max-w-xs">{tx.walletAddressUsed}</td>
+                    <td className="px-4 py-3 text-sm text-gray-300">{tx.userId?.email || "N/A"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
