@@ -30,15 +30,20 @@ export default function AdminPendingPage() {
           Authorization: `Bearer ${token}`,
         },
       });
+      if (!res.ok) {
+        setTransactions([]);
+        setLoading(false);
+        return;
+      }
       const data = await res.json();
-      const pending = data.data.filter((tx: Transaction) => tx.status === "pending");
+      const pending = Array.isArray(data.data) ? data.data.filter((tx: Transaction) => tx.status === "pending") : [];
       setTransactions(pending);
-    } catch (err) {
-      console.error("Failed to load transactions", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+          } catch (err) {
+            console.error("Failed to load transactions", err);
+          } finally {
+            setLoading(false);
+          }
+        };
 
   const handleUpdateStatus = async (txid: string, status: string) => {
     const token = localStorage.getItem("accessToken");
