@@ -40,6 +40,13 @@ export default function AdminDashboard() {
         });
 
         const data = await res.json();
+        console.log("API response:", data);
+
+        if (!res.ok || !Array.isArray(data.data)) {
+          setError(data.message || "Failed to load transactions");
+          setLoading(false);
+          return;
+        }
         const pending = data.data.filter((txid: Transaction) => txid.status === "pending");
         setPendingCount(pending.length);
       } catch (err) {

@@ -187,7 +187,7 @@ if (error) {
     <div className="max-w-6xl mx-auto">
       {/* Header Section */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-100">Transaction History</h1>
+        <h1 className="text-lg md:text-2xl font-bold text-gray-100">Transaction History</h1>
         <p className="text-gray-300">{filteredTransactions.length} transactions found</p>
       </div>
 
@@ -254,7 +254,7 @@ if (error) {
 
       {/* Transactions Table */}
       <div className="bg-gray-800 border border-gray-700 rounded-lg shadow-lg overflow-hidden">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto scrollbar-hide">
           <table className="min-w-full divide-y divide-gray-700">
             <thead className="bg-gray-800">
               <tr>
