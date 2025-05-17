@@ -228,6 +228,11 @@ export default function BuyCrypto() {
     }
   }, [amount, selectedCoin, exchangeRate, selectedCountry]);
 
+
+  const adjustedExchangeRate = exchangeRate + 50;
+  const usdAmount = parseFloat(amount || "0");
+  const calculatedLocalCurrencyAmount = usdAmount * adjustedExchangeRate;
+
   const formatCurrency = (value: number) => {
     if (!selectedCountry) return value.toString();
     return new Intl.NumberFormat("en-US", {
@@ -302,6 +307,7 @@ export default function BuyCrypto() {
           selectedCoin={selectedCoin}
           serviceFee={serviceFee}
           amount={amount}
+          localCurrencyAmount={calculatedLocalCurrencyAmount.toString()}
           coinAmount={coinAmount}
           exchangeRate={exchangeRate}
           
@@ -317,7 +323,7 @@ export default function BuyCrypto() {
             key={reference} // ensures button is remounted with updated reference
             reference={reference}
             email={userEmail || "user@example.com"}
-            amount={(parseFloat(amount) - serviceFee) * 100}
+            amount={calculatedLocalCurrencyAmount * 100}
             publicKey={process.env.NEXT_PUBLIC_PAYSTACK_KEY!}
             onSuccess={onSuccess}
             onClose={onClose}
