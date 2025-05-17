@@ -3,11 +3,15 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { BellIcon } from "@heroicons/react/24/outline";
+import { AnimatePresence, motion } from "framer-motion";
+import AllTransaction from '../admin/alltransaction'
+import PendingTransaction from '../admin/pendingtransaction'
 
 export default function AdminDashboard() {
   const [pendingCount, setPendingCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"pending" | "all">("pending");
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
@@ -15,17 +19,16 @@ export default function AdminDashboard() {
 
     const fetchPendingTransactions = async () => {
       try {
-        const res = await fetch("https://oceanic-servernz.vercel.app/api/v1/admin", {
+        const res = await fetch("https://oceanic-servernz.vercel.app/api/v1/transaction/admin", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
 
         const data = await res.json();
-        type Transaction = { status: string; [key: string]: unknown };
-        const pending = data.data.filter((tx: Transaction) => tx.status === "pending");
+        const pending = data.data.filter((txid: any) => txid.status === "pending");
         setPendingCount(pending.length);
-      } catch {
+      } catch (err) {
         setError("Failed to load transactions");
       } finally {
         setLoading(false);
@@ -52,17 +55,60 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Link href="/admin/pending" className="bg-gray-800/30 hover:border-blue-500 border border-gray-700/20 rounded-xl p-6 transition-all backdrop-blur-sm shadow hover:shadow-blue-500/10">
-            <h2 className="text-xl font-semibold mb-2 text-white">Pending Approvals</h2>
-            <p className="text-gray-400 text-sm">Review and confirm new buy/sell transactions.</p>
-          </Link>
-
-          <Link href="/admin/all" className="bg-gray-800/30 hover:border-blue-500 border border-gray-700/20 rounded-xl p-6 transition-all backdrop-blur-sm shadow hover:shadow-blue-500/10">
-            <h2 className="text-xl font-semibold mb-2 text-white">All Transactions</h2>
-            <p className="text-gray-400 text-sm">Browse full history of crypto trades made on Oceanic Charts.</p>
-          </Link>
+        <div className="flex justify-center items-center space-x-4 py-4">
+          <button
+            onClick={() => setActiveTab("pending")}
+            className={`px-6 py-2 rounded-full font-semibold transition-all duration-300 border-2 ${
+              activeTab === "pending"
+                ? "bg-[rgba(0,71,171,0.2)] text-[#0047AB] border-[#0047AB]"
+                : "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-300"
+            }`}
+          >
+            Pending
+          </button>
+          <button
+            onClick={() => setActiveTab("all")}
+            className={`px-6 py-2 rounded-full font-semibold transition-all duration-300 border-2 ${
+              activeTab === "all"
+                ? "bg-[rgba(0,71,171,0.2)] text-[#0047AB] border-[#0047AB]"
+                : "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-300"
+            }`}
+          >
+            All
+          </button>
         </div>
+
+        <AnimatePresence mode="wait">
+          {activeTab === "pending" ? (
+            <motion.div
+              key="pending"
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -30 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Link href="/admin/pending" className="block bg-gray-800/30 hover:border-blue-500 border border-gray-700/20 rounded-xl p-6 transition-all backdrop-blur-sm shadow hover:shadow-blue-500/10">
+                <h2 className="text-xl font-semibold mb-2 text-white">Pending Approvals</h2>
+                <p className="text-gray-400 text-sm">Review and confirm new buy/sell transactions.</p>
+              </Link>
+              <PendingTransaction />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="all"
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -30 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Link href="/admin/all" className="block bg-gray-800/30 hover:border-blue-500 border border-gray-700/20 rounded-xl p-6 transition-all backdrop-blur-sm shadow hover:shadow-blue-500/10">
+                <h2 className="text-xl font-semibold mb-2 text-white">All Transactions</h2>
+                <p className="text-gray-400 text-sm">Browse full history of crypto trades made on Oceanic Charts.</p>
+              </Link>
+              <AllTransaction />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {loading && <p className="mt-6 text-gray-400">Loading data...</p>}
         {error && <p className="mt-6 text-red-500">{error}</p>}
