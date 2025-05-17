@@ -34,16 +34,16 @@ export default function Header() {
 
   
       <nav className="hidden lg:flex gap-6">
-        <ul className="flex gap-6 pt-2"> 
+        {/* <ul className="flex gap-6 pt-2"> 
           <li>
-            <button className="relative p-2 rounded-full hover:bg-gray-800/30 transition-colors backdrop-blur-sm">
+            {/* <button className="relative p-2 rounded-full hover:bg-gray-800/30 transition-colors backdrop-blur-sm">
               <FaBell className="text-gray-300" />
               <span className="absolute top-0 right-0 w-5 h-5 bg-red-500 text-xs flex items-center justify-center rounded-full backdrop-blur-sm">
                 {6}
               </span>
-            </button>
+            </button> 
           </li>
-        </ul>
+        </ul> */}
         {user ? (
           <>
             <button 
