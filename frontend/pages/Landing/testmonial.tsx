@@ -1,12 +1,9 @@
 "use client";
 
-import { useKeenSlider } from "keen-slider/react";
-import "keen-slider/keen-slider.min.css";
-import { useEffect, useState } from "react";
-import { FaQuoteLeft, FaQuoteRight } from "react-icons/fa";
-import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
+import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import img from "../../public/Images/blogp.png";
+import img from '../../public/Images/blogp.png';
+import { useState, useEffect } from 'react';
 
 const testimonials = [
   {
@@ -32,119 +29,152 @@ const testimonials = [
   },
   {
     id: 4,
-    name: "James Lee",
+    name: "David Johnson",
     role: "NFT Collector",
     image: img,
-    text: "I found exclusive drops and community insights here. Awesome ecosystem!",
+    text: "The NFT marketplace integration is seamless. I've discovered amazing digital art through this platform!",
   },
   {
     id: 5,
-    name: "Elena Garcia",
+    name: "Emma Thompson",
     role: "Crypto Trader",
     image: img,
-    text: "Finally, a platform that respects speed and clarity. I love the clean UI.",
+    text: "The real-time market data and trading tools have significantly improved my trading performance.",
   },
   {
     id: 6,
-    name: "Daniel Kim",
-    role: "Web3 Builder",
+    name: "James Wilson",
+    role: "Crypto Analyst",
     image: img,
-    text: "I onboarded in minutes. The tech stack is solid and reliable.",
+    text: "The depth of market analysis available here is unparalleled in the crypto space.",
   },
 ];
 
-export default function TestimonialSection() {
-  const [currentSlide, setCurrentSlide] = useState(0);
+export default function TestimonialCarousel() {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const [itemsPerPage, setItemsPerPage] = useState(3);
+  const [direction, setDirection] = useState(1);
 
-  const [sliderRef, instanceRef] = useKeenSlider<HTMLDivElement>({
-    loop: true,
-    slides: {
-      perView: 3,
-      spacing: 18,
-      origin: "center", // ✅ replaces "centered: true"
-    },
-    slideChanged(slider) {
-      setCurrentSlide(slider.track.details.rel);
-    },
-    breakpoints: {
-      "(max-width: 768px)": {
-        slides: {
-          perView: 1,
-          spacing: 13,
-          origin: "center",
-        },
-      },
-    },
-  });
-
+  // Handle responsive items per page
   useEffect(() => {
+    const updateItemsPerPage = () => {
+      setItemsPerPage(window.innerWidth < 768 ? 1 : 3);
+    };
+    
+    updateItemsPerPage();
+    window.addEventListener('resize', updateItemsPerPage);
+    return () => window.removeEventListener('resize', updateItemsPerPage);
+  }, []);
+
+  // Auto-play functionality
+  useEffect(() => {
+    if (isPaused) return;
+
     const interval = setInterval(() => {
-      instanceRef.current?.next();
-    }, 4000);
+      setDirection(1);
+      setCurrentIndex(prev => (prev + 1) % (testimonials.length - itemsPerPage + 1));
+    }, 3000);
+
     return () => clearInterval(interval);
-  }, [instanceRef]);
+  }, [isPaused, itemsPerPage]);
+
+  const slideVariants = {
+    enter: (direction: number) => ({
+      x: direction > 0 ? '100%' : '-100%',
+      opacity: 0
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+      transition: { duration: 0.5 }
+    },
+    exit: (direction: number) => ({
+      x: direction > 0 ? '-100%' : '100%',
+      opacity: 0,
+      transition: { duration: 0.5 }
+    })
+  };
+
+  // Get visible testimonials
+  const visibleTestimonials = [];
+  for (let i = 0; i < itemsPerPage; i++) {
+    const index = (currentIndex + i) % testimonials.length;
+    visibleTestimonials.push(testimonials[index]);
+  }
 
   return (
-    <div className="py-12 pb-20 text-center font-grotesk relative">
-      <h2 className="lg:text-2xl text-md font-bold mb-6">What Our Users Say</h2>
+    <div className="py-16 pb-24 text-center font-grotesk overflow-hidden">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        viewport={{ once: true }}
+        className="mb-12"
+      >
+        <h2 className="lg:text-3xl text-2xl font-bold mb-3">What Our Users Say</h2>
+        <p className="text-gray-600 max-w-2xl mx-auto">
+          Hear from our community of crypto enthusiasts and investors
+        </p>
+      </motion.div>
 
-      {/* Carousel Container */}
-      <div className="relative max-w-6xl mx-auto px-4">
-        {/* Arrows */}
-        <button
-          onClick={() => instanceRef.current?.prev()}
-          className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-white p-2 rounded-full shadow-md"
-        >
-          <ChevronLeftIcon className="w-5 h-5 text-black" />
-        </button>
-
-        <div ref={sliderRef} className="keen-slider">
-          {testimonials.map((testimonial, idx) => (
-            <div
-              key={testimonial.id}
-              className={`keen-slider__slide p-6 shadow-xl rounded-2xl relative transition duration-300 ${
-                currentSlide === idx
-                  ? "bg-[#0047AB] text-white scale-105"
-                  : "bg-white"
-              }`}
+      <div 
+        className="relative max-w-7xl mx-auto px-4"
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+      >
+        <div className="relative h-70 overflow-hidden">
+          <AnimatePresence custom={direction} initial={false}>
+            <motion.div
+              key={currentIndex}
+              custom={direction}
+              variants={slideVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              className="absolute inset-0 flex justify-center gap-6"
             >
-              <FaQuoteLeft className="absolute top-4 left-4 text-gray-300 text-md" />
-              <p className="text-md italic px-4">{testimonial.text}</p>
-              <div className="mt-4 flex flex-col items-center">
-                <Image
-                  src={testimonial.image}
-                  alt={testimonial.name}
-                  width={20}
-                  height={20}
-                  className="w-16 h-16 rounded-full shadow-lg"
-                />
-                <h4 className="font-semibold text-sm mt-2">{testimonial.name}</h4>
-                <p className="text-xs opacity-70">{testimonial.role}</p>
-              </div>
-              <FaQuoteRight className="absolute bottom-4 right-4 text-gray-300 text-md" />
-            </div>
-          ))}
+              {visibleTestimonials.map((testimonial) => (
+                <div 
+                  key={testimonial.id}
+                  className="p-6 bg-white rounded-xl shadow-md w-full max-w-sm mx-auto flex-shrink-0"
+                >
+
+                  <p className="text-gray-700 text-md px-6 mb-6 relative z-10">
+                    {testimonial.text}
+                  </p>
+                  <div className="mt-6 flex flex-col items-center">
+                    <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-white shadow-md">
+                      <Image
+                        src={testimonial.image}
+                        alt={testimonial.name}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    <h4 className="font-semibold text-md mt-3">{testimonial.name}</h4>
+                    <p className="text-gray-500 text-sm mt-1">{testimonial.role}</p>
+                  </div>
+   
+                </div>
+              ))}
+            </motion.div>
+          </AnimatePresence>
         </div>
 
-        <button
-          onClick={() => instanceRef.current?.next()}
-          className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 bg-white p-2 rounded-full shadow-md"
-        >
-          <ChevronRightIcon className="w-5 h-5 text-black" />
-        </button>
-      </div>
-
-      {/* Pagination Dots */}
-      <div className="flex justify-center mt-6 gap-2">
-        {testimonials.map((_, idx) => (
-          <button
-            key={idx}
-            onClick={() => instanceRef.current?.moveToIdx(idx)}
-            className={`w-3 h-3 rounded-full transition ${
-              currentSlide === idx ? "bg-[#0047AB]" : "bg-gray-300"
-            }`}
-          />
-        ))}
+        <div className="flex justify-center mt-8 space-x-2">
+          {Array.from({ length: testimonials.length - itemsPerPage + 1 }).map((_, index) => (
+            <button
+              key={index}
+              onClick={() => {
+                setDirection(index > currentIndex ? 1 : -1);
+                setCurrentIndex(index);
+              }}
+              className={`w-3 h-3 rounded-full transition-colors ${currentIndex === index ? 'bg-blue-500' : 'bg-gray-300'}`}
+              aria-label={`Go to testimonial group ${index + 1}`}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

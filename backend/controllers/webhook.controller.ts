@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { Transaction } from '../models/transaction.model.js';
 import { sendUserNotification } from '../utils/notification.js';
 import { sendAdminEmail } from '../utils/mailer.js';
-import { io } from '../config/socket.js';
+//import { io } from '../config/socket.js';
 import crypto from 'crypto';
 
 export const handleBitgetWebhook = async (req: Request, res: Response) => {
@@ -98,15 +98,15 @@ export const handleBitgetWebhook = async (req: Request, res: Response) => {
     });
     
 
-    io.emit('transaction_updated', {
-      user: transaction.userId,
-      txid,
-      status,
-      type,
-      coin,
-      amount,
-      country
-    });
+    // io.emit('transaction_updated', {
+    //   user: transaction.userId,
+    //   txid,
+    //   status,
+    //   type,
+    //   coin,
+    //   amount,
+    //   country
+    // });
 
     res.status(200).json({ success: true });
   } catch (error) {

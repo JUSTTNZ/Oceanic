@@ -54,11 +54,12 @@ interface Coin {
             <h4 className="font-medium text-gray-100">Current Prices:</h4>
             <div className="grid grid-cols-2 gap-2 mt-2">
               {coins.slice(0, 10).map((coin) => (
-                <div key={coin.id} className="flex items-center  text-white bg-gray-800/30 border border-gray-700/20 rounded-xl p-5 hover:border-blue-500/30 transition-all backdrop-blur-sm shadow-lg hover:shadow-blue-500/10">
+                <div key={coin.id} className="flex items-center  text-white 
+                bg-gray-800/30 border border-gray-700/20 rounded-xl p-5 hover:border-blue-500/30 transition-all backdrop-blur-sm shadow-lg hover:shadow-blue-500/10">
                   <Image src={coin.image} alt={coin.name} width={24} height={24} className="mr-2" />
                   <div className="md:text-sm text-xs">
                     <p className="font-medium">{coin.symbol.toUpperCase()}</p>
-                    <p className="md:text-sm text-xs">{formatCurrency(coin.current_price * exchangeRate)}</p>
+                    <p className="md:text-sm text-xs">{formatCurrency(coin.current_price * exchangeRate + 50)}</p>
                   </div>
                 </div>
               ))}

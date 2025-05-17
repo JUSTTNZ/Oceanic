@@ -18,7 +18,7 @@ export default function WhyOceanic() {
                     alt="phone"
                     width={300}
                     height={500}
-                    className="rounded-lg pb-10"
+                    className="rounded-lg"
                 />
             </div>
 

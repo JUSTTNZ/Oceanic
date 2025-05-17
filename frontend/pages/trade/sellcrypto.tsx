@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { ArrowPathIcon } from "@heroicons/react/24/outline";
+import { ArrowPathIcon, } from "@heroicons/react/24/outline";
 import CoinSelection from "../components/sell/coinselection";
 import TxidInput from "../components/sell/txidinput";
 import StatusMessage from "../components/sell/statusmessage";
@@ -11,6 +11,7 @@ import WalletAddressDisplay from "../components/sell/walletaddres";
 import FirstSide from "../components/sell/firstside";
 import TransactionStatusModal from "./transactionmodal";
 import AmountInputSell from "../components/sell/amout";
+import Banks from "../components/sell/bank";
 
 interface Coin {
   id: string;
@@ -23,6 +24,8 @@ interface Coin {
 interface Country {
   name: string;
   code: string;
+  currency:string;
+  currencySymbol: string;
 }
 
 interface TransactionDetails {
@@ -31,68 +34,96 @@ interface TransactionDetails {
   amount: number;
   status: string;
 }
-
-const BYBIT_WALLET_ADDRESSES: Record<string, Record<string, string>> = {
-  USDT: {
-    NG: "0x8e5b5a4c4fc1e6fbdcb2aa3eec0381c1344f85cf",
-    US: "0x456...def",
-    EU: "0x789...ghi",
-    UK: "0x101...jkl"
-  },
-  BTC: {
-    NG: "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh",
-    US: "bc1qzw...",
-    EU: "bc1qab...",
-    UK: "bc1qcd..."
-  },
-  ETH: {
-    NG: "0xde0b295669a9fd93d5f28d9ec85e40f4cb697bae",
-    US: "0x567...efg",
-    EU: "0x890...hij",
-    UK: "0x112...klm"
-  },
-  BNB: {
-    NG: "bnb1grpf0955h0ykzq3ar5nmum7y6gdfl6lxfn46h2",
-    US: "bnb1zw...",
-    EU: "bnb1ab...",
-    UK: "bnb1cd..."
-  },
-  SOL: {
-    NG: "8e1YyRzFKR5nJ1Rw1ErGfP9Y7EXW8B7jvN5QvL6oUpvN",
-    US: "SolanaAddress2",
-    EU: "SolanaAddress3",
-    UK: "SolanaAddress4"
-  },
-  XRP: {
-    NG: "rEb8TK3gBgk5auZkwc6sHnwrGVJH8DuaLh",
-    US: "rPw5...",
-    EU: "rPw6...",
-    UK: "rPw7..."
-  },
-  ADA: {
-    NG: "addr1q9d6t0sx9ywhcwn04n4z8s6guxle5z5hf6a0kxdygnh6z0d0xgk8dcvxsp2k2vm0l2c4xptqx9a9n5",
-    US: "addr1zw...",
-    EU: "addr1ab...",
-    UK: "addr1cd..."
-  },
-  DOGE: {
-    NG: "D7Y55qnMaQKUyUxuSHM3wZjaeU5iW6HXRL",
-    US: "D8zw...",
-    EU: "D8ab...",
-    UK: "D8cd..."
-  },
-  DOT: {
-    NG: "14ErftuTiyBi2LqCHNfX1LpbMfW6Y2VtKMRuhV2zNHff5D2W",
-    US: "1zw...",
-    EU: "1ab...",
-    UK: "1cd..."
-  },
-  MATIC: {
-    NG: "0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0",
-    US: "0x678...fgh",
-    EU: "0x901...ijk",
-    UK: "0x113...lmn"
-  }
+interface WalletAddress {
+  address: string;
+  network: string;
+  note?: string;
+}
+const BYBIT_WALLET_ADDRESSES: Record<string, WalletAddress[]> = {
+  USDT: [
+    {
+      address: "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t",
+      network: "TRC20",
+      note: "Tron Network (Recommended - Low Fees)"
+    },
+    {
+      address: "0x8e5b5a4c4fc1e6fbdcb2aa3eec0381c1344f85cf",
+      network: "ERC20",
+      note: "Ethereum Network (Higher Fees)"
+    },
+    {
+      address: "TYgG3S22bqxfKF2Q5ZhWpQvDq5W4dXbm1D",
+      network: "TRC20 (Legacy)",
+      note: "Old Tron address"
+    }
+  ],
+  BTC: [
+    {
+      address: "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh",
+      network: "BTC",
+      note: "Native SegWit (Recommended)"
+    },
+    {
+      address: "3FZbgi29cpjq2GjdwV8eyHuJJnkLtktZc5",
+      network: "BTC (Legacy)",
+      note: "Bitcoin Legacy Address"
+    }
+  ],
+  ETH: [
+    {
+      address: "0xde0b295669a9fd93d5f28d9ec85e40f4cb697bae",
+      network: "ETH"
+    }
+  ],
+  BNB: [
+    {
+      address: "bnb1grpf0955h0ykzq3ar5nmum7y6gdfl6lxfn46h2",
+      network: "BEP2",
+      note: "Binance Chain"
+    },
+    {
+      address: "0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0",
+      network: "BEP20",
+      note: "Binance Smart Chain"
+    }
+  ],
+  SOL: [
+    {
+      address: "8e1YyRzFKR5nJ1Rw1ErGfP9Y7EXW8B7jvN5QvL6oUpvN",
+      network: "SOL"
+    }
+  ],
+  XRP: [
+    {
+      address: "rEb8TK3gBgk5auZkwc6sHnwrGVJH8DuaLh",
+      network: "XRP",
+      note: "Include Destination Tag: 12345678"
+    }
+  ],
+  ADA: [
+    {
+      address: "addr1q9d6t0sx9ywhcwn04n4z8s6guxle5z5hf6a0kxdygnh6z0d0xgk8dcvxsp2k2vm0l2c4xptqx9a9n5",
+      network: "ADA"
+    }
+  ],
+  DOGE: [
+    {
+      address: "D7Y55qnMaQKUyUxuSHM3wZjaeU5iW6HXRL",
+      network: "DOGE"
+    }
+  ],
+  DOT: [
+    {
+      address: "14ErftuTiyBi2LqCHNfX1LpbMfW6Y2VtKMRuhV2zNHff5D2W",
+      network: "DOT"
+    }
+  ],
+  MATIC: [
+    {
+      address: "0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0",
+      network: "MATIC"
+    }
+  ]
 };
 interface BankDetails {
   accountNumber: string;
@@ -116,7 +147,12 @@ const SellCrypto = () => {
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState<"success" | "error">("success");
   const [transactionDetails, setTransactionDetails] = useState<TransactionDetails | null>(null);
-  const [selectedCountry] = useState<Country>({ code: "NG", name: "Nigeria" });
+const [selectedCountry] = useState<Country>({ 
+  code: "NG", 
+  name: "Nigeria", 
+  currency: "NGN",  
+  currencySymbol: "₦"  
+});
   const [bankDetails, setBankDetails] = useState<BankDetails>({
     accountNumber: "",
     accountName: "",
@@ -124,12 +160,15 @@ const SellCrypto = () => {
     bankCode: ""
   });
   const [banksList, setBanksList] = useState<{name: string, code: string}[]>([]);
+
+// rate
+  const [exchangeRate, setExchangeRate] = useState<number>(0);
  console.log(transactionDetails)
   useEffect(() => {
     const fetchCoins = async () => {
       try {
         const res = await fetch("/api/coin");
-        if (!res.ok) throw new Error("Failed to fetch cryptocurrencies");
+        if (!res.ok) setErrorMessage("Failed to fetch cryptocurrencies");
         const data = await res.json();
         const supported = data.filter((coin: Coin) => SUPPORTED_COINS.includes(coin.symbol.toUpperCase()));
         setCoins(supported);
@@ -140,30 +179,45 @@ const SellCrypto = () => {
     };
     fetchCoins();
 
-    // Fetch banks list for the selected country
-    const fetchBanks = async () => {
+
+const fetchBanks = async () => {
+  try {
+    const response = await fetch(`/api/banks?country=${selectedCountry.name.toLowerCase()}`);
+    const data = await response.json();
+
+    if (Array.isArray(data.banks)) {
+      setBanksList(data.banks); // Set your dropdown list
+    } else {
+      console.error("Unexpected response format:", data);
+      setBanksList([]);
+    }
+  } catch (error) {
+    console.error("Failed to fetch banks:", error);
+  }
+};
+
+    fetchBanks();
+  }, [selectedCountry.code, selectedCountry.name]);
+  useEffect(() => {
+    const fetchExchangeRate = async () => {
+      if (!selectedCountry.name) return;
+
       try {
-        const response = await fetch(`/api/banks?country=${selectedCountry.code}`);
+        const response = await fetch("/api/rate");
+        if (!response.ok) 
+          setErrorMessage("Failed to fetch rate");
         const data = await response.json();
-        setBanksList(data.banks || []);
-      } catch (error) {
-        console.error("Failed to fetch banks:", error);
+        setExchangeRate(data.conversion_rates[selectedCountry.currency] || 1);
+      } catch {
+        setExchangeRate(1);
       }
     };
-    fetchBanks();
-  }, [selectedCountry.code]);
+    fetchExchangeRate();
+  }, [selectedCountry.name]);
 
-  const walletAddress = selectedCoin
-    ? BYBIT_WALLET_ADDRESSES[selectedCoin.symbol.toUpperCase()]?.[selectedCountry.code] ||
-      "Wallet address not available for this country"
-    : null;
-      const handleBankDetailsChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setBankDetails(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
+const walletAddresses = selectedCoin
+  ? BYBIT_WALLET_ADDRESSES[selectedCoin.symbol.toUpperCase()] || []
+  : null;
 
   const handleSubmit = async () => {
     if (!txid || !selectedCoin || amount <= 0) {
@@ -185,7 +239,7 @@ const SellCrypto = () => {
       setIsChecking(true);
 
       const accessToken = localStorage.getItem('accessToken');
-      if (!accessToken) throw new Error("Please login first");
+      if (!accessToken) setErrorMessage("Please login first");
 
       const response = await fetch('https://oceanic-servernz.vercel.app/api/v1/transaction', {
         method: 'POST',
@@ -254,7 +308,9 @@ const SellCrypto = () => {
         transition={{ duration: 0.3 }} 
         className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl mx-auto py-14 px-4"
       >
-        <FirstSide status={status} SUPPORTED_COINS={SUPPORTED_COINS} />
+        <FirstSide status={status}
+           SUPPORTED_COINS={coins.filter(coin => SUPPORTED_COINS.includes(coin.symbol.toUpperCase()))} 
+         exchangeRate={exchangeRate} selectedCountry={selectedCountry} />
       <div className="w-full max-w-sm mx-auto   p-6 md:shadow-xl shadow-2xl space-y-4 bg-gray-800/30 border border-gray-700/20 rounded-xl hover:border-blue-500/30 transition-all backdrop-blur-sm hover:shadow-blue-500/10">
           <h2 className="text-center font-semibold text-lg mb-4  bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">Sell Crypto</h2>
           
@@ -286,14 +342,14 @@ const SellCrypto = () => {
             }} 
           />
 
-          <WalletAddressDisplay 
-            {...{ 
-              selectedCoin, 
-              selectedCountry, 
-              walletAddress, 
-              status 
-            }} 
-          />
+       <WalletAddressDisplay
+  selectedCoin={selectedCoin}
+  selectedCountry={selectedCountry}
+   walletAddresses={walletAddresses || []}
+  status={status}
+/>
+
+          
         <AmountInputSell 
           amount={amount}
           setAmount={setAmount}
@@ -301,61 +357,15 @@ const SellCrypto = () => {
         />
         
           <TxidInput {...{ txid, setTxid, status }} />
-       <div className="space-y-4">
-        
-            <div>
-              <label htmlFor="bankName" className="block text-sm font-medium text-gray-100 mb-1">
-                Bank Name
-              </label>
-              <select
-                id="bankName"
-                name="bankName"
-                value={bankDetails.bankName}
-                onChange={handleBankDetailsChange}
-                className="w-full border border-gray-500 px-4 py-2 rounded-lg text-white text-md font-medium focus:border-blue-600 focus:outline-none "
-                disabled={status !== 'pending'}
-              >
-                <option value="">Select your bank</option>
-                {banksList.map(bank => (
-                  <option key={bank.code} value={bank.name}>
-                    {bank.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+      
+          <Banks 
+          bankDetails={bankDetails}
+          banksList={banksList}
+          setBankDetails={setBankDetails}
+          status={status}
 
-            <div>
-              <label htmlFor="accountNumber" className="block text-sm font-medium text-gray-100 mb-1">
-                Account Number
-              </label>
-              <input
-                type="text"
-                id="accountNumber"
-                name="accountNumber"
-                value={bankDetails.accountNumber}
-                onChange={handleBankDetailsChange}
-                placeholder="1234567890"
-                className="w-full border border-gray-500 px-4 py-2 rounded-lg text-white text-md font-medium focus:border-blue-600 focus:outline-none "
-                disabled={status !== 'pending'}
-              />
-            </div>
 
-            <div>
-              <label htmlFor="accountName" className="block text-sm font-medium text-gray-100 mb-1">
-                Account Name
-              </label>
-              <input
-                type="text"
-                id="accountName"
-                name="accountName"
-                value={bankDetails.accountName}
-                onChange={handleBankDetailsChange}
-                placeholder="John Doe"
-                className="w-full border border-gray-500 px-4 py-2 rounded-lg text-white text-md font-medium focus:border-blue-600 focus:outline-none "
-                disabled={status !== 'pending'}
-              />
-            </div>
-          </div>
+          />
           <StatusMessage 
             {...{ 
               status, 
@@ -372,12 +382,12 @@ const SellCrypto = () => {
 
           <button 
             onClick={handleSubmit} 
-            disabled={!txid || !selectedCoin || status !== 'pending' || amount <= 0 || !bankDetails.accountNumber || !bankDetails.accountName } 
+            disabled={!txid || !selectedCoin || status !== 'pending' || amount <= 0 || !bankDetails.accountNumber || !bankDetails.accountName || !bankDetails.bankName } 
             className={`
               w-full py-3 rounded-full font-semibold transition-colors 
               
               ${
-              !txid || !selectedCoin || status !== 'pending' || amount <= 0 || !bankDetails.accountNumber || !bankDetails.accountName 
+              !txid || !selectedCoin || status !== 'pending' || amount <= 0 || !bankDetails.accountNumber || !bankDetails.accountName || !bankDetails.bankName
                 ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
                 : '              bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3 px-4  transition-all hover:shadow-lg hover:shadow-blue-500/20'
             }`}

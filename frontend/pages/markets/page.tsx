@@ -417,7 +417,7 @@ export default function Markets() {
                   </div>
                 </div>
               ) : (
-                <div className="bg-white rounded-xl shadow-sm overflow-hidden h-full flex items-center justify-center p-6">
+                <div className="bg-gray-800 rounded-xl shadow-sm overflow-hidden h-full flex items-center justify-center p-6">
                   <p className="text-gray-500 text-center">
                     {loading ? 'Loading coin details...' : 'Select a coin to view details'}
                   </p>
