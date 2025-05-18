@@ -379,6 +379,7 @@ const walletAddresses = selectedCoin
           banksList={banksList}
           setBankDetails={setBankDetails}
           status={status}
+          setBankErrors={setBankErrors}
           bankErrors={bankErrors}
           />
           <TxidInput 

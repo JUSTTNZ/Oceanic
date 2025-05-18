@@ -20,6 +20,11 @@ interface BankDetails {
   setBankDetails: React.Dispatch<React.SetStateAction<BankDetails>>;
   status: TransactionStatus;
   bankErrors: { accountNumber?: string; accountName?: string };
+  setBankErrors: React.Dispatch<
+    React.SetStateAction<{
+      accountNumber?: string;
+      accountName?: string;
+    }>
 }
 
 
