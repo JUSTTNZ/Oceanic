@@ -67,10 +67,10 @@ const createTransaction = asyncHandler(async (req, res) => {
         });
       }
 
-      if (!/^\d{11}$/.test(accountNumber)) {
+      if (!/^\d{10}$/.test(accountNumber)) {
         throw new ApiError({
           statusCode: 400,
-          message: "Account number must be exactly 11 digits",
+          message: "Account number must be exactly 10 digits",
         });
       }
 
