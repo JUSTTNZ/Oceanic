@@ -148,7 +148,7 @@ if (userData.data.role === "admin" || userData.data.role === "superadmin") {
         const user = credential.user;
         const idToken = await user.getIdToken();
   
-    const response = await fetch("http://localhost:7001/api/v1/google", {
+    const response = await fetch("https://oceanic-servernz.vercel.app/api/v1/google", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
