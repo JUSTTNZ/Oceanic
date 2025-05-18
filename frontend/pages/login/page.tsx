@@ -7,7 +7,8 @@ import { useRouter } from "next/router";
 import { useEffect, useState,  } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useDispatch } from "react-redux";
-
+import {  signInWithPopup,  } from "firebase/auth";
+import { auth, googleProvider } from '../firebase';
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState({
@@ -139,6 +140,77 @@ if (userData.data.role === "admin" || userData.data.role === "superadmin") {
     return () => clearTimeout(timer);
   }
 }, [error.general]);
+
+ const handleGoogleLogin = async () => {
+
+  try {
+    const credential = await signInWithPopup(auth, googleProvider);
+        const user = credential.user;
+        const idToken = await user.getIdToken();
+  
+    const response = await fetch("http://localhost:7001/api/v1/google", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ idToken }),
+      credentials: "include" 
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Google login failed");
+    }
+
+    // 4. Handle successful response
+    const data = await response.json();
+    console.log("goo",data)
+
+         localStorage.setItem("accessToken", data.data.accessToken);
+      localStorage.setItem("refreshToken", data.data.refreshToken);
+      
+      // Fetch user data from /auth/me
+      const userRes = await fetch("https://oceanic-servernz.vercel.app/api/v1/users/getCurrentUser", {
+        headers: {
+          Authorization: `Bearer ${data.data.accessToken}`,
+        },
+      });
+            console.log(userRes)
+      const userData = await userRes.json();
+
+      if (userRes.ok && userData?.data) {
+        console.log(userData)
+        dispatch(setUser({
+          uid: userData.data._id,
+          email: userData.data.email,
+          username: userData.data.username,
+          role: userData.data.role,
+          fullname: userData.data.fullname,
+          createdAt: userData.data.createdAt,
+          phoneNumber: userData.data.phoneNumber,
+          lastLogin: new Date().toISOString(),
+        }));
+      }
+      console.log(data.user?.role)
+if (userData.data.role === "admin" || userData.data.role === "superadmin") {
+  router.push("/adminpage");
+} else  {
+  router.push("/markets");  
+}
+    
+  } catch (error) {
+    console.error("Google login error:", error);
+    const errorMessage = 'Google login failed. Please try again.';
+        
+
+    setError(prev => ({
+          ...prev,
+          general: errorMessage
+        }));
+  
+  }
+};
+
   return (
   <div className="flex justify-center items-center min-h-screen bg-gray-900 p-4">
   <div className="relative bg-gray-800/50 backdrop-blur-lg lg:p-10 p-6 w-full max-w-md lg:max-w-xl border border-gray-600/30 rounded-2xl shadow-xl overflow-hidden">
@@ -167,6 +239,7 @@ if (userData.data.role === "admin" || userData.data.role === "superadmin") {
             </svg>
           </div>
         </div>
+       
         <h2 className="text-3xl lg:text-4xl font-light text-gray-100 mb-2">Sign in</h2>
         <p className="text-sm text-gray-400 mb-4">Please check that you are visiting the correct URL</p>
         <div className="inline-flex items-center px-4 py-2 bg-gray-800/50 border border-gray-700 rounded-full mb-6">
@@ -270,7 +343,7 @@ if (userData.data.role === "admin" || userData.data.role === "superadmin") {
       </div>
 
       <button
-        // onClick={handleGoogleLogin}
+        onClick={handleGoogleLogin}
         className="w-full bg-gray-700/50 hover:bg-gray-700/70 text-gray-300 p-3 rounded-lg font-medium text-sm transition-all duration-300 border border-gray-600/50 flex justify-center items-center h-12 mb-6"
       >
         <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

@@ -12,10 +12,11 @@ declare global {
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import http from 'http';
-
+import firebaseInit  from './utils/firebase.js'
 const app = express();
 const server = http.createServer(app);
 
+firebaseInit()
 // CORS Configuration
 app.use(cors({
   origin: ['http://localhost:3000', 'https://oceanic-charts.vercel.app'],
@@ -32,7 +33,7 @@ import healthCheckRouter from "./routes/healthcheck.route.js";
 import transactionRouter from "./routes/transaction.route.js";
 import paystackWebhookRouter from "./routes/buy.route.js";
 import { errorHandler } from "./middlewares/error.middleware.js";
-
+import google from './routes/google.route.js'
 // ✅ Setup raw body parsing for webhooks
 app.use('/api/v1/webhook', express.raw({ type: 'application/json' }), (req, res, next) => {
   try {
@@ -81,6 +82,7 @@ app.get('/', (req, res) => {
 app.use("/api/v1/healthCheck", healthCheckRouter);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/transaction", transactionRouter);
+app.use("/api/v1/google", google);
 
 // Global error handler
 app.use(errorHandler);
