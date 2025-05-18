@@ -159,9 +159,8 @@ const [selectedCountry] = useState<Country>({
     bankName: "",
     bankCode: ""
   });
-  const [bankErrors, setBankErrors] = useState<{ accountNumber?: string; accountName?: string }>({});
-
   const [banksList, setBanksList] = useState<{name: string, code: string}[]>([]);
+  const [bankErrors, setBankErrors] = useState<{ accountNumber?: string; accountName?: string }>({});
 
 // rate
   const [exchangeRate, setExchangeRate] = useState<number>(0);
@@ -222,118 +221,99 @@ const walletAddresses = selectedCoin
   : null;
 
   const handleSubmit = async () => {
-  const errors: { accountNumber?: string; accountName?: string } = {};
-
-  // Validate required fields
-  if (!txid || !selectedCoin || amount <= 0) {
-    setErrorMessage("Please fill in all transaction fields correctly.");
-    setStatus('failed');
-    setModalType("error");
-    setShowModal(true);
-    return;
-  }
-
-  // Validate bank fields
-  if (!bankDetails.accountNumber || !bankDetails.accountName || !bankDetails.bankName) {
-    setErrorMessage("Please provide your bank account details.");
-    setStatus('failed');
-    setModalType("error");
-    setShowModal(true);
-    return;
-  }
-
-  // Validate account number (must be 11 digits)
-  if (!/^\d{11}$/.test(bankDetails.accountNumber)) {
-    errors.accountNumber = "Account number must be exactly 11 digits.";
-  }
-
-  // Validate account name (must be two words)
-  if (!/^[A-Za-z]+ [A-Za-z]+$/.test(bankDetails.accountName.trim())) {
-    errors.accountName = "Enter full name (first and last name).";
-  }
-
-  if (Object.keys(errors).length > 0) {
-    setBankErrors(errors); // You must define useState for this
-    setErrorMessage("Please correct the highlighted bank details.");
-    setStatus('failed');
-    setModalType("error");
-    setShowModal(true);
-    return;
-  }
-
-  setBankErrors({}); // Clear old errors
-
-  try {
-    setStatus('sent');
-    setIsChecking(true);
-
-    const accessToken = localStorage.getItem('accessToken');
-    if (!accessToken) {
-      setErrorMessage("Please login first.");
+    if (!txid || !selectedCoin || amount <= 0) {
+      setErrorMessage("Please fill in all fields correctly.");
+      setStatus('failed');
+      setModalType("error");
+      setShowModal(true);
       return;
     }
+ if (!bankDetails.accountNumber || !bankDetails.accountName || !bankDetails.bankName) {
+      setErrorMessage("Please provide your bank account details.");
+      setStatus('failed');
+      setModalType("error");
+      setShowModal(true);
+      return;
+    }
+    try {
+      setStatus('sent');
+      setIsChecking(true);
 
-    const response = await fetch('https://oceanic-servernz.vercel.app/api/v1/transaction', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}`
-      },
-      body: JSON.stringify({
-        coin: selectedCoin.symbol,
-        amount,
-        txid,
-        type: "sell",
-        country: selectedCountry.code,
-        bankName: bankDetails.bankName,
-        accountName: bankDetails.accountName,
-        accountNumber: bankDetails.accountNumber,
-      })
+      const accessToken = localStorage.getItem('accessToken');
+      if (!accessToken) setErrorMessage("Please login first");
+
+      const response = await fetch('https://oceanic-servernz.vercel.app/api/v1/transaction', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`
+        },
+        body: JSON.stringify({
+          coin: selectedCoin.symbol,
+          amount,
+          txid,
+          type: "sell",
+          country: selectedCountry.code
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        setErrorMessage(errorData.message || 'Transaction failed');
+      }
+
+      const data = await response.json();
+      setTransactionDetails(data.data);
+
+      let tries = 0;
+      const maxTries = 20;
+      const pollStatus = setInterval(async () => {
+        tries++;
+        const pollRes = await fetch(`https://oceanic-servernz.vercel.app/api/v1/transaction/poll?txid=${txid}&coin=${selectedCoin.symbol}`);
+        const pollData = await pollRes.json();
+
+        if (pollData.status === 'confirmed') {
+          clearInterval(pollStatus);
+          setStatus('confirmed');
+          setModalType("success");
+          setShowModal(true);
+          setIsChecking(false);
+        }
+
+        if (tries > maxTries) {
+          clearInterval(pollStatus);
+          setStatus("failed");
+          setModalType("error");
+          setErrorMessage(`${amount} ${selectedCoin.symbol.toUpperCase()} is pending. We are yet to confirm your transaction.`);
+          setShowModal(true);
+          setIsChecking(false);
+        }
+      }, 3000);
+
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Transaction error');
+      setStatus('failed');
+      setIsChecking(false);
+      setModalType("error");
+      setShowModal(true);
+    }
+  };
+    const safeCountry = selectedCountry || { currency: "USD", currencySymbol: "$" };
+  
+    const formatCurrency = (value: number, currency: string = safeCountry.currency || 'USD'): string => {
+    const formatter = new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Transaction failed');
+    if (currency === safeCountry.currency && safeCountry.currencySymbol) {
+      return formatter.format(value).replace(currency, safeCountry.currencySymbol);
     }
-
-    const data = await response.json();
-    setTransactionDetails(data.data);
-
-    // Start polling
-    let tries = 0;
-    const maxTries = 20;
-    const pollStatus = setInterval(async () => {
-      tries++;
-      const pollRes = await fetch(`https://oceanic-servernz.vercel.app/api/v1/transaction/poll?txid=${txid}&coin=${selectedCoin.symbol}`);
-      const pollData = await pollRes.json();
-
-      if (pollData.status === 'confirmed') {
-        clearInterval(pollStatus);
-        setStatus('confirmed');
-        setModalType("success");
-        setShowModal(true);
-        setIsChecking(false);
-      }
-
-      if (tries > maxTries) {
-        clearInterval(pollStatus);
-        setStatus("failed");
-        setModalType("error");
-        setErrorMessage(`${amount} ${selectedCoin.symbol.toUpperCase()} is pending. We are yet to confirm your transaction.`);
-        setShowModal(true);
-        setIsChecking(false);
-      }
-    }, 3000);
-  } catch (error) {
-    setErrorMessage(error instanceof Error ? error.message : 'Transaction error');
-    setStatus('failed');
-    setIsChecking(false);
-    setModalType("error");
-    setShowModal(true);
-  }
-};
-
-
+    return formatter.format(value);
+  };
+ const adjustedExchangeRate = exchangeRate - 50;
   return (
     <div className="min-h-screen">
       <motion.div 
@@ -349,7 +329,8 @@ const walletAddresses = selectedCoin
          exchangeRate={exchangeRate} selectedCountry={selectedCountry} />
       <div className="w-full max-w-sm mx-auto   p-6 md:shadow-xl shadow-2xl space-y-4 bg-gray-800/30 border border-gray-700/20 rounded-xl hover:border-blue-500/30 transition-all backdrop-blur-sm hover:shadow-blue-500/10">
           <h2 className="text-center font-semibold text-lg mb-4  bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">Sell Crypto</h2>
-          
+           
+    
           {errorMessage && (
             <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-4">
               <div className="flex">
@@ -391,17 +372,30 @@ const walletAddresses = selectedCoin
           setAmount={setAmount}
           status={status}
         />
-        
-          <TxidInput {...{ txid, setTxid, status }} />
+       
       
           <Banks 
-            bankDetails={bankDetails}
-            banksList={banksList}
-            setBankDetails={setBankDetails}
-            status={status}
-            bankErrors={bankErrors}
+          bankDetails={bankDetails}
+          banksList={banksList}
+          setBankDetails={setBankDetails}
+          status={status}
+          bankErrors={bankErrors}
           />
-
+          <TxidInput 
+            txid={txid} 
+            setTxid={setTxid} 
+            status={status} 
+          />              
+          <div className="pt-4 pb-2 px-4 bg-gray-700/20 rounded-lg border border-gray-600/30">
+  <div className="flex items-center justify-between text-sm">
+    <span className="text-gray-300">Oceanic Rate:</span>
+    <span className="font-medium text-blue-400">
+      $1 = {formatCurrency(adjustedExchangeRate)}
+    </span>
+  </div>
+ 
+</div>
+        
           <StatusMessage 
             {...{ 
               status, 

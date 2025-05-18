@@ -54,7 +54,7 @@ export default function CoinLive({ coins }: CoinLiveProps) {
   const visibleCoins = showAll ? categoryCoins : categoryCoins.slice(0, 10);
 
   return (
-    <div className="p-4 md:bg-[#0f0c29] bg-gray-200  text-white font-grotesk">
+    <div className="p-4 bg-[#0f0c29]   text-white font-grotesk">
       {/* Category Tabs */}
       <div className="flex space-x-4 overflow-x-auto scrollbar-hide mb-4">
         {categories.map((cat) => (
@@ -77,7 +77,7 @@ export default function CoinLive({ coins }: CoinLiveProps) {
           placeholder="Search Coin"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full md:bg-[#1c1c3b] bg-gray-300  border border-gray-600 px-3 py-2 rounded md:placeholder-gray-400 placeholder-gray-500 md:text-white text-gray-900 focus:outline-none"
+          className="w-full bg-[#1c1c3b]   border border-gray-600 px-3 py-2 rounded md:placeholder-gray-400 placeholder-gray-500 text-white  focus:outline-none"
         />
       </div>
 
@@ -132,7 +132,7 @@ export default function CoinLive({ coins }: CoinLiveProps) {
           // Removed unused 'change' variable
 
           return (
-            <div key={coin.id} className="flex justify-between items-center border rounded-lg p-3 bg-white text-black">
+            <div key={coin.id} className="flex justify-between items-center border border-gray-900 rounded-lg p-3 bg-[#1c1c3b] text-white">
               <div className="flex items-center space-x-2">
                 <Image src={coin.image} alt={coin.name} width={30} height={30} />
                 <div>
@@ -142,7 +142,7 @@ export default function CoinLive({ coins }: CoinLiveProps) {
               </div>
 
               <div className="text-right text-xs flex flex-col items-end">
-                <div className="text-black font-semibold">USDT ${coin.current_price.toFixed(4)}</div>
+                <div className="text-white font-semibold">USDT ${coin.current_price.toFixed(4)}</div>
                 <Image
            src={trendUp ? green : red}
                   alt="trend"

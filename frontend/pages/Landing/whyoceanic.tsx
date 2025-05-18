@@ -10,9 +10,10 @@ import {
 
 export default function WhyOceanic() {
     return (
-        <section className="flex flex-col md:gap-16 md:flex-row items-center justify-center min-h-screen bg-white text-gray-900 py-12 px-6 md:px-16 font-grotesk">
-            {/* Left Side - Image */}
-            <div className="flex justify-center h-[500px]">
+        <section className="relative overflow-hidden bg-white text-gray-900 py-16 px-4 sm:px-6 lg:px-8 xl:px-16 font-grotesk">
+            <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16 xl:gap-24">
+                {/* Left Side - Image with responsive sizing */}
+                    <div className="flex justify-center h-[500px]">
                 <Image 
                     src="/Images/phone1.png"
                     alt="phone"
@@ -22,61 +23,71 @@ export default function WhyOceanic() {
                 />
             </div>
 
-         
-            <div className="max-w-3xl text-center md:text-left">
-                <h1 className="text-4xl font-bold text-[#0f0c29] mb-4">Why Choose Oceanic?</h1>
-                <p className="text-gray-600 text-lg">
-                    We simplify the complexities of crypto trading, ensuring seamless transactions with top-tier security and support.
-                </p>
+                {/* Right Side - Content */}
+                <div className="w-full lg:w-2/2 max-w-3xl">
+                    <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#0f0c29] mb-6 leading-tight">
+                        Why Choose Oceanic?
+                    </h1>
+                    <p className="text-gray-600 text-lg sm:text-xl mb-10 md:mb-12">
+                        We simplify the complexities of crypto trading, ensuring seamless transactions with top-tier security and support.
+                    </p>
 
-          
-                <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-              
-                    <div className="flex items-start space-x-4">
-                        <BoltIcon className="w-8 h-8 lg:h-20 lg-w-20 pb-0 lg:pb-10 text-blue-600" />
-                        <div>
-                            <h3 className="text-lg font-semibold text-gray-900">Lightning-Fast Transactions</h3>
-                            <p className="text-gray-600 text-sm">
-                                Experience instant trades without unnecessary delays, making every second count.
-                            </p>
+                    {/* Features Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
+                        {/* Feature 1 */}
+                        <div className="flex items-start space-x-4 p-4 hover:bg-gray-50 rounded-xl transition-all">
+                            <div className="flex-shrink-0 bg-blue-50 p-3 rounded-full">
+                                <BoltIcon className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
+                            </div>
+                            <div>
+                                <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-2">Lightning-Fast Transactions</h3>
+                                <p className="text-gray-600 text-sm md:text-base">
+                                    Experience instant trades without unnecessary delays, making every second count.
+                                </p>
+                            </div>
                         </div>
-                    </div>
 
-                   
-                    <div className="flex items-start space-x-4">
-                        <LockClosedIcon className="w-8 h-8 lg:h-20 lg-w-20 pb-0 lg:pb-10 text-blue-600" />
-                        <div>
-                            <h3 className="text-lg font-semibold text-gray-900">Ironclad Security</h3>
-                            <p className="text-gray-600 text-sm">
-                                Your assets are fortified with advanced encryption, ensuring protection from cyber threats.
-                            </p>
+                        {/* Feature 2 */}
+                        <div className="flex items-start space-x-4 p-4 hover:bg-gray-50 rounded-xl transition-all">
+                            <div className="flex-shrink-0 bg-blue-50 p-3 rounded-full">
+                                <LockClosedIcon className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
+                            </div>
+                            <div>
+                                <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-2">Ironclad Security</h3>
+                                <p className="text-gray-600 text-sm md:text-base">
+                                    Your assets are fortified with advanced encryption, ensuring protection from cyber threats.
+                                </p>
+                            </div>
                         </div>
-                    </div>
 
-              
-                    <div className="flex items-start space-x-4">
-                        <CurrencyDollarIcon className="w-8 h-8 lg:h-20 lg-w-20 pb-0 lg:pb-10 text-blue-600" />
-                        <div>
-                            <h3 className="text-lg font-semibold text-gray-900">Diverse Crypto Portfolio</h3>
-                            <p className="text-gray-600 text-sm">
-                                Gain access to a vast array of digital currencies, from mainstream coins to emerging tokens.
-                            </p>
+                        {/* Feature 3 */}
+                        <div className="flex items-start space-x-4 p-4 hover:bg-gray-50 rounded-xl transition-all">
+                            <div className="flex-shrink-0 bg-blue-50 p-3 rounded-full">
+                                <CurrencyDollarIcon className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
+                            </div>
+                            <div>
+                                <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-2">Diverse Crypto Portfolio</h3>
+                                <p className="text-gray-600 text-sm md:text-base">
+                                    Gain access to a vast array of digital currencies, from mainstream coins to emerging tokens.
+                                </p>
+                            </div>
                         </div>
-                    </div>
 
-                  
-                    <div className="flex items-start space-x-4">
-                        <ChatBubbleLeftRightIcon className="w-8 h-8 lg:h-20 lg-w-20 pb-0 lg:pb-10 text-blue-600 " />
-                        <div>
-                            <h3 className="text-lg font-semibold text-gray-900">Always-On Support</h3>
-                            <p className="text-gray-600 text-sm">
-                                Day or night, our dedicated team is just a message away, ready to assist you 24/7.
-                            </p>
+                        {/* Feature 4 */}
+                        <div className="flex items-start space-x-4 p-4 hover:bg-gray-50 rounded-xl transition-all">
+                            <div className="flex-shrink-0 bg-blue-50 p-3 rounded-full">
+                                <ChatBubbleLeftRightIcon className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
+                            </div>
+                            <div>
+                                <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-2">Always-On Support</h3>
+                                <p className="text-gray-600 text-sm md:text-base">
+                                    Day or night, our dedicated team is just a message away, ready to assist you 24/7.
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
-
     );
 }
