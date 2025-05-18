@@ -8,7 +8,7 @@ import { useEffect, useState,  } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import {  signInWithPopup,  } from "firebase/auth";
-import { auth, googleProvider } from '../firebase';
+import { auth, googleProvider } from '../../firebase';
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState({
