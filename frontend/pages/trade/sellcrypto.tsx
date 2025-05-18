@@ -378,7 +378,11 @@ const walletAddresses = selectedCoin
           bankDetails={bankDetails}
           banksList={banksList}
           setBankDetails={setBankDetails}
-          status={status}
+          status={
+            status === "pending" || status === "confirmed" || status === "failed"
+              ? status
+              : "pending"
+          }
           setBankErrors={setBankErrors}
           bankErrors={bankErrors}
           />
