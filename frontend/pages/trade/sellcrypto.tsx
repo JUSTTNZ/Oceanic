@@ -253,7 +253,10 @@ const walletAddresses = selectedCoin
           amount,
           txid,
           type: "sell",
-          country: selectedCountry.code
+          country: selectedCountry.code,
+          bankName: bankDetails.bankName,
+          accountName: bankDetails.accountName,
+          accountNumber: bankDetails.accountNumber,
         })
       });
 
