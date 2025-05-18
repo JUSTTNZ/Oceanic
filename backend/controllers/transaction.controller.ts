@@ -7,110 +7,129 @@ import { CoinWallet } from "../models/coinWallet.model.js";
 import coins from "../coindata/coin.json" with { type: "json" };
 
 // Create Transaction (Buy or Sell)
-  const createTransaction = asyncHandler(async (req, res) => {
-    try{
-    const { coin, amount, txid, type, walletAddressUsed, country, bankName, accountName, accountNumber  } = req.body;
-  
-    // Validate common required fields
+const createTransaction = asyncHandler(async (req, res) => {
+  try {
+    const {
+      coin,
+      amount,
+      txid,
+      type,
+      walletAddressUsed,
+      country,
+      bankName,
+      accountName,
+      accountNumber
+    } = req.body;
+
+    // Validate required fields
     if (!coin || !amount || !txid || !type || !country) {
       throw new ApiError({ statusCode: 400, message: "Missing required fields" });
     }
-  
-    // Check transaction mode
+
     if (type !== "buy" && type !== "sell") {
       throw new ApiError({ statusCode: 400, message: "Transaction type must be 'buy' or 'sell'" });
     }
-  
-    // Prevent duplicate txid
+
     const existing = await Transaction.findOne({ txid });
     if (existing) {
       throw new ApiError({ statusCode: 400, message: "Transaction with this TXID already exists" });
     }
-  
+
     const data: any = {
       userId: req.user._id,
-      userFullname: req.user.fullname, // Add fullname
-      userUsername: req.user.username, // Add username
-      userEmail: req.user.email, // Add email
+      userFullname: req.user.fullname,
+      userUsername: req.user.username,
+      userEmail: req.user.email,
       coin,
       amount,
       txid,
       type,
       country,
-      bankName, 
-      accountName, 
-      accountNumber 
     };
-  
-    // If it's a buy, require user's wallet address
+
+    // Handle buy transaction
     if (type === "buy") {
       if (!walletAddressUsed) {
-        throw new ApiError({ statusCode: 400, message: "User wallet address is required for buy transactions" });
+        throw new ApiError({
+          statusCode: 400,
+          message: "User wallet address is required for buy transactions",
+        });
       }
       data.walletAddressUsed = walletAddressUsed;
     }
-  
-    // If it's a sell, add walletAddressSentTo from admin’s CoinWallet model
-    if (type === "sell") {
-      const walletInfo = await CoinWallet.findOne({ coin });
-    
-      if (!walletInfo) {
-        const fallback = coins.find(c => c.coin.toUpperCase() === coin.toUpperCase());
-        
-        console.log("🔍 Fallback from coin.json:", fallback);
-        
-        if (!fallback) {
-          throw new ApiError({ statusCode: 404, message: 'No wallet address found for this coin' });
-        }
-    
-        console.log("✅ Using fallback wallet address:", fallback.walletAddress);
-        
-        data.walletAddressSentTo = fallback.walletAddress;
-      } else {
-        console.log("✅ Found wallet in MongoDB:", walletInfo.walletAddress);
-        data.walletAddressSentTo = walletInfo.walletAddress;
-      }
-    }
+
 
     if (type === "sell") {
+      if (!bankName || !accountName || !accountNumber) {
+        throw new ApiError({
+          statusCode: 400,
+          message: "Bank name, account name, and account number are required for sell transactions",
+        });
+      }
+
+      if (!/^\d{11}$/.test(accountNumber)) {
+        throw new ApiError({
+          statusCode: 400,
+          message: "Account number must be exactly 11 digits",
+        });
+      }
+
+      if (!/^[a-zA-Z]+ [a-zA-Z]+$/.test(accountName.trim())) {
+        throw new ApiError({
+          statusCode: 400,
+          message: "Account name must be two words (e.g., John Doe)",
+        });
+      }
+
       data.bankName = bankName;
       data.accountName = accountName;
       data.accountNumber = accountNumber;
     }
-    
-    
-  
-    // Save transaction
-    const transaction = await Transaction.create(data);
-  
-    // const io = getIO();
-    // io.emit("transaction_created", {
-    //   user: req.user._id,
-    //   transaction,
-    // });
-  
-    res.status(201).json(new ApiResponse(201, "Transaction created successfully", transaction));
-    console.log("Transaction created:", transaction);
-    
-    } catch (error) {
-      console.error("Error creating transaction:", error);
- // Handle both ApiError and other errors
- if (error instanceof ApiError) {
-  throw error;
-}
 
-// Type-safe error message extraction
-const errorMessage = error instanceof Error 
-  ? error.message 
-  : 'Something went wrong while creating transaction';
-  
-throw new ApiError({ 
-  statusCode: 500, 
-  message: errorMessage
+    // Set receiving wallet address (for both buy/sell)
+    const walletInfo = await CoinWallet.findOne({ coin });
+
+    if (!walletInfo) {
+      const fallback = coins.find((c) => c.coin.toUpperCase() === coin.toUpperCase());
+
+      if (!fallback) {
+        throw new ApiError({
+          statusCode: 404,
+          message: "No wallet address found for this coin",
+        });
+      }
+
+      data.walletAddressSentTo = fallback.walletAddress;
+    } else {
+      data.walletAddressSentTo = walletInfo.walletAddress;
+    }
+
+    const transaction = await Transaction.create(data);
+
+    res
+      .status(201)
+      .json(new ApiResponse(201, "Transaction created successfully", transaction));
+
+    console.log("Transaction created:", transaction);
+  } catch (error) {
+    console.error("Error creating transaction:", error);
+
+    if (error instanceof ApiError) {
+      throw error;
+    }
+
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : "Something went wrong while creating transaction";
+
+    throw new ApiError({
+      statusCode: 500,
+      message: errorMessage,
+    });
+  }
 });
-}
-    
-});
+
   
 
 // Get All Transactions with optional sorting and filtering

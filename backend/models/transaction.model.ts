@@ -6,7 +6,7 @@ export interface ITransaction extends Document {
   coin: string;
   amount: number;
   txid: string;
-  status: 'pending' | 'confirmed';
+  status: 'pending' | 'confirmed' | 'paid';
   type: 'buy' | 'sell';
   walletAddressSentTo?: string;
   walletAddressUsed?: string;
@@ -33,7 +33,7 @@ const TransactionSchema = new mongoose.Schema({
   bankName: { type: String },
   accountName: { type: String },
   accountNumber: { type: String },
-  status: { type: String, enum: ['pending', 'confirmed'], default: 'pending' },
+  status: { type: String, enum: ['pending', 'confirmed', 'paid'], default: 'pending' },
 }, { timestamps: true });
 
 export const Transaction = mongoose.model<ITransaction>('Transaction', TransactionSchema);
