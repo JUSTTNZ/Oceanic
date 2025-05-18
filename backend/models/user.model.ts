@@ -25,6 +25,7 @@ declare global {
     role: "user" | "admin" | "superadmin";
     phoneNumber: string;
     isVerified: boolean;
+     isGoogleAuth?: boolean;
     refreshToken?: string; 
     bankDetails?: {
         bankName: string;
@@ -85,16 +86,17 @@ const UserSchema = new Schema<UserDocument, UserModel, IUserMethods> (
         enum: ["user", "admin", "superadmin"],
         default: "user"
     },
-    phoneNumber: {
-        type: String,
-        required: true,
-        unique: [true, "Phonenumber already exists"],
-        trim: true,
-        match: [
-            /^(070|080|090|081|091)\d{8}$/,
-            'Phone number must be 11 digits and start with one of the valid prefixes: 070, 080, 090, 081, 091.',
-        ],
+ phoneNumber: {
+      type: String,
+      required: function() { return !this.isGoogleAuth; }, // Conditional requirement
+      unique: [true, "Phone number already exists"],
+      trim: true,
+      match: [
+        /^(070|080|090|081|091)\d{8}$/,
+        'Phone number must be 11 digits and start with valid prefixes: 070, 080, 090, 081, 091.',
+      ],
     },
+    
     bankDetails: {
         bankName: String,
         accountNumber: String,
@@ -103,7 +105,12 @@ const UserSchema = new Schema<UserDocument, UserModel, IUserMethods> (
     isVerified: {
         type: Boolean,
         default: false
+    },
+        isGoogleAuth: { // Add this new field
+      type: Boolean,
+      default: false
     }
+
     }, {  timestamps: true}
 )
 

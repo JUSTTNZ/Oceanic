@@ -3,13 +3,13 @@ import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDjQYzTKid2JTOs_VwVHztr8sO3cqI5cUM",
-  authDomain: "chat-app-321cb.firebaseapp.com",
-  projectId: "chat-app-321cb",
-  storageBucket: "chat-app-321cb.firebasestorage.app",
-  messagingSenderId: "290327068207",
-  appId: "1:290327068207:web:bc1f0e4aadfa03f91250da",
-  measurementId: "G-T6V5W4M4W8"
+  apiKey: "AIzaSyCSRAkm9g4uia5wuALKuGaXB3HC5EHA_1Y",
+  authDomain: "oceanic-charts.firebaseapp.com",
+  projectId: "oceanic-charts",
+  storageBucket: "oceanic-charts.firebasestorage.app",
+  messagingSenderId: "296792137036",
+  appId: "1:296792137036:web:76ab4c53faaceaf2b083e9",
+  measurementId: "G-P75LRSBF7J"
 };
 
 
