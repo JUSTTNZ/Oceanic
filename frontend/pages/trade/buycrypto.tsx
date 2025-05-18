@@ -3,26 +3,13 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useState, useEffect} from "react";
-import dynamic from "next/dynamic";
+import { useState, useEffect } from "react";
 import CountryDropdown from "../components/buy/country";
 import CoinDropdown from "../components/buy/coin";
 import AmountInput from "../components/buy/amout";
 import ConversionDisplay from "../components/buy/conversion";
 import FirstSide from "../components/buy/firstside";
 import WalletAddressBuy from "../components/buy/walletaddress";
-
-const PaystackButton = dynamic(
-  () => import("react-paystack").then((mod) => mod.PaystackButton),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="w-full bg-[#0047AB] text-white font-semibold py-3 rounded-full mt-4 text-center">
-        Loading payment...
-      </div>
-    ),
-  }
-);
 
 interface Coin {
   id: string;
@@ -75,7 +62,6 @@ export default function BuyCrypto() {
   const [loadingPayment, setLoadingPayment] = useState(false);
   const serviceFee = 50;
 
-  
   const onSuccess = (ref: string) => {
     alert("Payment successful!");
   };
@@ -84,48 +70,93 @@ export default function BuyCrypto() {
     console.log("Payment closed");
   };
 
+  const payWithPaystack = (ref: string) => {
+    interface PaystackPopType {
+      setup: (options: {
+        key: string | undefined;
+        email: string;
+        amount: number;
+        currency: string;
+        ref: string;
+        callback: (response: { reference: string }) => void;
+        onClose: () => void;
+      }) => { openIframe: () => void };
+    }
+
+    const paystackPop = (window as { PaystackPop?: PaystackPopType }).PaystackPop;
+    const handler = paystackPop?.setup({
+      key: process.env.NEXT_PUBLIC_PAYSTACK_KEY,
+      email: userEmail || "user@example.com",
+      amount: Math.round(calculatedLocalCurrencyAmount * 100),
+      currency: "NGN",
+      ref,
+      callback: function (response: { reference: string }) {
+        onSuccess(response.reference);
+      },
+      onClose: function () {
+        onClose();
+      },
+    });
+
+    if (handler) {
+      handler.openIframe();
+    } else {
+      alert("Paystack SDK failed to load. Please refresh and try again.");
+    }
+  };
+
   function generateUniqueTxid() {
     return "tx_" + Math.random().toString(36).substr(2, 9);
   }
 
   const handleCreateTransaction = async () => {
-  setLoadingPayment(true);
-  const token = localStorage.getItem("accessToken");
+    setLoadingPayment(true);
+    const token = localStorage.getItem("accessToken");
 
-  try {
-    const res = await fetch("https://oceanic-servernz.vercel.app/api/v1/transaction", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        coin: selectedCoin?.symbol,
-        amount: parseFloat(amount),
-        txid: generateUniqueTxid(),
-        type: "buy",
-        country: selectedCountry?.name,
-        walletAddressUsed: walletAddress,
-      }),
-    });
+    try {
+      const res = await fetch("https://oceanic-servernz.vercel.app/api/v1/transaction", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          coin: selectedCoin?.symbol,
+          amount: parseFloat(amount),
+          txid: generateUniqueTxid(),
+          type: "buy",
+          country: selectedCountry?.name,
+          walletAddressUsed: walletAddress,
+        }),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!res.ok || !data?.data?.txid) {
-      alert("Failed to create transaction.");
+      if (!res.ok || !data?.data?.txid) {
+        alert("Failed to create transaction.");
+        setLoadingPayment(false);
+        return;
+      }
+
+      setReference(data.data.txid);
+      payWithPaystack(data.data.txid);
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong.");
+    } finally {
       setLoadingPayment(false);
-      return;
     }
+  };
 
-    setReference(data.data.txid);
-  } catch (err) {
-    console.error(err);
-    alert("Something went wrong.");
-  } finally {
-    setLoadingPayment(false);
-  }
-};
-
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://js.paystack.co/v1/inline.js";
+    script.async = true;
+    document.body.appendChild(script);
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
@@ -228,45 +259,9 @@ export default function BuyCrypto() {
     }
   }, [amount, selectedCoin, exchangeRate, selectedCountry]);
 
-
   const adjustedExchangeRate = exchangeRate + 50;
   const usdAmount = parseFloat(amount || "0");
   const calculatedLocalCurrencyAmount = usdAmount * adjustedExchangeRate;
-
-  const formatCurrency = (value: number) => {
-    if (!selectedCountry) return value.toString();
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: selectedCountry.currency,
-      minimumFractionDigits: 2,
-    })
-      .format(value)
-      .replace(selectedCountry.currency, selectedCountry.currencySymbol);
-  };
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="text-red-500 text-lg">{error}</div>
-      </div>
-    );
-  }
-
-  if (!selectedCountry) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="text-red-500 text-lg">No country data available</div>
-      </div>
-    );
-  }
 
   return (
     <motion.div
@@ -277,71 +272,31 @@ export default function BuyCrypto() {
       transition={{ duration: 0.3 }}
       className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl mx-auto py-14 px-4 font-grotesk"
     >
-      <FirstSide coins={coins} selectedCountry={selectedCountry} exchangeRate={exchangeRate} />
+      <FirstSide coins={coins} selectedCountry={selectedCountry ?? countries[0]} exchangeRate={exchangeRate} />
 
-      <div className="w-full max-w-sm mx-auto   p-6 md:shadow-xl shadow-2xl space-y-4 bg-gray-800/30 border border-gray-700/20 rounded-xl hover:border-blue-500/30 transition-all backdrop-blur-sm hover:shadow-blue-500/10">
+      <div className="w-full max-w-sm mx-auto p-6 md:shadow-xl shadow-2xl space-y-4 bg-gray-800/30 border border-gray-700/20 rounded-xl hover:border-blue-500/30 transition-all backdrop-blur-sm hover:shadow-blue-500/10">
         <h2 className="text-center font-semibold text-lg mb-4 bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">Buy Crypto</h2>
 
-        <CountryDropdown countries={countries} selectedCountry={selectedCountry} onSelect={setSelectedCountry} />
-
-        <CoinDropdown
-          coins={coins}
-          selectedCoin={selectedCoin}
-          onSelect={setSelectedCoin}
-          exchangeRate={exchangeRate}
-          formatCurrency={formatCurrency}
-        />
-    <WalletAddressBuy
-          walletAddress={walletAddress}
-          setWalletAddress={setWalletAddress}
-         
-         />
-        <AmountInput
-         
-          value={amount}
-          onChange={setAmount}
-        />
-      
-        <ConversionDisplay
-          selectedCountry={selectedCountry}
-          selectedCoin={selectedCoin}
-          serviceFee={serviceFee}
-          amount={amount}
-          localCurrencyAmount={calculatedLocalCurrencyAmount.toString()}
-          coinAmount={coinAmount}
-          exchangeRate={exchangeRate}
-          
-        />
+        <CountryDropdown countries={countries} selectedCountry={selectedCountry ?? countries[0]} onSelect={setSelectedCountry} />
+        <CoinDropdown coins={coins} selectedCoin={selectedCoin} onSelect={setSelectedCoin} exchangeRate={exchangeRate} formatCurrency={(val) => val.toString()} />
+        <WalletAddressBuy walletAddress={walletAddress} setWalletAddress={setWalletAddress} />
+        <AmountInput value={amount} onChange={setAmount} />
+        <ConversionDisplay selectedCountry={selectedCountry ?? countries[0]} selectedCoin={selectedCoin} serviceFee={serviceFee} amount={amount} localCurrencyAmount={calculatedLocalCurrencyAmount.toString()} coinAmount={coinAmount} exchangeRate={exchangeRate} />
 
         {loadingPayment ? (
           <div className="flex items-center justify-center gap-2 text-blue-600 font-medium">
             <span className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></span>
             Checking payment...
           </div>
-        ) : reference ? (
-          <PaystackButton
-            key={reference} // ensures button is remounted with updated reference
-            reference={reference}
-            email={userEmail || "user@example.com"}
-            amount={calculatedLocalCurrencyAmount * 100}
-            publicKey={process.env.NEXT_PUBLIC_PAYSTACK_KEY!}
-            onSuccess={onSuccess}
-            onClose={onClose}
-            className="w-full bg-[#0047AB] text-white font-semibold py-3 rounded-full hover:bg-blue-700 transition-colors"
-            text="Pay with Paystack"
-          />
         ) : (
           <button
             onClick={handleCreateTransaction}
-            className="w-full bg-[#0047AB] text-white font-semibold py-3 rounded-full mt-4 hover:bg-blue-700 transition-colors disabled:opacity-50
-              bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700  px-4  hover:shadow-lg hover:shadow-blue-500/20
-            "
+            className="w-full bg-[#0047AB] text-white font-semibold py-3 rounded-full mt-4 hover:bg-blue-700 transition-colors disabled:opacity-50"
             disabled={!amount || parseFloat(amount) <= serviceFee || !selectedCoin || !walletAddress}
           >
             Continue to Payment
           </button>
         )}
-
       </div>
     </motion.div>
   );
