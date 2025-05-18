@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-//import { motion } from "framer-motion";
 import { FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
 
 interface Transaction {
@@ -12,6 +11,9 @@ interface Transaction {
   status: string;
   walletAddressUsed: string;
   createdAt: string;
+  bankName?: string;
+  accountName?: string;
+  accountNumber?: string;
   userId?: {
     email: string;
     username: string;
@@ -54,14 +56,15 @@ export default function AllTransactionsPage() {
     fetchTransactions();
   }, []);
 
-const sortedTransactions = Array.isArray(transactions)
-  ? [...transactions].sort((a, b) => {
-      const order = sortDirection === "asc" ? 1 : -1;
-      const valA = a[sortField]!;
-      const valB = b[sortField]!;
-      return valA > valB ? order : valA < valB ? -order : 0;
-    })
-  : [];
+  const sortedTransactions = Array.isArray(transactions)
+    ? [...transactions].sort((a, b) => {
+        const order = sortDirection === "asc" ? 1 : -1;
+        const valA = a[sortField]!;
+        const valB = b[sortField]!;
+        return valA > valB ? order : valA < valB ? -order : 0;
+      })
+    : [];
+
   const toggleSort = (field: keyof Transaction) => {
     if (field === sortField) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
@@ -101,6 +104,7 @@ const sortedTransactions = Array.isArray(transactions)
                   <th className="px-4 py-2 text-right text-sm font-semibold cursor-pointer" onClick={() => toggleSort("amount")}>Amount {renderSortIcon("amount")}</th>
                   <th className="px-4 py-2 text-left text-sm font-semibold">Wallet</th>
                   <th className="px-4 py-2 text-left text-sm font-semibold">User</th>
+                  <th className="px-4 py-2 text-left text-sm font-semibold">Bank</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-700">
@@ -117,6 +121,19 @@ const sortedTransactions = Array.isArray(transactions)
                     <td className="px-4 py-3 text-sm text-right text-white font-semibold">{tx.amount} {tx.coin.toUpperCase()}</td>
                     <td className="px-4 py-3 text-sm text-gray-400 font-mono truncate max-w-xs">{tx.walletAddressUsed}</td>
                     <td className="px-4 py-3 text-sm text-gray-300">{tx.userId?.email || "N/A"}</td>
+                    <td className="px-4 py-3 text-sm text-gray-400">
+                      {tx.type === 'sell' ? (
+                        <>
+                          <div>{tx.bankName || "-"}</div>
+                          <div>{tx.accountName || "-"}</div>
+                          <div title="Click to copy" onClick={() => navigator.clipboard.writeText(tx.accountNumber || '')} className="cursor-pointer hover:text-blue-400">
+                            {tx.accountNumber || "-"}
+                          </div>
+                        </>
+                      ) : (
+                        <div className="text-gray-500">N/A</div>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>

@@ -12,7 +12,7 @@ export const megaMenus = {
   Trade: [
     { icon: CreditCardIcon, title: "Cards", desc: "Spend money globally with a card that does it all.", href: "trades/cards" },
     { icon: RocketLaunchIcon, title: "Instant Swap", desc: "Buy your favourite cryptocurrency in 2 mins or less.", href: "trades/instant-swap" },
-    { icon: LockClosedIcon, title: "Buy/Sell", desc: "Trade cryptocurrencies instantly with deep liquidity and competitive rates.", href: "trades/buy-sell" },
+    { icon: LockClosedIcon, title: "Buy/Sell", desc: "Trade cryptocurrencies instantly with deep liquidity and competitive rates.", href: "trades/buyandsell" },
     { icon: Squares2X2Icon, title: "P2P", desc: "Securely buy and sell crypto directly with other users.", href: "trades/p2p" },
   ],
   Resources: [

@@ -160,6 +160,7 @@ const [selectedCountry] = useState<Country>({
     bankCode: ""
   });
   const [banksList, setBanksList] = useState<{name: string, code: string}[]>([]);
+  const [bankErrors, setBankErrors] = useState<{ accountNumber?: string; accountName?: string }>({});
 
 // rate
   const [exchangeRate, setExchangeRate] = useState<number>(0);
@@ -373,17 +374,23 @@ const walletAddresses = selectedCoin
         />
        
       
-          <TxidInput {...{ txid, setTxid, status }} />
-      
           <Banks 
           bankDetails={bankDetails}
           banksList={banksList}
           setBankDetails={setBankDetails}
-          status={status}
-
-
+          status={
+            status === "pending" || status === "confirmed" || status === "failed"
+              ? status
+              : "pending"
+          }
+          setBankErrors={setBankErrors}
+          bankErrors={bankErrors}
           />
-              
+          <TxidInput 
+            txid={txid} 
+            setTxid={setTxid} 
+            status={status} 
+          />              
           <div className="pt-4 pb-2 px-4 bg-gray-700/20 rounded-lg border border-gray-600/30">
   <div className="flex items-center justify-between text-sm">
     <span className="text-gray-300">Oceanic Rate:</span>
