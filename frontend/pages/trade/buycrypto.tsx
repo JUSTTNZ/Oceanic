@@ -329,7 +329,6 @@ export default function BuyCrypto() {
             onClose={onClose}
             className="w-full bg-[#0047AB] text-white font-semibold py-3 rounded-full hover:bg-blue-700 transition-colors"
             text="Pay with Paystack"
-            disabled={loadingPayment}
           />
         ) : (
           <button
