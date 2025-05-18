@@ -7,10 +7,13 @@ import {
   UsersIcon,
   BoltIcon,
 } from "@heroicons/react/24/outline";
+import Navbar from "../Landing/navbar";
 
 export default function AboutPage() {
   return (
     <>
+      <Navbar />
+      {/* Meta Tags */}
       <Head>
         <title>About Us | Oceanic Charts</title>
         <meta

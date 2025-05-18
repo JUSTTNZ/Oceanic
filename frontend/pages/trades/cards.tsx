@@ -17,7 +17,7 @@ import {
   MinusIcon,
   QuestionMarkCircleIcon,
 } from "@heroicons/react/24/outline";
-
+import Navbar from "../Landing/navbar";
 const faqs = [
   {
     question: "When will the Oceanic Card launch?",
@@ -49,6 +49,8 @@ export default function CardsPage() {
 
   return (
     <>
+      <Navbar />
+      {/* Meta Tags */}
       <Head>
         <title>Crypto Cards | Oceanic Charts</title>
         <meta

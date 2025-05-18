@@ -12,6 +12,7 @@ import {
   PlusIcon,
   MinusIcon,
 } from "@heroicons/react/24/outline";
+import Navbar from "../Landing/navbar";
 
 const faqs = [
   {
@@ -45,6 +46,8 @@ export default function InstantSwapPage() {
 
   return (
     <>
+      <Navbar />
+      {/* Meta Tags */}
       <Head>
         <title>Instant Swap | Oceanic Charts</title>
         <meta

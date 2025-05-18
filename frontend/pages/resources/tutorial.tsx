@@ -5,12 +5,15 @@ import {
   ExclamationCircleIcon,
   MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
+import Navbar from "../Landing/navbar";
 
 const tags = ["All", "Beginner", "Intermediate", "Security", "Compliance"];
 
 export default function TutorialsPage() {
   return (
     <>
+      <Navbar />
+      {/* Meta Tags */}
       <Head>
         <title>Crypto Tutorials | Oceanic Charts</title>
         <meta
