@@ -23,7 +23,6 @@ export default function ConversionDisplay({
   selectedCountry,
   selectedCoin,
   amount,
-  coinAmount,
   exchangeRate,
 }: ConversionDisplayProps) {
   
@@ -52,6 +51,21 @@ export default function ConversionDisplay({
   const usdAmount = parseFloat(amount || "0");
   const calculatedLocalCurrencyAmount = usdAmount * adjustedExchangeRate;
 
+  // FIXED: Calculate crypto amount correctly
+  const coinAmount = selectedCoin 
+    ? usdAmount / selectedCoin.current_price 
+    : 0;
+const formatCryptoAmount = (amount: number, symbol: string): string => {
+  const isWholeNumber = amount % 1 === 0;
+  
+  if (isWholeNumber) {
+    return `${amount} ${symbol.toUpperCase()}`; // Shows "1 BTC"
+  } else if (amount < 0.01) {
+    return `${amount.toFixed(8)} ${symbol.toUpperCase()}`; // Shows full precision for tiny amounts
+  } else {
+    return `${amount.toFixed(4)} ${symbol.toUpperCase()}`; // Shows 4 decimals for fractional amounts
+  }
+};
   return (
     <div className="bg-gray-800 text-white p-4 rounded-lg space-y-2">
       <div className="flex justify-between items-center">
@@ -60,7 +74,6 @@ export default function ConversionDisplay({
           <span className="font-semibold block">
             {formatCurrency(calculatedLocalCurrencyAmount)}
           </span>
-          
         </div>
       </div>
       
@@ -68,8 +81,9 @@ export default function ConversionDisplay({
         <span className="text-gray-100">You receive:</span>
         <div className="text-right">
           <span className="font-semibold block">
-            {coinAmount.toFixed(8)} {selectedCoin?.symbol?.toUpperCase() || "BTC"}
+ {formatCryptoAmount(coinAmount, selectedCoin?.symbol || "BTC")}
           </span>
+      
         </div>
       </div>
       
@@ -78,6 +92,7 @@ export default function ConversionDisplay({
           <div>
             Exchange Rate: $1 = {formatCurrency(adjustedExchangeRate)} 
           </div>
+          
         </div>
       )}
     </div>
