@@ -164,6 +164,7 @@ const [selectedCountry] = useState<Country>({
 
 // rate
   const [exchangeRate, setExchangeRate] = useState<number>(0);
+  const [loading, setLoading] = useState(true);
  console.log(transactionDetails)
   useEffect(() => {
     const fetchCoins = async () => {
@@ -174,6 +175,7 @@ const [selectedCountry] = useState<Country>({
         const supported = data.filter((coin: Coin) => SUPPORTED_COINS.includes(coin.symbol.toUpperCase()));
         setCoins(supported);
         if (supported.length > 0) setSelectedCoin(supported[0]);
+         setLoading(false);
       } catch (error) {
         console.error("Failed to fetch coins:", error);
       }
@@ -188,6 +190,7 @@ const fetchBanks = async () => {
 
     if (Array.isArray(data.banks)) {
       setBanksList(data.banks); // Set your dropdown list
+       setLoading(false);
     } else {
       console.error("Unexpected response format:", data);
       setBanksList([]);
@@ -209,6 +212,7 @@ const fetchBanks = async () => {
           setErrorMessage("Failed to fetch rate");
         const data = await response.json();
         setExchangeRate(data.conversion_rates[selectedCountry.currency] || 1);
+         setLoading(false);
       } catch {
         setExchangeRate(1);
       }
@@ -317,6 +321,16 @@ const walletAddresses = selectedCoin
     return formatter.format(value);
   };
  const adjustedExchangeRate = exchangeRate - 50;
+ if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500" />
+      </div>
+    );
+  }
+
+
+
   return (
     <div className="min-h-screen">
       <motion.div 
@@ -327,6 +341,16 @@ const walletAddresses = selectedCoin
         transition={{ duration: 0.3 }} 
         className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl mx-auto py-14 px-4"
       >
+                      {errorMessage && (
+  <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded">
+    <div className="flex items-center">
+      <svg className="h-5 w-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+      </svg>
+      <p className="font-medium">{errorMessage}</p>
+    </div>
+  </div>
+)}
         <FirstSide status={status}
            SUPPORTED_COINS={coins.filter(coin => SUPPORTED_COINS.includes(coin.symbol.toUpperCase()))} 
          exchangeRate={exchangeRate} selectedCountry={selectedCountry} />

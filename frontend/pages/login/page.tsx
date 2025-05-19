@@ -8,7 +8,7 @@ import { useEffect, useState,  } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import {  signInWithPopup,  } from "firebase/auth";
-import { auth, googleProvider } from '../firebase';
+import { auth, googleProvider } from '../../firebase';
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState({
@@ -148,7 +148,7 @@ if (userData.data.role === "admin" || userData.data.role === "superadmin") {
         const user = credential.user;
         const idToken = await user.getIdToken();
   
-    const response = await fetch("https://oceanic-servernz.vercel.app    https://oceanic-axthrzdp5-justtnzs-projects.vercel.app/_logs/api/v1/google", {
+    const response = await fetch("https://oceanic-servernz.vercel.app/api/v1/google", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

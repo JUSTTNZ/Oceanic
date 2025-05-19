@@ -193,6 +193,7 @@ export default function BuyCrypto() {
         const data = await response.json();
         setCoins(data);
         setSelectedCoin(data[0]);
+        setLoading(false);
       } catch (err) {
         setError("Failed to fetch cryptocurrencies");
         console.log(err);
@@ -241,6 +242,7 @@ export default function BuyCrypto() {
         if (!response.ok) setError("Failed to fetch rate");
         const data = await response.json();
         setExchangeRate(data.conversion_rates[selectedCountry.currency] || 1);
+        setLoading(false);
       } catch {
         setExchangeRate(1);
       }
@@ -263,6 +265,16 @@ export default function BuyCrypto() {
   const usdAmount = parseFloat(amount || "0");
   const calculatedLocalCurrencyAmount = usdAmount * adjustedExchangeRate;
 
+   if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500" />
+      </div>
+    );
+  }
+
+
+
   return (
     <motion.div
       key="buy"
@@ -272,6 +284,16 @@ export default function BuyCrypto() {
       transition={{ duration: 0.3 }}
       className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl mx-auto py-14 px-4 font-grotesk"
     >
+              {error && (
+  <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded">
+    <div className="flex items-center">
+      <svg className="h-5 w-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+      </svg>
+      <p className="font-medium">{error}</p>
+    </div>
+  </div>
+)}
       <FirstSide coins={coins} selectedCountry={selectedCountry ?? countries[0]} exchangeRate={exchangeRate} />
 
       <div className="w-full max-w-sm mx-auto p-6 md:shadow-xl shadow-2xl space-y-4 bg-gray-800/30 border border-gray-700/20 rounded-xl hover:border-blue-500/30 transition-all backdrop-blur-sm hover:shadow-blue-500/10">
