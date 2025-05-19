@@ -11,7 +11,7 @@ import {
   MinusIcon,
   ExclamationCircleIcon,
 } from "@heroicons/react/24/outline";
-
+import Navbar from "../Landing/navbar";
 const faqs = [
   {
     question: "What is P2P trading?",
@@ -41,6 +41,8 @@ export default function P2PPage() {
 
   return (
     <>
+      <Navbar />
+      {/* Meta Tags */}
       <Head>
         <title>Peer-to-Peer Marketplace | Oceanic Charts</title>
         <meta

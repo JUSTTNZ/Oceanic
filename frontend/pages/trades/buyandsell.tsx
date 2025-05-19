@@ -11,6 +11,7 @@ import {
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
+import Navbar from "../Landing/navbar";
 
 const testimonials = [
   {
@@ -42,6 +43,8 @@ export default function BuySellPage() {
 
   return (
     <>
+      <Navbar />
+      {/* Meta Tags */}
       <Head>
         <title>Buy & Sell Crypto | Oceanic Charts</title>
         <meta

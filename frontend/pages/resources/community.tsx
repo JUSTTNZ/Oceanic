@@ -7,7 +7,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { UserCircleIcon } from "@heroicons/react/24/solid";
 import { FaWhatsapp, FaTelegramPlane, FaDiscord } from "react-icons/fa";
-
+import Navbar from "../Landing/navbar";
 const communityMembers = [
   { name: "CryptoCoach", title: "Pro Trader", country: "\ud83c\uddf3\ud83c\uddec Nigeria" },
   { name: "SashaDev", title: "Web3 Engineer", country: "\ud83c\uddec\ud83c\udde7 UK" },
@@ -17,6 +17,8 @@ const communityMembers = [
 export default function CommunityPage() {
   return (
     <>
+      <Navbar />
+      {/* Meta Tags */}
       <Head>
         <title>Community | Oceanic Charts</title>
         <meta

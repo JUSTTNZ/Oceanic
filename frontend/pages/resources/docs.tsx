@@ -9,6 +9,7 @@ import {
   CpuChipIcon,
   CommandLineIcon,
 } from "@heroicons/react/24/outline";
+import Navbar from "../Landing/navbar";
 
 const docs = [
   {
@@ -41,6 +42,8 @@ const docs = [
 export default function DocsPage() {
   return (
     <>
+      <Navbar />
+      {/* Meta Tags */}
       <Head>
         <title>Developer Docs | Oceanic Charts</title>
         <meta

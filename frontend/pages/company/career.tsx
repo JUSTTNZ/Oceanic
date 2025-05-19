@@ -8,10 +8,12 @@ import {
   StarIcon,
   ExclamationCircleIcon,
 } from "@heroicons/react/24/outline";
+import Navbar from "../Landing/navbar";
 
 export default function CareersPage() {
   return (
     <>
+      <Navbar />
       <Head>
         <title>Careers | Oceanic Charts</title>
         <meta
