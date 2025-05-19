@@ -18,7 +18,7 @@ export default function Toast({ message, type = "success", onClose }: ToastProps
     const timeout = setTimeout(() => {
       if (onClose) onClose();
       clearInterval(interval);
-    }, 2000);
+    }, 3000);
 
     return () => {
       clearTimeout(timeout);

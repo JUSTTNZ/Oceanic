@@ -1,5 +1,6 @@
 "use client"
 import Link from 'next/link';
+import { useToast } from "../../hooks/toast";
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
@@ -9,6 +10,8 @@ import {setUser} from '../../action'
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const { showToast, ToastComponent } = useToast();
+
   const [formData, setFormData] = useState({
     username: '',
     fullname: '',
@@ -130,6 +133,7 @@ export default function RegisterPage() {
       if (!response.ok) {
         const errorMessage = data.message || data.error || 'Registration failed';
         setError(prev => ({ ...prev, general: errorMessage }));
+        showToast(errorMessage, "error"); // Show error toast
         return;
       }
 
@@ -144,7 +148,7 @@ export default function RegisterPage() {
         phoneNumber: data.data?.phoneNumber,
         lastLogin: new Date().toISOString()
       }));
-
+      showToast("Registration successful!", "success"); 
       router.push('/markets');
 
     } catch (err) {
@@ -396,6 +400,7 @@ export default function RegisterPage() {
       </div>
     </div>
   </div>
+  {ToastComponent}
 </div>
   );
 }

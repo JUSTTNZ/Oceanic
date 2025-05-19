@@ -86,7 +86,7 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       });
 
       const data = await response.json();
- console.log(data)
+      console.log(data)
       if (!response.ok || !data.data) {
         const errorMessage = data.message || data.error || "Login failed";
         // setError((prev) => ({ ...prev, general: errorMessage }));
@@ -121,19 +121,18 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         }));
       }
       console.log(data.user?.role)
-if (userData.data.role === "admin" || userData.data.role === "superadmin") {
-  toast.success(" Admin Logged in successfully!");
-  router.push("/adminpage");
-} else {
-  toast.success("User Logged in successfully!");
-  router.push("/markets");
-}
-
- } catch (err) {
-  const errorMessage = err instanceof Error ? err.message : "Login failed";
-  toast.error(errorMessage); // ✅ Red toast
-  console.error("Login error:", err);
-}
+      if (userData.data.role === "admin" || userData.data.role === "superadmin") {
+        showToast("Welcome Admin!", "success");
+        router.push("/adminpage");
+      } else {
+        showToast("Login successful", "success");
+        router.push("/markets");
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Login failed";
+      showToast(errorMessage, "error"); // ✅ Red toast
+      console.error("Login error:", err);
+    }
 
  finally {
       setLoading(false);
@@ -379,6 +378,7 @@ if (userData.data.role === "admin" || userData.data.role === "superadmin") {
       </div>
     </div>
   </div>
+  {ToastComponent}
 </div>
   );
 }

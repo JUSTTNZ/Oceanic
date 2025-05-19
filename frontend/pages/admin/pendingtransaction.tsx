@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { FaCheck, FaTimes } from "react-icons/fa";
-
+import { useToast } from "../../hooks/toast";
 interface Transaction {
   txid: string;
   userId: {
@@ -21,7 +21,7 @@ interface Transaction {
 export default function AdminPendingPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
-
+  const { ToastComponent, showToast } = useToast();
   const fetchPendingTransactions = async () => {
     const token = localStorage.getItem("accessToken");
     try {
@@ -39,6 +39,7 @@ export default function AdminPendingPage() {
       const pending = Array.isArray(data.data) ? data.data.filter((tx: Transaction) => tx.status === "pending") : [];
       setTransactions(pending);
           } catch (err) {
+            showToast("Failed to load transactions", "error");
             console.error("Failed to load transactions", err);
           } finally {
             setLoading(false);
@@ -58,6 +59,7 @@ export default function AdminPendingPage() {
       });
       setTransactions(transactions.filter(tx => tx.txid !== txid));
     } catch (err) {
+      showToast("Failed to update transaction status", "error");
       console.error("Failed to update transaction status", err);
     }
   };

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useToast } from "../../hooks/toast";
 import {  FaSort, FaSortUp, FaSortDown, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import Footer from "../login/footer";
 import Header from "../login/header";
@@ -54,7 +55,8 @@ export default function CryptoTransactions() {
   const [selectedStatus, setSelectedStatus] = useState<string>("All");
   const [selectedType, setSelectedType] = useState<string>("All");
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const [error] = useState<string | null>(null);
+  const { ToastComponent, showToast } = useToast();
    const [loading, setLoading] = useState(true);
     useEffect(() => {
       const fetchTransactions = async () => {
@@ -81,14 +83,14 @@ export default function CryptoTransactions() {
       
       setTransactions(formattedTransactions);
         } catch (err) {
-          setError("Failed to fetch transactions");
+          showToast("Failed to fetch transactions", "error");
           console.error(err);
         } finally {
           setLoading(false);
         }
       };
       fetchTransactions();
-    }, []);
+    }, [showToast]);
 const filteredTransactions = transactions.filter(tx => {
   const matchesSearch = 
     tx.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -458,6 +460,7 @@ if (error) {
         )}
       </div>
     </div>
+    {ToastComponent}
   </div>
   <Footer />
 </section>

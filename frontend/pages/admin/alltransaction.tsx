@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
-
+import { useToast } from "../../hooks/toast";
 interface Transaction {
   txid: string;
   amount: number;
@@ -30,9 +30,11 @@ const statusColors: Record<string, string> = {
 export default function AllTransactionsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error] = useState<string | null>(null);
   const [sortField, setSortField] = useState<keyof Transaction>("createdAt");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const { ToastComponent, showToast } = useToast();
+
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -47,14 +49,14 @@ export default function AllTransactionsPage() {
         const data = await res.json();
         setTransactions(Array.isArray(data.data) ? data.data : []);
       } catch (err) {
-        setError("Failed to fetch transactions");
+        showToast("Failed to fetch transactions", "error");
         console.error(err);
       } finally {
         setLoading(false);
       }
     };
     fetchTransactions();
-  }, []);
+  }, [showToast]);
 
   const sortedTransactions = Array.isArray(transactions)
     ? [...transactions].sort((a, b) => {
@@ -141,6 +143,7 @@ export default function AllTransactionsPage() {
           </div>
         )}
       </div>
+      {ToastComponent}
     </div>
   );
 }

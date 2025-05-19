@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
+//import { useToast } from "../../hooks/toast";
 import { ArrowPathIcon, } from "@heroicons/react/24/outline";
 import CoinSelection from "../components/sell/coinselection";
 import TxidInput from "../components/sell/txidinput";
@@ -146,6 +147,7 @@ const SellCrypto = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState<"success" | "error">("success");
+  //const { ToastComponent, showToast } = useToast();
   const [transactionDetails, setTransactionDetails] = useState<TransactionDetails | null>(null);
 const [selectedCountry] = useState<Country>({ 
   code: "NG", 

@@ -4,6 +4,7 @@
 
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
+import { useToast } from "../../hooks/toast";
 import CountryDropdown from "../components/buy/country";
 import CoinDropdown from "../components/buy/coin";
 import AmountInput from "../components/buy/amout";
@@ -60,10 +61,12 @@ export default function BuyCrypto() {
   const [error, setError] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string>("");
   const [loadingPayment, setLoadingPayment] = useState(false);
+  const { ToastComponent, showToast } = useToast();
+
   const serviceFee = 50;
 
   const onSuccess = (ref: string) => {
-    alert("Payment successful!");
+   showToast("Payment successful!", "success");
   };
 
   const onClose = () => {
@@ -101,7 +104,7 @@ export default function BuyCrypto() {
     if (handler) {
       handler.openIframe();
     } else {
-      alert("Paystack SDK failed to load. Please refresh and try again.");
+      showToast("Paystack SDK failed to load. Please refresh and try again.", "error");
     }
   };
 
@@ -133,7 +136,7 @@ export default function BuyCrypto() {
       const data = await res.json();
 
       if (!res.ok || !data?.data?.txid) {
-        alert("Failed to create transaction.");
+        showToast("Failed to create transaction.", "error");
         setLoadingPayment(false);
         return;
       }
@@ -142,7 +145,7 @@ export default function BuyCrypto() {
       payWithPaystack(data.data.txid);
     } catch (err) {
       console.error(err);
-      alert("Something went wrong.");
+      showToast("Something went wrong.", "error");
     } finally {
       setLoadingPayment(false);
     }
@@ -319,6 +322,7 @@ export default function BuyCrypto() {
             Continue to Payment
           </button>
         )}
+        {ToastComponent}
       </div>
     </motion.div>
   );
