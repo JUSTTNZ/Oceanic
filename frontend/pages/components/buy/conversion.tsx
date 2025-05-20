@@ -27,7 +27,7 @@ export default function ConversionDisplay({
 }: ConversionDisplayProps) {
   
   if (!selectedCountry) {
-    return <p>Loading...</p>;
+    return <p>Loading..</p>;
   }
 
   const safeCountry = selectedCountry || { currency: "USD", currencySymbol: "$" };
