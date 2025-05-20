@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { FaCheck, FaTimes } from "react-icons/fa";
-
+import { useToast } from "../../hooks/toast";
 interface Transaction {
   txid: string;
   userId: {
@@ -21,8 +21,9 @@ interface Transaction {
 export default function AdminPendingPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
+  const { ToastComponent, showToast } = useToast();
 
-  const fetchPendingTransactions = async () => {
+  const fetchPendingTransactions = useCallback(async () => {
     const token = localStorage.getItem("accessToken");
     try {
       const res = await fetch("https://oceanic-servernz.vercel.app/api/v1/transaction/admin", {
@@ -38,12 +39,13 @@ export default function AdminPendingPage() {
       const data = await res.json();
       const pending = Array.isArray(data.data) ? data.data.filter((tx: Transaction) => tx.status === "pending") : [];
       setTransactions(pending);
-          } catch (err) {
-            console.error("Failed to load transactions", err);
-          } finally {
-            setLoading(false);
-          }
-        };
+    } catch (err) {
+      showToast("Failed to load transactions", "error");
+      console.error("Failed to load transactions", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [showToast]);
 
   const handleUpdateStatus = async (txid: string, status: string) => {
     const token = localStorage.getItem("accessToken");
@@ -58,13 +60,14 @@ export default function AdminPendingPage() {
       });
       setTransactions(transactions.filter(tx => tx.txid !== txid));
     } catch (err) {
+      showToast("Failed to update transaction status", "error");
       console.error("Failed to update transaction status", err);
     }
   };
 
   useEffect(() => {
     fetchPendingTransactions();
-  }, []);
+  }, [fetchPendingTransactions]);
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 font-grotesk pt-20">
@@ -130,6 +133,7 @@ export default function AdminPendingPage() {
           </div>
         )}
       </main>
+      {ToastComponent}
     </div>
   );
 }

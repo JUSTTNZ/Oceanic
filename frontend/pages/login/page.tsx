@@ -1,16 +1,19 @@
 "use client";
 
 import { setUser } from "@/action";
-
+//import toast from 'react-hot-toast';
+import { useToast } from "../../hooks/toast";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect, useState,  } from "react";
+import {  useState  } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import {  signInWithPopup,  } from "firebase/auth";
 import { auth, googleProvider } from '../../firebase';
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
+  const { showToast, ToastComponent } = useToast();
+
   const [error, setError] = useState({
     email: "",
     password: "",
@@ -83,10 +86,11 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       });
 
       const data = await response.json();
- console.log(data)
+      console.log(data)
       if (!response.ok || !data.data) {
         const errorMessage = data.message || data.error || "Login failed";
-        setError((prev) => ({ ...prev, general: errorMessage }));
+        // setError((prev) => ({ ...prev, general: errorMessage }));
+        showToast(errorMessage, "error"); 
         return;
       }
 
@@ -117,29 +121,33 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         }));
       }
       console.log(data.user?.role)
-if (userData.data.role === "admin" || userData.data.role === "superadmin") {
-  router.push("/adminpage");
-} else  {
-  router.push("/markets");  
-}
+      if (userData.data.role === "admin" || userData.data.role === "superadmin") {
+        showToast("Welcome Admin!", "success");
+        router.push("/adminpage");
+      } else {
+        showToast("Login successful", "success");
+        router.push("/markets");
+      }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Login failed";
-      setError((prev) => ({ ...prev, general: errorMessage }));
+      showToast(errorMessage, "error"); // ✅ Red toast
       console.error("Login error:", err);
-    } finally {
+    }
+
+ finally {
       setLoading(false);
     }
   };
 
- useEffect(() => {
-  if (error.general) {
-    const timer = setTimeout(() => {
-      setError((prev) => ({ ...prev, general: "" }));
-    }, 2000);
-    // Cleanup function to clear the timeout if the component unmounts or error changes
-    return () => clearTimeout(timer);
-  }
-}, [error.general]);
+//  useEffect(() => {
+//   if (error.general) {
+//     const timer = setTimeout(() => {
+//       setError((prev) => ({ ...prev, general: "" }));
+//     }, 2000);
+//     // Cleanup function to clear the timeout if the component unmounts or error changes
+//     return () => clearTimeout(timer);
+//   }
+// }, [error.general]);
 
  const handleGoogleLogin = async () => {
 
@@ -250,11 +258,11 @@ if (userData.data.role === "admin" || userData.data.role === "superadmin") {
         </div>
       </div>
 
-      {error.general && (
+      {/* {error.general && (
         <div className="mb-4 p-3 bg-red-900/30 text-red-300 rounded-lg text-sm border border-red-800/50">
           {error.general}
         </div>
-      )}
+      )} */}
 
       <form onSubmit={handleLogin}>
         <div className="mb-4">
@@ -370,6 +378,7 @@ if (userData.data.role === "admin" || userData.data.role === "superadmin") {
       </div>
     </div>
   </div>
+  {ToastComponent}
 </div>
   );
 }

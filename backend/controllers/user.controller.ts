@@ -229,15 +229,25 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 const changeUserCurrentPassword = asyncHandler(async(req,res) => {
     const { email } = req.body
 
-    // finduser
-    const user = await User.findOne({email})
-    // if(!user){
-    //     return res.status(200)
-    //     .json(
-    //         new ApiResponse(200, {}, 'A reset Link has been sent to your email')
-    //     );
+    if(!email) {
+        throw new ApiError({ statusCode: 400, message: "Email is required" })
+    }
 
-    // }
+    const userNewPassword = req.body.password
+    const user = await User.findOne({ email })
+    if(!user) {
+        throw new ApiError({ statusCode: 404, message: "User not found" })
+    }
+    const isPasswordMatched = await user.comparePassword(userNewPassword)
+    if(isPasswordMatched) {
+        throw new ApiError({ statusCode: 400, message: "New password cannot be same as old password" })
+    }
+    const updatedUser = await User.findByIdAndUpdate(user._id, { password: userNewPassword }, { new: true })
+    if(!updatedUser) {
+        throw new ApiError({ statusCode: 404, message: "User not found" })
+    }
+    return res.status(200).json(new ApiResponse(200, "Password changed successfully", {}))
+
 })
 
 const getCurrentUser = async (req: Request, res: Response) => {
@@ -266,9 +276,31 @@ const getCurrentUser = async (req: Request, res: Response) => {
 };
 
 const updateUserDetails = asyncHandler(async(req, res) => {
-    
+    const { email, username, fullname, phoneNumber } = req.body
+    const userId = req.user._id
+    const user = await User.findById(userId)
+    if(!user) {
+        throw new ApiError({ statusCode: 404, message: "User not found" })
+    }
+    const updatedUser = await User.findByIdAndUpdate(userId, { email, fullname, phoneNumber }, { new: true })
+    if(!updatedUser) {
+        throw new ApiError({ statusCode: 404, message: "User not found" })
+    }
+    return res.status(200).json(new ApiResponse(200, "User details updated successfully", updatedUser))
 })
 
+const deleteUser = asyncHandler(async(req, res) => {
+    const userId = req.user._id
+    const user = await User.findById(userId)
+    if(!user) {
+        throw new ApiError({ statusCode: 404, message: "User not found" })
+    }
+    const deletedUser = await User.findByIdAndDelete(userId)
+    if(!deletedUser) {
+        throw new ApiError({ statusCode: 404, message: "User not found" })
+    }
+    return res.status(200).json(new ApiResponse(200, "User deleted successfully", {}))
+});
 
 export {
     registerUser,
@@ -277,5 +309,6 @@ export {
     refreshAccessToken,
     changeUserCurrentPassword,
     updateUserDetails,
-    getCurrentUser
+    getCurrentUser,
+    deleteUser
 }
