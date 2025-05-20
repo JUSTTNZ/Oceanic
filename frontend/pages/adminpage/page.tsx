@@ -21,11 +21,14 @@ import { AnimatePresence, motion } from "framer-motion";
 import AllTransaction from '../admin/alltransaction'
 import PendingTransaction from '../admin/pendingtransaction'
 
+
 export default function AdminDashboard() {
   const [pendingCount, setPendingCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"pending" | "all">("pending");
+
+
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
@@ -61,7 +64,34 @@ export default function AdminDashboard() {
     fetchPendingTransactions();
   }, []);
 
+     if(loading){
+return(
+
+
+
+          <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+           <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500" />
+      </div>
+          </div>
+          )
+        }
+      if(error){
+return(
+
+
+
+          <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+            <div className="bg-red-600 text-white rounded-lg p-6 max-w-sm w-full">
+              <h2 className="text-lg font-semibold mb-2">Error</h2>
+              <p>{error}</p>
+           
+            </div>
+          </div>
+          )
+        }
   return (
+    
     <div className="min-h-screen bg-gray-900 text-white py-20 px-6 font-grotesk">
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-12">
@@ -133,9 +163,8 @@ export default function AdminDashboard() {
           )}
         </AnimatePresence>
 
-        {loading && <p className="mt-6 text-gray-400">Loading data...</p>}
-        {error && <p className="mt-6 text-red-500">{error}</p>}
       </div>
     </div>
+   
   );
 }
