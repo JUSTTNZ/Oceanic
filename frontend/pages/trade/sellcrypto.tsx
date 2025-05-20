@@ -43,74 +43,63 @@ interface WalletAddress {
 const BYBIT_WALLET_ADDRESSES: Record<string, WalletAddress[]> = {
   USDT: [
     {
-      address: "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t",
+      address: "TGNsXRxzAXs7xh4fBs7sQVjhej9JnKcvfU",
       network: "TRC20",
-      note: "Tron Network (Recommended - Low Fees)"
-    },
-    {
-      address: "0x8e5b5a4c4fc1e6fbdcb2aa3eec0381c1344f85cf",
-      network: "ERC20",
-      note: "Ethereum Network (Higher Fees)"
-    },
-    {
-      address: "TYgG3S22bqxfKF2Q5ZhWpQvDq5W4dXbm1D",
-      network: "TRC20 (Legacy)",
-      note: "Old Tron address"
+      note: "USDT TRC20 wallet address"
     }
   ],
   BTC: [
     {
-      address: "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh",
+      address: "1QBbNxYLTAUPNHeQeU6aeEivz6mbVBdiT7",
       network: "BTC",
-      note: "Native SegWit (Recommended)"
-    },
-    {
-      address: "3FZbgi29cpjq2GjdwV8eyHuJJnkLtktZc5",
-      network: "BTC (Legacy)",
-      note: "Bitcoin Legacy Address"
+      note: "Bybit BTC wallet address"
     }
   ],
   ETH: [
     {
-      address: "0xde0b295669a9fd93d5f28d9ec85e40f4cb697bae",
-      network: "ETH"
+      address: "0x4532fe9d370b19dd1bba5fd324e4b022a85a5345",
+      network: "Ethereum Mainnet",
+      note: "Ethereum Mainnet wallet address"
+    },
+    {
+      address: "0x4532fe9d370b19dd1bba5fd324e4b022a85a5345",
+      network: "Base",
+      note: "Ethereum Base wallet address"
     }
   ],
   BNB: [
     {
-      address: "bnb1grpf0955h0ykzq3ar5nmum7y6gdfl6lxfn46h2",
-      network: "BEP2",
-      note: "Binance Chain"
-    },
-    {
-      address: "0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0",
+      address: "CNPyBk7Zqvn52qRg1w9CcnbwpkBr8LQ9KLwYUhWMBbQU",
       network: "BEP20",
-      note: "Binance Smart Chain"
+      note: "BNB BEP20 wallet address"
     }
   ],
   SOL: [
     {
-      address: "8e1YyRzFKR5nJ1Rw1ErGfP9Y7EXW8B7jvN5QvL6oUpvN",
-      network: "SOL"
+      address: "0x4532fe9d370b19dd1bba5fd324e4b022a85a5345",
+      network: "SOL",
+      note: "Solana wallet address"
     }
   ],
   XRP: [
     {
-      address: "rEb8TK3gBgk5auZkwc6sHnwrGVJH8DuaLh",
+      address: "rGDreBvnHrX1get7na3J4oowN19ny4GzFn",
       network: "XRP",
-      note: "Include Destination Tag: 12345678"
+      note: "XRP wallet address, Tag/memo: 451786069"
     }
   ],
   ADA: [
     {
-      address: "addr1q9d6t0sx9ywhcwn04n4z8s6guxle5z5hf6a0kxdygnh6z0d0xgk8dcvxsp2k2vm0l2c4xptqx9a9n5",
-      network: "ADA"
+      address: "2a60aae0aedffc89d5b0ef571af7b7937e58d494251c5a0da535a91dcb0d23f9",
+      network: "ADA",
+      note: "Cardano wallet address"
     }
   ],
   DOGE: [
     {
-      address: "D7Y55qnMaQKUyUxuSHM3wZjaeU5iW6HXRL",
-      network: "DOGE"
+      address: "0x4532fe9d370b19dd1bba5fd324e4b022a85a5345",
+      network: "DOGE",
+      note: "Doge wallet address"
     }
   ],
   DOT: [
@@ -123,6 +112,36 @@ const BYBIT_WALLET_ADDRESSES: Record<string, WalletAddress[]> = {
     {
       address: "0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0",
       network: "MATIC"
+    }
+  ],
+  USDC: [
+    {
+      address: "0x4532fe9d370b19dd1bba5fd324e4b022a85a5345",
+      network: "BEP20",
+      note: "USDC BEP20 wallet address"
+    },
+    {
+      address: "D8ZR94qAgK4Hgj75Zhs352ztCr1QEtX98P",
+      network: "ERC20",
+      note: "USDC ERC20 wallet address"
+    }
+  ],
+  AVAX: [
+    {
+      address: "X-avax1deqsna9u4jy38squh65twvy68d7rcjpnntvcua",
+      network: "C-Chain",
+      note: "AVAX C-Chain wallet address"
+    },
+    {
+      address: "Ae2tdPwUPEZ9nvdiZoMJEPXx5Lmwfy1AQrUBmtofAhPSYRgmtm6rAb4WNuR",
+      network: "X-Chain",
+      note: "AVAX X-Chain wallet address"
+    }
+  ],
+  NEAR: [
+    {
+      address: "2a60aae0aedffc89d5b0ef571af7b7937e58d494251c5a0da535a91dcb0d23f9",
+      network: "Near (Near protocol) wallet address"
     }
   ]
 };
