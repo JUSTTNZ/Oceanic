@@ -52,6 +52,8 @@ export default function EditProfileModal({ user, onClose,  }: {
           <button 
             onClick={onClose}
             className="text-gray-400 hover:text-gray-500"
+            title="Close"
+            aria-label="Close"
           >
             <FiX className="h-5 w-5" />
           </button>
