@@ -242,8 +242,10 @@ export default function BuyCrypto() {
 
       try {
         const response = await fetch("/api/rate");
+        console.log("ress", response)
         if (!response.ok) setError("Failed to fetch rate");
         const data = await response.json();
+        console.log(data)
         setExchangeRate(data.conversion_rates[selectedCountry.currency] || 1);
         setLoading(false);
       } catch {
