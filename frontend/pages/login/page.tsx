@@ -123,10 +123,16 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       console.log(data.user?.role)
       if (userData.data.role === "admin" || userData.data.role === "superadmin") {
         showToast("Welcome Admin!", "success");
-        router.push("/adminpage");
+        
+        setTimeout(() => {
+  router.push("/adminpage");
+}, 2000);
       } else {
         showToast("Login successful", "success");
-        router.push("/markets");
+        
+        setTimeout(() => {
+ router.push("/markets");
+}, 2000);
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Login failed";
