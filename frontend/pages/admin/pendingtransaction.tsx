@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { FaCheck, FaTimes } from "react-icons/fa";
+import { FaCheck,  } from "react-icons/fa";
 import { useToast } from "../../hooks/toast";
 interface Transaction {
   txid: string;
@@ -95,21 +95,24 @@ export default function AdminPendingPage() {
                 key={tx.txid}
                 className="bg-gray-800/30 border border-gray-700/20 rounded-xl p-5 hover:border-blue-500/30 transition-all backdrop-blur-sm shadow-lg hover:shadow-blue-500/10"
               >
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h3 className="font-medium text-blue-300">{tx.userId.username}</h3>
-                    <p className="text-xs text-gray-400 mt-1">{tx.walletAddressUsed}</p>
-                  </div>
-                  <span className="text-xs bg-gray-800/50 text-gray-300 px-2 py-1 rounded-full backdrop-blur-sm">
-                    {new Date(tx.createdAt).toLocaleTimeString()}
-                  </span>
-                </div>
+                 <div className="flex justify-between items-start mb-4">
+        <div className="flex-1">
+          <h3 className="font-medium text-blue-300">{tx.userId.username}</h3>
+          <p className="text-xs text-gray-400 mt-1 overflow-hidden text-ellipsis whitespace-nowrap">
+            {tx.walletAddressUsed}
+          </p>
+        </div>
+        <span className="text-xs bg-gray-800/50 text-gray-300 px-2 py-1 rounded-full backdrop-blur-sm">
+          {new Date(tx.createdAt).toLocaleTimeString()}
+        </span>
+      </div>
 
-                <div className="mb-6">
+
+                <div className="mb-6 max-w-2xl">
                   <p className="text-2xl font-bold text-white">
                     {tx.amount} {tx.coin.toUpperCase()}
                   </p>
-                  <p className="text-xs text-gray-400 mt-1">Transaction ID: {tx.txid}</p>
+                  <p className="text-xs text-gray-400 mt-1 max-w-2xl">Transaction ID: {tx.txid}</p>
                 </div>
 
                 <div className="flex space-x-3">
@@ -120,13 +123,7 @@ export default function AdminPendingPage() {
                     <FaCheck />
                     <span>Confirm</span>
                   </button>
-                  <button
-                    //onClick={() => handleUpdateStatus(tx.txid, "rejected")}
-                    className="flex-1 flex items-center justify-center space-x-2 bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white py-3 px-4 rounded-lg transition-all hover:shadow-lg hover:shadow-red-500/20"
-                  >
-                    <FaTimes />
-                    <span>Reject</span>
-                  </button>
+                 
                 </div>
               </div>
             ))}

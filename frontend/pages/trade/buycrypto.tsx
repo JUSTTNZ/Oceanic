@@ -189,6 +189,7 @@ export default function BuyCrypto() {
   }, []);
 
   useEffect(() => {
+    
     const fetchCoins = async () => {
       try {
         const response = await fetch("/api/coin");
@@ -206,6 +207,7 @@ export default function BuyCrypto() {
   }, []);
 
   useEffect(() => {
+    
     const fetchCountries = async () => {
       try {
         const response = await fetch("/api/country");
@@ -248,12 +250,16 @@ export default function BuyCrypto() {
         console.log(data)
         setExchangeRate(data.conversion_rates[selectedCountry.currency] || 1);
         setLoading(false);
-      } catch {
+      } catch (err){
+        setError("Failed to fetch countries");
+        console.log(err);
         setExchangeRate(1);
       }
     };
     fetchExchangeRate();
   }, [selectedCountry]);
+
+  
 
   useEffect(() => {
     if (amount && selectedCoin && exchangeRate > 0 && selectedCountry) {
@@ -278,7 +284,30 @@ export default function BuyCrypto() {
     );
   }
 
-
+if (error){
+  return(
+ <div className="fixed inset-0  bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 max-w-sm w-full shadow-lg">
+    
+        <div className="text-center max-w-md p-6 bg-white rounded-xl shadow-sm">
+          <div className="text-red-500 mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Network error</h3>
+          <p className="text-gray-600 mb-4">Make you are connected to the internet</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
 
   return (
     <motion.div
@@ -289,16 +318,7 @@ export default function BuyCrypto() {
       transition={{ duration: 0.3 }}
       className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl mx-auto py-14 px-4 font-grotesk"
     >
-              {error && (
-  <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded">
-    <div className="flex items-center">
-      <svg className="h-5 w-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
-        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-      </svg>
-      <p className="font-medium">{error}</p>
-    </div>
-  </div>
-)}
+
       <FirstSide coins={coins} selectedCountry={selectedCountry ?? countries[0]} exchangeRate={exchangeRate} />
 
       <div className="w-full max-w-sm mx-auto p-6 md:shadow-xl shadow-2xl space-y-4 bg-gray-800/30 border border-gray-700/20 rounded-xl hover:border-blue-500/30 transition-all backdrop-blur-sm hover:shadow-blue-500/10">
@@ -310,20 +330,26 @@ export default function BuyCrypto() {
         <AmountInput value={amount} onChange={setAmount} />
         <ConversionDisplay selectedCountry={selectedCountry ?? countries[0]} selectedCoin={selectedCoin} serviceFee={serviceFee} amount={amount} localCurrencyAmount={calculatedLocalCurrencyAmount.toString()} coinAmount={coinAmount} exchangeRate={exchangeRate} />
 
-        {loadingPayment ? (
-          <div className="flex items-center justify-center gap-2 text-blue-600 font-medium">
-            <span className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></span>
-            Checking payment....
-          </div>
-        ) : (
+    
           <button
             onClick={handleCreateTransaction}
             className="w-full bg-[#0047AB] text-white font-semibold py-3 rounded-full mt-4 hover:bg-blue-700 transition-colors disabled:opacity-50"
-            disabled={!amount || parseFloat(amount) <= serviceFee || !selectedCoin || !walletAddress}
+            disabled={!amount || parseFloat(amount) <= serviceFee || !selectedCoin || !walletAddress || loadingPayment}
+
           >
-            Continue to Payment
+            {
+              loadingPayment ?(
+                  <div className="flex items-center justify-center gap-2 text-white font-medium">
+            <span className="w-4 h-4 border-2 border-blue-300 border-t-transparent rounded-full animate-spin"></span>
+            Checking payment....
+          </div>
+              ): (
+              "  Continue to Payment"
+              )
+            }
+          
           </button>
-        )}
+      
         {ToastComponent}
       </div>
     </motion.div>

@@ -164,6 +164,7 @@ const SellCrypto = () => {
   const [searchCoin, setSearchCoin] = useState("");
   const [showCoinDropdown, setShowCoinDropdown] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [error, setError] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState<"success" | "error">("success");
   //const { ToastComponent, showToast } = useToast();
@@ -191,14 +192,15 @@ const [selectedCountry] = useState<Country>({
     const fetchCoins = async () => {
       try {
         const res = await fetch("/api/coin");
-        if (!res.ok) setErrorMessage("Failed to fetch cryptocurrencies");
+        if (!res.ok) setError("Failed to fetch cryptocurrencies");
         const data = await res.json();
         const supported = data.filter((coin: Coin) => SUPPORTED_COINS.includes(coin.symbol.toUpperCase()));
         setCoins(supported);
         if (supported.length > 0) setSelectedCoin(supported[0]);
          setLoading(false);
       } catch (error) {
-        console.error("Failed to fetch coins:", error);
+          console.log("Failed to fetch coins:", error);
+        setError("Failed to fetch coins:",);
       }
     };
     fetchCoins();
@@ -213,11 +215,12 @@ const fetchBanks = async () => {
       setBanksList(data.banks); // Set your dropdown list
        setLoading(false);
     } else {
-      console.error("Unexpected response format:", data);
+      console.log("Unexpected response format:",);
       setBanksList([]);
     }
   } catch (error) {
-    console.error("Failed to fetch banks:", error);
+      console.log("Failed to fetch banks:", error);
+    setError("Failed to fetch banks:",);
   }
 };
 
@@ -230,12 +233,13 @@ const fetchBanks = async () => {
       try {
         const response = await fetch("/api/rate");
         if (!response.ok) 
-          setErrorMessage("Failed to fetch rate");
+          setError("Failed to fetch rate");
         const data = await response.json();
         setExchangeRate(data.conversion_rates[selectedCountry.currency] || 1);
          setLoading(false);
       } catch {
         setExchangeRate(1);
+           setError("Failed to fetch rate");
       }
     };
     fetchExchangeRate();
@@ -350,6 +354,30 @@ const walletAddresses = selectedCoin
     );
   }
 
+if (error){
+  return(
+ <div className="fixed inset-0  bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 max-w-sm w-full shadow-lg">
+    
+        <div className="text-center max-w-md p-6 bg-white rounded-xl shadow-sm">
+          <div className="text-red-500 mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Network error</h3>
+          <p className="text-gray-600 mb-4">Make you are connected to the internet</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 
   return (
@@ -362,16 +390,7 @@ const walletAddresses = selectedCoin
         transition={{ duration: 0.3 }} 
         className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl mx-auto py-14 px-4"
       >
-                      {errorMessage && (
-  <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded">
-    <div className="flex items-center">
-      <svg className="h-5 w-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
-        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-      </svg>
-      <p className="font-medium">{errorMessage}</p>
-    </div>
-  </div>
-)}
+
         <FirstSide status={status}
            SUPPORTED_COINS={coins.filter(coin => SUPPORTED_COINS.includes(coin.symbol.toUpperCase()))} 
          exchangeRate={exchangeRate} selectedCountry={selectedCountry} />

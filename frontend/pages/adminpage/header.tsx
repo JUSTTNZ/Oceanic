@@ -4,7 +4,7 @@ import Link from "next/link";
 
 import Sidebar from "./sidebar";
 import { RiMenu3Line } from "react-icons/ri";
-import { FaBell, FaChevronDown } from "react-icons/fa";
+import {  FaChevronDown } from "react-icons/fa";
 import { useSelector } from "react-redux";
 import LogoutModal from "./logoutModal";
 
@@ -44,6 +44,7 @@ export default function Header() {
             </button> 
           </li>
         </ul> */}
+        
         {user ? (
           <>
             <button 
@@ -88,12 +89,7 @@ export default function Header() {
       
  
       <div className="flex lg:hidden items-center gap-4">
-        <button className="relative p-2 rounded-full hover:bg-gray-800/30 transition-colors backdrop-blur-sm">
-          <FaBell className="text-gray-300 text-lg" />
-          <span className="absolute top-0 right-0 w-5 h-5 bg-red-500 text-xs flex items-center justify-center rounded-full backdrop-blur-sm">
-            {4}
-          </span>
-        </button>
+    
   
         <button
           className="p-2 rounded-full hover:bg-gray-800/30 transition-colors backdrop-blur-sm"

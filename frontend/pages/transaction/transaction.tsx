@@ -7,7 +7,7 @@ import Header from "../login/header";
 interface Transaction {
   id: string;
   date: string;
-  status: "confirm" | "pending";  // changed to lowercase
+  status: "confirmed" | "pending";  // changed to lowercase
   amount: string;
   type: "buy" | "sell";  // changed to lowercase
   wallet: string;
@@ -16,7 +16,7 @@ interface Transaction {
 
 
 const statusColors = {
-  confirm: "bg-green-100 text-green-800",  
+  confirmed: "bg-green-100 text-green-800",  
   pending: "bg-red-100 text-red-800",     
 };
 
@@ -27,7 +27,7 @@ const typeColors = {
 interface FormatTransaction {
   id: string;
   date: string;
-  status: "confirm" | "pending";  // changed to lowercase
+  status: "confirmed" | "pending";  // changed to lowercase
   amount: string;
   type: "buy" | "sell";  // changed to lowercase
   wallet: string;
@@ -230,7 +230,7 @@ if (error) {
               }}
             >
               <option value="All" className="bg-gray-800">All Statuses</option>
-              <option value="confirm" className="bg-gray-800">Confirm</option>
+              <option value="confirmed" className="bg-gray-800">Confirmed</option>
               <option value="pending" className="bg-gray-800">Pending</option>
             </select>
           </div>
