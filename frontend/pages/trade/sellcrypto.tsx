@@ -287,7 +287,7 @@ const walletAddresses = selectedCoin
 
       if (!response.ok) {
         const errorData = await response.json();
-        setErrorMessage(errorData.message || 'Transaction failed');
+        setErrorMessage(errorData.message || 'Transaction failed, user must be logged in');
       }
 
       const data = await response.json();
