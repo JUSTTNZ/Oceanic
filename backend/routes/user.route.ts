@@ -20,7 +20,7 @@ router.route("/login").post(userLoginValidator, loginUser);
 router.route("/getCurrentUser").get(verifyJWT, getCurrentUser);
 router.route("/refreshToken").post(verifyJWT, refreshAccessToken);
 router.route("/logout").post(verifyJWT, logOutUser);
-router.route("/changePassword").post(verifyJWT, changeUserCurrentPassword);
-router.route("/updateUser").post(verifyJWT, updateUserDetails);
+router.route("/changePassword").put(verifyJWT, changeUserCurrentPassword);
+router.route("/updateUser").put(verifyJWT, updateUserDetails);
 
 export default router

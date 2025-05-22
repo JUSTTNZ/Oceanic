@@ -226,29 +226,40 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     }
 })
 
-const changeUserCurrentPassword = asyncHandler(async(req,res) => {
-    const { email } = req.body
+const changeUserCurrentPassword = asyncHandler(async(req, res) => {
+    const { email, currentPassword, newPassword } = req.body;
 
-    if(!email) {
-        throw new ApiError({ statusCode: 400, message: "Email is required" })
+    // Validate input
+    if (!email || !currentPassword || !newPassword) {
+        throw new ApiError({ statusCode: 400, message: "All fields are required" });
     }
 
-    const userNewPassword = req.body.password
-    const user = await User.findOne({ email })
-    if(!user) {
-        throw new ApiError({ statusCode: 404, message: "User not found" })
+    // Find user
+    const user = await User.findOne({ email });
+    if (!user) {
+        throw new ApiError({ statusCode: 404, message: "User not found" });
     }
-    const isPasswordMatched = await user.comparePassword(userNewPassword)
-    if(isPasswordMatched) {
-        throw new ApiError({ statusCode: 400, message: "New password cannot be same as old password" })
-    }
-    const updatedUser = await User.findByIdAndUpdate(user._id, { password: userNewPassword }, { new: true })
-    if(!updatedUser) {
-        throw new ApiError({ statusCode: 404, message: "User not found" })
-    }
-    return res.status(200).json(new ApiResponse(200, "Password changed successfully", {}))
 
-})
+    // Verify current password
+    const isCurrentPasswordValid = await user.comparePassword(currentPassword);
+    if (!isCurrentPasswordValid) {
+        throw new ApiError({ statusCode: 401, message: "Current password is incorrect" });
+    }
+
+    // Check if new password is same as old
+    const isSamePassword = await user.comparePassword(newPassword);
+    if (isSamePassword) {
+        throw new ApiError({ statusCode: 400, message: "New password cannot be same as current password" });
+    }
+
+    // Update password
+    user.password = newPassword;
+    await user.save(); // Using save() to trigger pre-save hooks for password hashing
+
+    return res.status(200).json(
+        new ApiResponse(200, "Password changed successfully", {})
+    );
+});
 
 const getCurrentUser = async (req: Request, res: Response) => {
   try {
