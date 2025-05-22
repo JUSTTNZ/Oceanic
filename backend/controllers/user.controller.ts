@@ -228,7 +228,9 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
 const changeUserCurrentPassword = asyncHandler(async(req, res) => {
     const { email, currentPassword, newPassword } = req.body;
-
+ console.log("current",currentPassword,)
+  console.log("email",email, )
+   console.log("new",newPassword)
     // Validate input
     if (!email || !currentPassword || !newPassword) {
         throw new ApiError({ statusCode: 400, message: "All fields are required" });
@@ -287,18 +289,36 @@ const getCurrentUser = async (req: Request, res: Response) => {
 };
 
 const updateUserDetails = asyncHandler(async(req, res) => {
-    const { email, username, fullname, phoneNumber } = req.body
-    const userId = req.user._id
-    const user = await User.findById(userId)
-    if(!user) {
-        throw new ApiError({ statusCode: 404, message: "User not found" })
+    const {  fullname, phoneNumber } = req.body; // 
+    const userId = req.user._id;
+
+    
+    if ( !fullname) {
+        throw new ApiError({ statusCode: 400, message: " fullname is required" });
     }
-    const updatedUser = await User.findByIdAndUpdate(userId, { email, fullname, phoneNumber }, { new: true })
-    if(!updatedUser) {
-        throw new ApiError({ statusCode: 404, message: "User not found" })
+
+    const user = await User.findById(userId);
+    if (!user) {
+        throw new ApiError({ statusCode: 404, message: "User not found" });
     }
-    return res.status(200).json(new ApiResponse(200, "User details updated successfully", updatedUser))
-})
+
+    const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        { 
+            fullname, 
+            phoneNumber 
+        },
+        { new: true, }
+    )
+
+    if (!updatedUser) {
+        throw new ApiError({ statusCode: 404, message: "User not found" });
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, "User details updated successfully", updatedUser)
+    );
+});
 
 const deleteUser = asyncHandler(async(req, res) => {
     const userId = req.user._id

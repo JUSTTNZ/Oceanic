@@ -7,7 +7,8 @@ import {
     refreshAccessToken,
     logOutUser,
     changeUserCurrentPassword,
-    updateUserDetails
+    updateUserDetails,
+    deleteUser
     
 } from "../controllers/user.controller.js"
 import { userRegisterValidator, userLoginValidator } from "../middlewares/validator.js";
@@ -22,5 +23,5 @@ router.route("/refreshToken").post(verifyJWT, refreshAccessToken);
 router.route("/logout").post(verifyJWT, logOutUser);
 router.route("/changePassword").put(verifyJWT, changeUserCurrentPassword);
 router.route("/updateUser").put(verifyJWT, updateUserDetails);
-
+router.route("/deleteUser").delete(verifyJWT, deleteUser);
 export default router

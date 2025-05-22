@@ -7,6 +7,8 @@ import { useEffect, useState } from "react";
 import EditProfileModal from "./modal";
 import { useRouter } from "next/router";
 import timeAgo from "./time";
+import DeleteModal from "./deletemodal";
+import PasswordChangeModal from "./passwordmodal";
 interface RootState {
     user: {
       uid: number;
@@ -23,6 +25,8 @@ interface RootState {
   
 export default function Profile() {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
+  const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false);
 
   const user = useSelector((state: RootState) => state.user);
   const formattedDate = user?.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', {
@@ -52,6 +56,7 @@ export default function Profile() {
     
       // Don't render anything while checking auth
       if (checkingAuth) return null;
+
   return (
     <section className="bg-gray-50">
       <Header />
@@ -178,23 +183,49 @@ export default function Profile() {
                   </div>
                 </div>
 
-                <div className="pt-4">
-                  <h3 className="text-sm font-medium text-gray-900 mb-2">Security Actions</h3>
-                  <div className="space-y-2">
-                    <button className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                      <span className="text-sm font-medium text-gray-900">Change Password</span>
-                      <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </button>
-                    <button className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                      <span className="text-sm font-medium text-red-600">Delete Account</span>
-                      <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
+                 <div className="pt-4">
+      <h3 className="text-sm font-medium text-gray-900 mb-2">Security Actions</h3>
+      <div className="space-y-2">
+        <button 
+          onClick={() => setShowChangePasswordModal(true)}
+          className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+        >
+          <span className="text-sm font-medium text-gray-900">Change Password</span>
+          <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+        
+        <button 
+          onClick={() => setShowDeleteAccountModal(true)}
+          className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+        >
+          <span className="text-sm font-medium text-red-600">Delete Account</span>
+          <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Change Password Modal */}
+      {showChangePasswordModal && (
+        <PasswordChangeModal
+         user={user} 
+    onClose={() => setShowChangePasswordModal(false)}
+
+        />
+      )}
+
+      {/* Delete Account Modal */}
+      {showDeleteAccountModal && (
+      <DeleteModal
+    user={user}
+     onClose={() => setShowDeleteAccountModal(false)}
+
+      />
+      )}
+    </div>
+
               </div>
             </div>
 

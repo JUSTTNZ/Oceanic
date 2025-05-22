@@ -31,13 +31,20 @@ const expireTransform = createTransform(
 const initialState = {
   user: '',
 };
-
 const reducer = (state = initialState, action) => {
   switch (action.type) {
     case "SET_USER":
       return {
         ...state,
         user: action.payload,
+      };
+    case "UPDATE_USER":
+      return {
+        ...state,
+        user: {
+          ...state.user, // Keep existing user data
+          ...action.payload // Merge with updated fields
+        }
       };
     default:
       return state;
