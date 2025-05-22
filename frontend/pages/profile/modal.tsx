@@ -1,30 +1,26 @@
 import { useState } from "react";
 import { FiX, FiCheck } from "react-icons/fi";
+import { toast } from "react-hot-toast";
+import { updateUser } from "@/action";
+import { useDispatch } from "react-redux";
 
-export default function EditProfileModal({ user, onClose,  }: {
+export default function EditProfileModal({ user, onClose }: {
   user: {
     email: string;
     username: string;
+    fullname: string;
     phoneNumber: string;
   };
   onClose: () => void;
-//   onSave: (updatedUser: {
-//     email: string;
-//     username: string;
-//     phoneNumber: string;
-//     country: string;
-//   }) => void;
-} ) {
-
+}) {
+    const dispatch = useDispatch();
   const [formData, setFormData] = useState({
-    email: user.email,
-    username: user.username,
-    phoneNumber: user.phoneNumber,
-    country: "Nigeria" // Default value
+    fullname: user.fullname,
+    phoneNumber: user.phoneNumber
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -32,28 +28,51 @@ export default function EditProfileModal({ user, onClose,  }: {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    // Simulate API call
-    setTimeout(() => {
-    //   onSave(formData);
-      setIsSubmitting(false);
+
+    try {
+      const token = localStorage.getItem("accessToken");
+      const response = await fetch('https://oceanic-servernz.vercel.app/api/v1/users/updateUser', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to update profile');
+      }
+     dispatch(updateUser({
+      fullname: data.data.fullname,
+      phoneNumber: data.data.phoneNumber,
+     }));
+      toast.success('Profile updated successfully!');
+      console.log(data)
       onClose();
-    }, 1000);
+    } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : "An error occurred while updating profile";
+      toast.error(errorMessage);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center p-4 z-50 font-grotesk">
-      <div className="bg-white rounded-xl shadow-lg w-full max-w-md">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
         {/* Modal Header */}
         <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
           <h2 className="text-lg font-semibold text-gray-900">Edit Profile</h2>
           <button 
             onClick={onClose}
             className="text-gray-400 hover:text-gray-500"
-            title="Close"
-            aria-label="Close"
+            disabled={isSubmitting}
           >
             <FiX className="h-5 w-5" />
           </button>
@@ -62,64 +81,37 @@ export default function EditProfileModal({ user, onClose,  }: {
         {/* Modal Body */}
         <form onSubmit={handleSubmit}>
           <div className="p-6 space-y-4">
-            {/* Email Field */}
-            <div className="flex items-start">
-            
-              <div className="ml-4 flex-1">
-                <label htmlFor="email" className="block text-sm font-medium text-gray-500 mb-1">
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  required
-                />
-              </div>
+            {/* Full Name Field */}
+            <div>
+              <label htmlFor="fullname" className="block text-sm font-medium text-gray-500 mb-1">
+                Full Name
+              </label>
+              <input
+                type="text"
+                id="fullname"
+                name="fullname"
+                value={formData.fullname}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                required
+              />
             </div>
-
-            {/* Username Field */}
-            <div className="flex items-start">
-              
-              <div className="ml-4 flex-1">
-                <label htmlFor="username" className="block text-sm font-medium text-gray-500 mb-1">
-                  Username
-                </label>
-                <input
-                  type="text"
-                  id="username"
-                  name="username"
-                  value={formData.username}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
-                  required
-                />
-              </div>
-            </div>
+        
 
             {/* Phone Number Field */}
-            <div className="flex items-start">
-              
-              <div className="ml-4 flex-1">
-                <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-500 mb-1">
-                  Phone Number
-                </label>
-                <input
-                  type="tel"
-                  id="phoneNumber"
-                  name="phoneNumber"
-                  value={formData.phoneNumber}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
-                  required
-                />
-              </div>
+            <div>
+              <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-500 mb-1">
+                Phone Number
+              </label>
+              <input
+                type="tel"
+                id="phoneNumber"
+                name="phoneNumber"
+                value={formData.phoneNumber}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
+              />
             </div>
-
-         
           </div>
 
           {/* Modal Footer */}
@@ -128,6 +120,7 @@ export default function EditProfileModal({ user, onClose,  }: {
               type="button"
               onClick={onClose}
               className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              disabled={isSubmitting}
             >
               Cancel
             </button>
