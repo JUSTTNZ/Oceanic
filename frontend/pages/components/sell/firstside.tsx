@@ -95,7 +95,7 @@ export default function FirstSide ({ status = 'pending', SUPPORTED_COINS = [], s
             <div>
               <h3 className="font-medium">Receive payment</h3>
               <p className="text-sm text-gray-500">
-                Funds will be sent to your bank account within 24 hours
+                Funds will be sent to your bank account within minutes
               </p>
             </div>
           </div>
