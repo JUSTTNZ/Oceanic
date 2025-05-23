@@ -33,7 +33,9 @@ export default function Banks({
   banksList,
   bankDetails,
   setBankDetails,
-  status,
+  setBankErrors,
+  bankErrors,
+ 
 }: BanksProps) {
   const [showBankDropdown, setShowBankDropdown] = useState(false);
   const [bankSearchTerm, setBankSearchTerm] = useState("");
@@ -43,15 +45,41 @@ export default function Banks({
     bank.name.toLowerCase().includes(bankSearchTerm.toLowerCase())
   );
 
-  const handleBankDetailsChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+ const handleBankDetailsChange = (
+    e: React.ChangeEvent<HTMLInputElement>
   ) => {
     const { name, value } = e.target;
-    setBankDetails((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+    
+    // Validation
+    if (name === "accountNumber") {
+      // Only allow numbers and limit to 10 digits
+      const numbersOnly = value.replace(/\D/g, '').slice(0, 10);
+      setBankDetails(prev => ({
+        ...prev,
+        accountNumber: numbersOnly
+      }));
+      
+      // Validate length
+      if (numbersOnly.length !== 10 && numbersOnly.length > 0) {
+        setBankErrors(prev => ({
+          ...prev,
+          accountNumber: "Account number must be 10 digits"
+        }));
+      } else {
+        setBankErrors(prev => ({
+          ...prev,
+          accountNumber: undefined
+        }));
+      }
+    } 
+ 
+    else {
+      setBankDetails(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
+  }
 
   return (
     <div className={`space-y-4 `}>
@@ -135,8 +163,11 @@ export default function Banks({
           onChange={handleBankDetailsChange}
           placeholder="1234567890"
           className="w-full border border-gray-500 px-4 py-2 rounded-lg text-white text-md font-medium focus:border-blue-600 focus:outline-none"
-          disabled={status !== "pending"}
+          // disabled={status !== "pending"}
         />
+           {bankErrors.accountNumber && (
+          <p className="text-sm text-red-400 mt-1">{bankErrors.accountNumber}</p>
+        )}
       </div>
 
       <div>
@@ -154,8 +185,11 @@ export default function Banks({
           onChange={handleBankDetailsChange}
           placeholder="John Doe"
           className="w-full border border-gray-500 px-4 py-2 rounded-lg text-white text-md font-medium focus:border-blue-600 focus:outline-none"
-          disabled={status !== "pending"}
+          // disabled={status !== "pending"}
         />
+           {bankErrors.accountName && (
+          <p className="text-sm text-red-400 mt-1">{bankErrors.accountName}</p>
+        )}
       </div>
     </div>
   );

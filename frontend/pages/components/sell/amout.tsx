@@ -10,7 +10,7 @@ export default function AmountInputSell({
  
   amount,
   setAmount,
-  status
+
 
 }: AmountInputProps) {
 
@@ -32,7 +32,6 @@ export default function AmountInputSell({
         value={amount}
         required
      onChange={(e) => setAmount(parseFloat(e.target.value))} 
-   disabled={status !== 'pending'} 
         inputMode="decimal"
       />
     </div>

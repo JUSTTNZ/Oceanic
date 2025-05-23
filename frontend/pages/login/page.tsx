@@ -145,23 +145,16 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     }
   };
 
-//  useEffect(() => {
-//   if (error.general) {
-//     const timer = setTimeout(() => {
-//       setError((prev) => ({ ...prev, general: "" }));
-//     }, 2000);
-//     // Cleanup function to clear the timeout if the component unmounts or error changes
-//     return () => clearTimeout(timer);
-//   }
-// }, [error.general]);
 
- const handleGoogleLogin = async () => {
 
+const handleGoogleLogin = async () => {
   try {
+    setLoading(true); // Set loading state
+    
     const credential = await signInWithPopup(auth, googleProvider);
-        const user = credential.user;
-        const idToken = await user.getIdToken();
-  
+    const user = credential.user;
+    const idToken = await user.getIdToken();
+
     const response = await fetch("https://oceanic-servernz.vercel.app/api/v1/google", {
       method: "POST",
       headers: {
@@ -176,52 +169,54 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       throw new Error(errorData.message || "Google login failed");
     }
 
-    // 4. Handle successful response
     const data = await response.json();
-    console.log("goo",data)
+    console.log("goo", data);
 
-         localStorage.setItem("accessToken", data.data.accessToken);
-      localStorage.setItem("refreshToken", data.data.refreshToken);
-      
-      // Fetch user data from /auth/me
-      const userRes = await fetch("https://oceanic-servernz.vercel.app/api/v1/users/getCurrentUser", {
-        headers: {
-          Authorization: `Bearer ${data.data.accessToken}`,
-        },
-      });
-            console.log(userRes)
-      const userData = await userRes.json();
-
-      if (userRes.ok && userData?.data) {
-        console.log(userData)
-        dispatch(setUser({
-          uid: userData.data._id,
-          email: userData.data.email,
-          username: userData.data.username,
-          role: userData.data.role,
-          fullname: userData.data.fullname,
-          createdAt: userData.data.createdAt,
-          phoneNumber: userData.data.phoneNumber,
-          lastLogin: new Date().toISOString(),
-        }));
-      }
-      console.log(data.user?.role)
-if (userData.data.role === "admin" || userData.data.role === "superadmin") {
-  router.push("/adminpage");
-} else  {
-  router.push("/markets");  
-}
+    localStorage.setItem("accessToken", data.data.accessToken);
+    localStorage.setItem("refreshToken", data.data.refreshToken);
     
+    // Fetch user data from /auth/me
+    const userRes = await fetch("https://oceanic-servernz.vercel.app/api/v1/users/getCurrentUser", {
+      headers: {
+        Authorization: `Bearer ${data.data.accessToken}`,
+      },
+    });
+    
+    console.log(userRes);
+    const userData = await userRes.json();
+
+    if (userRes.ok && userData?.data) {
+      console.log(userData);
+      dispatch(setUser({
+        uid: userData.data._id,
+        email: userData.data.email,
+        username: userData.data.username,
+        role: userData.data.role,
+        fullname: userData.data.fullname,
+        createdAt: userData.data.createdAt,
+        phoneNumber: userData.data.phoneNumber,
+        lastLogin: new Date().toISOString(),
+      }));
+    }
+    
+    console.log(data.user?.role);
+    if (userData.data.role === "admin" || userData.data.role === "superadmin") {
+      showToast("Welcome Admin!", "success");
+      setTimeout(() => {
+        router.push("/adminpage");
+      }, 2000);
+    } else {
+      showToast("Google login successful", "success");
+      setTimeout(() => {
+        router.push("/markets");  
+      }, 2000);
+    }
   } catch (error) {
     console.error("Google login error:", error);
-    const errorMessage = 'Google login failed. Please try again.';
-        
-
-    setError(prev => ({
-          ...prev,
-          general: errorMessage
-        }));
-  
+    const errorMessage = error instanceof Error ? error.message : 'Google login failed. Please try again.';
+    showToast(errorMessage, "error");
+  } finally {
+    setLoading(false);
   }
 };
 
@@ -358,6 +353,7 @@ if (userData.data.role === "admin" || userData.data.role === "superadmin") {
 
       <button
         onClick={handleGoogleLogin}
+          disabled={loading}
         className="w-full bg-gray-700/50 hover:bg-gray-700/70 text-gray-300 p-3 rounded-lg font-medium text-sm transition-all duration-300 border border-gray-600/50 flex justify-center items-center h-12 mb-6"
       >
         <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

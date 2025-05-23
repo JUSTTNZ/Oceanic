@@ -6,13 +6,13 @@ import { useState, useEffect } from "react";
 import { ArrowPathIcon, } from "@heroicons/react/24/outline";
 import CoinSelection from "../components/sell/coinselection";
 import TxidInput from "../components/sell/txidinput";
-import StatusMessage from "../components/sell/statusmessage";
 import NetworkWarning from "../components/sell/network";
 import WalletAddressDisplay from "../components/sell/walletaddres";
 import FirstSide from "../components/sell/firstside";
 import TransactionStatusModal from "./transactionmodal";
 import AmountInputSell from "../components/sell/amout";
 import Banks from "../components/sell/bank";
+import { useToast } from "@/hooks/toast";
 
 interface Coin {
   id: string;
@@ -29,16 +29,15 @@ interface Country {
   currencySymbol: string;
 }
 
-interface TransactionDetails {
-  id: string;
-  coin: string;
-  amount: number;
-  status: string;
-}
+
 interface WalletAddress {
   address: string;
   network: string;
   note?: string;
+}
+interface Transaction {
+  coin: string;
+  status: string;
 }
 const BYBIT_WALLET_ADDRESSES: Record<string, WalletAddress[]> = {
   USDT: [
@@ -156,19 +155,17 @@ export type TransactionStatus = 'pending' | 'sent' | 'received' | 'confirmed' | 
 
 const SellCrypto = () => {
   const [status, setStatus] = useState<TransactionStatus>('pending');
-  const [isChecking, setIsChecking] = useState(false);
   const [txid, setTxid] = useState("");
   const [amount, setAmount] = useState<number>(0);
   const [coins, setCoins] = useState<Coin[]>([]);
   const [selectedCoin, setSelectedCoin] = useState<Coin | null>(null);
   const [searchCoin, setSearchCoin] = useState("");
   const [showCoinDropdown, setShowCoinDropdown] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
   const [error, setError] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState<"success" | "error">("success");
-  //const { ToastComponent, showToast } = useToast();
-  const [transactionDetails, setTransactionDetails] = useState<TransactionDetails | null>(null);
+  const { showToast, ToastComponent } = useToast();
+  const [transaction, setTransaction] = useState<Transaction | null>(null);
 const [selectedCountry] = useState<Country>({ 
   code: "NG", 
   name: "Nigeria", 
@@ -187,7 +184,7 @@ const [selectedCountry] = useState<Country>({
 // rate
   const [exchangeRate, setExchangeRate] = useState<number>(0);
   const [loading, setLoading] = useState(true);
- console.log(transactionDetails)
+  const [isSubmitting, setIsSubmitting] = useState(false);
   useEffect(() => {
     const fetchCoins = async () => {
       try {
@@ -249,87 +246,140 @@ const walletAddresses = selectedCoin
   ? BYBIT_WALLET_ADDRESSES[selectedCoin.symbol.toUpperCase()] || []
   : null;
 
-  const handleSubmit = async () => {
-    if (!txid || !selectedCoin || amount <= 0) {
-      setErrorMessage("Please fill in all fields correctly.");
+  const resetForm = () => {
+  setTxid("");
+  setAmount(0);
+  setBankDetails({
+    accountNumber: "",
+    accountName: "",
+    bankName: "",
+    bankCode: ""
+  });
+ 
+};
+
+const handleSubmit = async () => {
+  // Validate form inputs
+  if (!txid || !selectedCoin || amount <= 0) {
+    showToast("Please fill in all fields correctly", "error");
+    setStatus('failed');
+    setModalType("error");
+    setShowModal(true);
+    return;
+  }
+
+  // Validate bank details
+  if (!bankDetails.accountNumber || !bankDetails.accountName || !bankDetails.bankName) {
+    showToast("Please provide your bank account details", "error");
+    setStatus('failed');
+    setModalType("error");
+    setShowModal(true);
+    return;
+  }
+
+  try {
+    setIsSubmitting(true);
+    setStatus('sent');
+
+    const accessToken = localStorage.getItem('accessToken');
+    if (!accessToken) {
+      showToast("Please login first", "error");
       setStatus('failed');
       setModalType("error");
       setShowModal(true);
+      setIsSubmitting(false);
       return;
     }
- if (!bankDetails.accountNumber || !bankDetails.accountName || !bankDetails.bankName) {
-      setErrorMessage("Please provide your bank account details.");
-      setStatus('failed');
-      setModalType("error");
-      setShowModal(true);
-      return;
+
+    // Submit transaction
+    const response = await fetch('https://oceanic-servernz.vercel.app/api/v1/transaction', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`
+      },
+      body: JSON.stringify({
+        coin: selectedCoin.symbol,
+        amount,
+        txid,
+        type: "sell",
+        country: selectedCountry.code,
+        bankName: bankDetails.bankName,
+        accountName: bankDetails.accountName,
+        accountNumber: bankDetails.accountNumber,
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      showToast(errorData.message || "Transaction failed");
     }
-    try {
-      setStatus('sent');
-      setIsChecking(true);
 
-      const accessToken = localStorage.getItem('accessToken');
-      if (!accessToken) setErrorMessage("Please login first");
+    const data = await response.json();
+    setTransaction(data.data);
 
-      const response = await fetch('https://oceanic-servernz.vercel.app/api/v1/transaction', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`
-        },
-        body: JSON.stringify({
-          coin: selectedCoin.symbol,
-          amount,
-          txid,
-          type: "sell",
-          country: selectedCountry.code,
-          bankName: bankDetails.bankName,
-          accountName: bankDetails.accountName,
-          accountNumber: bankDetails.accountNumber,
-        })
-      });
+   
+const pollIntervalMs = 3000;
+let tries = 0;
+const maxTries = 20;
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        setErrorMessage(errorData.message || 'Transaction failed, user must be logged in');
+
+const pollInterval = setInterval(async () => {
+  tries++;
+  try {
+    const pollRes = await fetch(
+      `http://localhost:7001/api/v1/transaction/poll?txid=${txid}&coin=${selectedCoin.symbol}`,
+      {
+    
       }
+    );
 
-      const data = await response.json();
-      setTransactionDetails(data.data);
+    if (!pollRes.ok) showToast('Failed to poll transaction status', "error");
 
-      let tries = 0;
-      const maxTries = 20;
-      const pollStatus = setInterval(async () => {
-        tries++;
-        const pollRes = await fetch(`https://oceanic-servernz.vercel.app/api/v1/transaction/poll?txid=${txid}&coin=${selectedCoin.symbol}`);
-        const pollData = await pollRes.json();
+    const pollData = await pollRes.json();
 
-        if (pollData.status === 'confirmed') {
-          clearInterval(pollStatus);
-          setStatus('confirmed');
-          setModalType("success");
-          setShowModal(true);
-          setIsChecking(false);
-        }
-
-        if (tries > maxTries) {
-          clearInterval(pollStatus);
-          setStatus("failed");
-          setModalType("error");
-          setErrorMessage(`${amount} ${selectedCoin.symbol.toUpperCase()} is pending. We are yet to confirm your transaction.`);
-          setShowModal(true);
-          setIsChecking(false);
-        }
-      }, 3000);
-
-    } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Transaction error');
+    if (pollData.status === 'confirmed') {
+      clearInterval(pollInterval);
+      setStatus('confirmed');
+      showToast("Transaction confirmed successfully!", "success");
+      setModalType("success");
+      setShowModal(true);
+      resetForm();
+    } else if (tries >= maxTries) {
+      clearInterval(pollInterval);
       setStatus('failed');
-      setIsChecking(false);
+      showToast(
+        `${amount} ${selectedCoin.symbol.toUpperCase()} transaction not confirmed yet. Please check later.`,
+        "error"
+      );
       setModalType("error");
       setShowModal(true);
     }
-  };
+  } catch (error) {
+    console.error("Polling error:", error);
+    clearInterval(pollInterval);
+    setStatus('failed');
+    showToast("Error checking transaction status", "error");
+    setModalType("error");
+    setShowModal(true);
+  }
+}, pollIntervalMs);
+
+
+
+  } catch (error) {
+    console.error("Transaction error:", error);
+    showToast(
+      error instanceof Error ? error.message : 'Transaction failed',
+      "error"
+    );
+    setStatus('failed');
+    setModalType("error");
+    setShowModal(true);
+  } finally {
+    setIsSubmitting(false);
+  }
+};
     const safeCountry = selectedCountry || { currency: "USD", currencySymbol: "$" };
   
     const formatCurrency = (value: number, currency: string = safeCountry.currency || 'USD'): string => {
@@ -397,21 +447,7 @@ if (error){
       <div className="w-full max-w-sm mx-auto   p-6 md:shadow-xl shadow-2xl space-y-4 bg-gray-800/30 border border-gray-700/20 rounded-xl hover:border-blue-500/30 transition-all backdrop-blur-sm hover:shadow-blue-500/10">
           <h2 className="text-center font-semibold text-lg mb-4  bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">Sell Crypto</h2>
            
-    
-          {errorMessage && (
-            <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-4">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm text-red-700">{errorMessage}</p>
-                </div>
-              </div>
-            </div>
-          )}
+   
 
           <CoinSelection 
             {...{ 
@@ -468,45 +504,32 @@ if (error){
  
 </div>
         
-          <StatusMessage 
-            {...{ 
-              status, 
-              isChecking, 
-              onReset: () => { 
-                setStatus('pending'); 
-                setTxid(""); 
-                setAmount(0); 
-                setIsChecking(false); 
-                setErrorMessage(""); 
-              } 
-            }} 
-          />
 
-          <button 
-            onClick={handleSubmit} 
-            disabled={!txid || !selectedCoin || status !== 'pending' || amount <= 0 || !bankDetails.accountNumber || !bankDetails.accountName || !bankDetails.bankName } 
-            className={`
-              w-full py-3 rounded-full font-semibold transition-colors 
-              
-              ${
-              !txid || !selectedCoin || status !== 'pending' || amount <= 0 || !bankDetails.accountNumber || !bankDetails.accountName || !bankDetails.bankName
-                ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
-                : '              bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3 px-4  transition-all hover:shadow-lg hover:shadow-blue-500/20'
-            }`}
-          >
-            {isChecking ? (
-              <span className="flex items-center justify-center">
-                <ArrowPathIcon className="h-4 w-4 mr-2 animate-spin" />
-                Processing...
-              </span>
-            ) : (
-              'Submit Transaction'
-            )}
-          </button>
-
+        <button 
+  onClick={handleSubmit} 
+  disabled={!txid || !selectedCoin  || amount <= 0 || !bankDetails.accountNumber || !bankDetails.accountName || !bankDetails.bankName || isSubmitting} 
+  className={`
+    w-full py-3 rounded-full font-semibold transition-colors 
+    ${
+      !txid || !selectedCoin  || amount <= 0 || !bankDetails.accountNumber || !bankDetails.accountName || !bankDetails.bankName
+        ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
+        : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3 px-4 transition-all hover:shadow-lg hover:shadow-blue-500/20'
+    }`}
+>
+  {isSubmitting ? (
+    <span className="flex items-center justify-center">
+      <ArrowPathIcon className="h-4 w-4 mr-2 animate-spin" />
+      Processing...
+    </span>
+  ) : (
+    'Submit Transaction'
+  )}
+</button>
           <NetworkWarning selectedCoin={selectedCoin} />
         </div>
       </motion.div>
+
+
 
       {showModal && (
         <TransactionStatusModal
@@ -514,18 +537,20 @@ if (error){
           title={modalType === "success" ? "Transaction Successful" : "Transaction Failed"}
           message={
             modalType === "success"
-              ? "Your transaction was completed successfully."
+              ? `Your transaction was completed successfully.Your account will be credited after being confirm by our team.
+      This usually takes 5-10 minutes`
               : `${amount} ${selectedCoin?.symbol.toUpperCase()} is pending. We are yet to confirm your transaction.`
           }
           details={{
-            coin: selectedCoin?.symbol || "",
+            coin: transaction?.coin || "",
             amount,
-            status,
+            status: transaction?.status || "failed",
             txid
           }}
           onClose={() => setShowModal(false)}
         />
       )}
+         {ToastComponent}
     </div>
   );
 };
