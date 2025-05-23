@@ -287,7 +287,7 @@ const handleSubmit = async () => {
       return;
     }
 
-    const response = await fetch('http://localhost:7001/api/v1/transaction', {
+    const response = await fetch('https://oceanic-servernz.vercel.app/api/v1/transaction', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
