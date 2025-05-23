@@ -13,7 +13,7 @@ const statusMessages = {
   pending: "Please send your crypto and submit the TXID",
   sent: "Waiting for transaction confirmation...",
   received: "Transaction received! Processing your payment...",
-  confirmed: "Payment completed! Funds have been sent to your bank account.",
+  confirmed: "Payment completed! Awaiting admin confirmation.",
   failed: "Transaction not found. Please verify your TXID and try again."
 };
 

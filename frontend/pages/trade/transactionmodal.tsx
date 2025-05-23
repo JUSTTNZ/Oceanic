@@ -17,7 +17,13 @@ interface Props {
   type: "success" | "error";
   title: string;
   message: string;
-  details?: Record<string, string | number | boolean>;
+   details?: {
+    coin?: string;
+    amount?: number;
+    status?: string; // Explicitly define status
+    txid?: string;
+    [key: string]: string | number | boolean | undefined; // Allow other optional fields
+  };
   onClose: () => void;
 }
 

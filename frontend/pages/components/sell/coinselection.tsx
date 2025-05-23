@@ -29,7 +29,7 @@ export default function CoinSelection({
   setSearchCoin,
   setSelectedCoin,
   filteredCoins,
-  status
+  
 }: CoinSelectionProps) {
   return (
     <div className="space-y-2">
@@ -38,7 +38,6 @@ export default function CoinSelection({
         <button
           onClick={() => setShowCoinDropdown(!showCoinDropdown)}
           className="flex items-center text-white justify-between w-full border border-gray-500 px-4 py-3 rounded-lg text-sm focus:border-blue-600 focus:outline-none"
-          disabled={status !== 'pending'}
         >
           {selectedCoin ? (
             <div className="flex items-center">
