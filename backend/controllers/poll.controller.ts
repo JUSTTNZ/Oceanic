@@ -9,6 +9,7 @@ export const pollTxidStatus = async (req: Request, res: Response) => {
     const status = await matchTxidInBitget(txid.toString(), coin.toString());
     return res.json({ status });
   } catch (error) {
+    console.error("Polling error:", error);
     return res.status(500).json({ message: 'Failed to poll status' });
   }
 };

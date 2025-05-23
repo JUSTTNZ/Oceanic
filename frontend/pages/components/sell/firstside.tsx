@@ -125,8 +125,42 @@ export default function FirstSide({
               </p>
             </div>
           </div>
+<<<<<<< HEAD
         ))}
       </div>
+=======
+          
+          {/* Step 2 */}
+          <div className="flex items-start space-x-4">
+            <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
+              status === 'pending' || status === 'sent' ? 'bg-blue-100 text-blue-600' : 'bg-green-100 text-green-600'
+            }`}>
+              2
+            </div>
+            <div>
+              <h3 className="font-medium">Submit your TXID</h3>
+              <p className="text-sm text-gray-500">
+                Paste the transaction hash to confirm your transfer
+              </p>
+            </div>
+          </div>
+          
+          {/* Step 3 */}
+          <div className="flex items-start space-x-4">
+            <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
+              status === 'confirmed' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'
+            }`}>
+              3
+            </div>
+            <div>
+              <h3 className="font-medium">Receive payment</h3>
+              <p className="text-sm text-gray-500">
+                Funds will be sent to your bank account within minutes
+              </p>
+            </div>
+          </div>
+        </div>
+>>>>>>> 00aa18458838794d286faf0191bbf5b2960a2930
 
       {SUPPORTED_COINS.length > 0 ? (
         <div className="pt-4">

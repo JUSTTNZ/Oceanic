@@ -324,6 +324,7 @@ const handleSubmit = async () => {
     resetForm();
   
 
+<<<<<<< HEAD
   } catch (error) {
     showToast(error instanceof Error ? error.message : 'Transaction error', "error");
     setStatus('failed');
@@ -333,6 +334,67 @@ const handleSubmit = async () => {
     setIsSubmitting(false); // Always stop loading
   }
 };
+=======
+      const response = await fetch('https://oceanic-servernz.vercel.app/api/v1/transaction', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`
+        },
+        body: JSON.stringify({
+          coin: selectedCoin.symbol,
+          amount,
+          txid,
+          type: "sell",
+          country: selectedCountry.code,
+          bankName: bankDetails.bankName,
+          accountName: bankDetails.accountName,
+          accountNumber: bankDetails.accountNumber,
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        setErrorMessage(errorData.message || 'Transaction failed, user must be logged in');
+      }
+
+      const data = await response.json();
+      setTransactionDetails(data.data);
+
+      let tries = 0;
+      const maxTries = 20;
+      const pollStatus = setInterval(async () => {
+        tries++;
+        const pollRes = await fetch(`https://oceanic-servernz.vercel.app/api/v1/transaction/poll?txid=${txid}&coin=${selectedCoin.symbol}`);
+        const pollData = await pollRes.json();
+
+        if (pollData.status === 'confirmed') {
+          clearInterval(pollStatus);
+          setStatus('confirmed');
+          setModalType("success");
+          setShowModal(true);
+          setIsChecking(false);
+        }
+
+        if (tries > maxTries) {
+          clearInterval(pollStatus);
+          setStatus("failed");
+          setModalType("error");
+          setErrorMessage(`${amount} ${selectedCoin.symbol.toUpperCase()} is pending. We are yet to confirm your transaction.`);
+          setShowModal(true);
+          setIsChecking(false);
+        }
+      }, 3000);
+
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Transaction error');
+      setStatus('failed');
+      setIsChecking(false);
+      setModalType("error");
+      setShowModal(true);
+    }
+  };
+>>>>>>> 00aa18458838794d286faf0191bbf5b2960a2930
     const safeCountry = selectedCountry || { currency: "USD", currencySymbol: "$" };
   
     const formatCurrency = (value: number, currency: string = safeCountry.currency || 'USD'): string => {
