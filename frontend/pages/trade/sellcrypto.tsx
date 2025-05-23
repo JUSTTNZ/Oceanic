@@ -259,6 +259,7 @@ const walletAddresses = selectedCoin
 };
 
 const handleSubmit = async () => {
+  // Validate form inputs
   if (!txid || !selectedCoin || amount <= 0) {
     showToast("Please fill in all fields correctly", "error");
     setStatus('failed');
@@ -267,6 +268,7 @@ const handleSubmit = async () => {
     return;
   }
 
+  // Validate bank details
   if (!bankDetails.accountNumber || !bankDetails.accountName || !bankDetails.bankName) {
     showToast("Please provide your bank account details", "error");
     setStatus('failed');
@@ -276,17 +278,20 @@ const handleSubmit = async () => {
   }
 
   try {
-    setIsSubmitting(true); // Start loading
+    setIsSubmitting(true);
     setStatus('sent');
 
     const accessToken = localStorage.getItem('accessToken');
     if (!accessToken) {
       showToast("Please login first", "error");
       setStatus('failed');
-      setIsSubmitting(false); // Stop loading on error
+      setModalType("error");
+      setShowModal(true);
+      setIsSubmitting(false);
       return;
     }
 
+    // Submit transaction
     const response = await fetch('https://oceanic-servernz.vercel.app/api/v1/transaction', {
       method: 'POST',
       headers: {
@@ -307,94 +312,74 @@ const handleSubmit = async () => {
 
     if (!response.ok) {
       const errorData = await response.json();
-      showToast(errorData.message || "Transaction failed", "error");
-      setStatus('failed');
-      setIsSubmitting(false); // Stop loading on error
-      return;
+      showToast(errorData.message || "Transaction failed");
     }
 
     const data = await response.json();
     setTransaction(data.data);
-    
-    setStatus('confirmed');
-    showToast("Transaction submitted successfully", "success");
-    setModalType("success");
-    setShowModal(true);
-      // Clear form after successful submission
-    resetForm();
-  
 
-<<<<<<< HEAD
+   
+const pollIntervalMs = 3000;
+let tries = 0;
+const maxTries = 20;
+
+
+const pollInterval = setInterval(async () => {
+  tries++;
+  try {
+    const pollRes = await fetch(
+      `http://localhost:7001/api/v1/transaction/poll?txid=${txid}&coin=${selectedCoin.symbol}`,
+      {
+    
+      }
+    );
+
+    if (!pollRes.ok) showToast('Failed to poll transaction status', "error");
+
+    const pollData = await pollRes.json();
+
+    if (pollData.status === 'confirmed') {
+      clearInterval(pollInterval);
+      setStatus('confirmed');
+      showToast("Transaction confirmed successfully!", "success");
+      setModalType("success");
+      setShowModal(true);
+      resetForm();
+    } else if (tries >= maxTries) {
+      clearInterval(pollInterval);
+      setStatus('failed');
+      showToast(
+        `${amount} ${selectedCoin.symbol.toUpperCase()} transaction not confirmed yet. Please check later.`,
+        "error"
+      );
+      setModalType("error");
+      setShowModal(true);
+    }
   } catch (error) {
-    showToast(error instanceof Error ? error.message : 'Transaction error', "error");
+    console.error("Polling error:", error);
+    clearInterval(pollInterval);
+    setStatus('failed');
+    showToast("Error checking transaction status", "error");
+    setModalType("error");
+    setShowModal(true);
+  }
+}, pollIntervalMs);
+
+
+
+  } catch (error) {
+    console.error("Transaction error:", error);
+    showToast(
+      error instanceof Error ? error.message : 'Transaction failed',
+      "error"
+    );
     setStatus('failed');
     setModalType("error");
     setShowModal(true);
   } finally {
-    setIsSubmitting(false); // Always stop loading
+    setIsSubmitting(false);
   }
 };
-=======
-      const response = await fetch('https://oceanic-servernz.vercel.app/api/v1/transaction', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`
-        },
-        body: JSON.stringify({
-          coin: selectedCoin.symbol,
-          amount,
-          txid,
-          type: "sell",
-          country: selectedCountry.code,
-          bankName: bankDetails.bankName,
-          accountName: bankDetails.accountName,
-          accountNumber: bankDetails.accountNumber,
-        })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        setErrorMessage(errorData.message || 'Transaction failed, user must be logged in');
-      }
-
-      const data = await response.json();
-      setTransactionDetails(data.data);
-
-      let tries = 0;
-      const maxTries = 20;
-      const pollStatus = setInterval(async () => {
-        tries++;
-        const pollRes = await fetch(`https://oceanic-servernz.vercel.app/api/v1/transaction/poll?txid=${txid}&coin=${selectedCoin.symbol}`);
-        const pollData = await pollRes.json();
-
-        if (pollData.status === 'confirmed') {
-          clearInterval(pollStatus);
-          setStatus('confirmed');
-          setModalType("success");
-          setShowModal(true);
-          setIsChecking(false);
-        }
-
-        if (tries > maxTries) {
-          clearInterval(pollStatus);
-          setStatus("failed");
-          setModalType("error");
-          setErrorMessage(`${amount} ${selectedCoin.symbol.toUpperCase()} is pending. We are yet to confirm your transaction.`);
-          setShowModal(true);
-          setIsChecking(false);
-        }
-      }, 3000);
-
-    } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Transaction error');
-      setStatus('failed');
-      setIsChecking(false);
-      setModalType("error");
-      setShowModal(true);
-    }
-  };
->>>>>>> 00aa18458838794d286faf0191bbf5b2960a2930
     const safeCountry = selectedCountry || { currency: "USD", currencySymbol: "$" };
   
     const formatCurrency = (value: number, currency: string = safeCountry.currency || 'USD'): string => {
