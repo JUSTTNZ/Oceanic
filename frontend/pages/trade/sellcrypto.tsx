@@ -13,7 +13,6 @@ import TransactionStatusModal from "./transactionmodal";
 import AmountInputSell from "../components/sell/amout";
 import Banks from "../components/sell/bank";
 import { useToast } from "@/hooks/toast";
-
 interface Coin {
   id: string;
   name: string;
@@ -310,62 +309,90 @@ const handleSubmit = async () => {
       })
     });
 
+    // Store the response data in a variable
+    const responseData = await response.json();
+
     if (!response.ok) {
-      const errorData = await response.json();
-      showToast(errorData.message || "Transaction failed");
+      showToast(responseData.message || "Transaction failed", "error");
+      throw new Error(responseData.message || "Transaction failed");
     }
 
-    const data = await response.json();
-    setTransaction(data.data);
+    setTransaction(responseData.data);
 
-   
-const pollIntervalMs = 3000;
-let tries = 0;
-const maxTries = 20;
+    // Start polling
+    const initialPollInterval = 5000;
+    const maxPollInterval = 30000;
+    const maxTries = 20;
+    let currentPollInterval = initialPollInterval;
+    let tries = 0;
 
-
-const pollInterval = setInterval(async () => {
-  tries++;
-  try {
-    const pollRes = await fetch(
-      `http://localhost:7001/api/v1/transaction/poll?txid=${txid}&coin=${selectedCoin.symbol}`,
-      {
-    
+    const pollTransactionStatus = async () => {
+      if (tries >= maxTries) {
+        clearPolling();
+        setStatus('failed');
+        showToast(
+          `${amount} ${selectedCoin.symbol.toUpperCase()} transaction not confirmed yet.`,
+          "error"
+        );
+        setModalType("error");
+        setShowModal(true);
+        return;
       }
-    );
 
-    if (!pollRes.ok) showToast('Failed to poll transaction status', "error");
+      tries++;
+      
+      try {
+        const pollRes = await fetch(
+          `http://localhost:7001/api/v1/transaction/poll?txid=${txid}&coin=${selectedCoin.symbol}`,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+            },
+              credentials: 'include' // Only if using cookies
+          }
+        );
 
-    const pollData = await pollRes.json();
+        if (!pollRes.ok) {
+          throw new Error(`HTTP error! status: ${pollRes.status}`);
+        }
 
-    if (pollData.status === 'confirmed') {
-      clearInterval(pollInterval);
-      setStatus('confirmed');
-      showToast("Transaction confirmed successfully!", "success");
-      setModalType("success");
-      setShowModal(true);
-      resetForm();
-    } else if (tries >= maxTries) {
-      clearInterval(pollInterval);
-      setStatus('failed');
-      showToast(
-        `${amount} ${selectedCoin.symbol.toUpperCase()} transaction not confirmed yet. Please check later.`,
-        "error"
-      );
-      setModalType("error");
-      setShowModal(true);
-    }
-  } catch (error) {
-    console.error("Polling error:", error);
-    clearInterval(pollInterval);
-    setStatus('failed');
-    showToast("Error checking transaction status", "error");
-    setModalType("error");
-    setShowModal(true);
-  }
-}, pollIntervalMs);
+        const pollData = await pollRes.json();
 
+        if (pollData.status === 'confirmed') {
+          clearPolling();
+          setStatus('confirmed');
+          showToast("Transaction confirmed successfully!", "success");
+          setModalType("success");
+          setShowModal(true);
+          resetForm();
+        } else {
+          currentPollInterval = Math.min(
+            currentPollInterval * 1.5,
+            maxPollInterval
+          );
+          scheduleNextPoll();
+        }
+      } catch (error) {
+        console.error("Polling error:", error);
+        currentPollInterval = Math.min(
+          currentPollInterval * 2,
+          maxPollInterval
+        );
+        scheduleNextPoll();
+      }
+    };
 
+    let pollTimeout: NodeJS.Timeout;
+    const scheduleNextPoll = () => {
+      pollTimeout = setTimeout(pollTransactionStatus, currentPollInterval);
+    };
+
+    const clearPolling = () => {
+      if (pollTimeout) clearTimeout(pollTimeout);
+    };
+
+    pollTransactionStatus();
 
   } catch (error) {
     console.error("Transaction error:", error);

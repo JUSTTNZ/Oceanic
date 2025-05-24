@@ -22,7 +22,7 @@ app.use(cors({
   origin: ['http://localhost:3000', 'https://oceanic-charts.vercel.app'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'x-signature']  // Added x-signature header
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-signature', 'Cache-Control' ]  // Added x-signature header
 }));
 
 app.options('*', cors());
