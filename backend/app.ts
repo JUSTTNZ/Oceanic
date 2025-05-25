@@ -12,11 +12,11 @@ declare global {
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import http from 'http';
-import firebaseInit  from './utils/firebase.js'
+//import firebaseInit  from './utils/firebase.js'
 const app = express();
 const server = http.createServer(app);
 
-firebaseInit()
+//firebaseInit()
 // CORS Configuration
 app.use(cors({
   origin: ['http://localhost:3000', 'https://oceanic-charts.vercel.app'],
@@ -81,8 +81,8 @@ app.get('/', (req, res) => {
 // Regular routes that use parsed JSON
 app.use("/api/v1/healthCheck", healthCheckRouter);
 app.use("/api/v1/users", userRouter);
-app.use("/api/v1/transaction", transactionRouter);
-app.use("/api/v1/google", google);
+app.use("/api/v2/transaction", transactionRouter);
+//app.use("/api/v1/google", google);
 
 // Global error handler
 app.use(errorHandler);
