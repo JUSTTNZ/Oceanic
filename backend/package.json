@@ -8,6 +8,7 @@
     "start": "node index.ts",
     "seed": "node --no-warnings --loader ts-node/esm populate.ts",
     "time": "node --no-warnings --loader ts-node/esm time.ts",
+    "dns": "node --no-warnings --loader ts-node/esm dns.ts",
     "generate-signature": "node --loader ts-node/esm generateSignature.ts",
     "dev": "nodemon --watch ./ --exec \"node --no-warnings --loader ts-node/esm\" ./index.ts"
   },
