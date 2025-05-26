@@ -1,19 +1,12 @@
-// Get current timestamp in milliseconds (JavaScript standard)
-const nowMs = Date.now(); 
+// 1. Get current time in milliseconds (Bitget uses ms)
+const nowMs = Date.now();
 
-// Calculate 1 hour ago in milliseconds (3600 seconds * 1000 ms)
-const oneHourAgoMs = nowMs - (3600 * 1000); 
+// 2. Calculate 90 days ago
+const ninetyDaysInMs = 90 * 24 * 60 * 60 * 1000;
+const ninetyDaysAgoMs = nowMs - ninetyDaysInMs;
 
-// Convert to seconds for Bitget API (remove last 3 digits)
-const nowSec = Math.floor(nowMs / 1000); 
-const oneHourAgoSec = Math.floor(oneHourAgoMs / 1000);
-
-console.log("Milliseconds (JS):", { 
-  startTime: oneHourAgoMs, 
-  endTime: nowMs 
-});
-
-console.log("Seconds (Bitget API):", { 
-  startTime: oneHourAgoSec, 
-  endTime: nowSec 
+// 3. Use these DIRECTLY in the API call (no conversion to seconds)
+console.log("Timestamps (Milliseconds):", {
+  startTime: ninetyDaysAgoMs, // 90 days ago
+  endTime: nowMs              // current time
 });
