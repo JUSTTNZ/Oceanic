@@ -162,7 +162,7 @@ const SellCrypto = () => {
   const [showCoinDropdown, setShowCoinDropdown] = useState(false);
   const [error, setError] = useState("");
   const [showModal, setShowModal] = useState(false);
-  const [modalType, setModalType] = useState<"success" | "error">("success");
+  const [modalType, setModalType] = useState<"success" | "error" | "pending">("pending");
   const { showToast, ToastComponent } = useToast();
   const [transaction, setTransaction] = useState<Transaction | null>(null);
 const [selectedCountry] = useState<Country>({ 
@@ -258,19 +258,18 @@ const walletAddresses = selectedCoin
 };
 
 const handleSubmit = async () => {
-  // Validate form inputs
+  // Validate inputs
   if (!txid || !selectedCoin || amount <= 0) {
     showToast("Please fill in all fields correctly", "error");
-    setStatus('failed');
+    setStatus("failed");
     setModalType("error");
     setShowModal(true);
     return;
   }
 
-  // Validate bank details
   if (!bankDetails.accountNumber || !bankDetails.accountName || !bankDetails.bankName) {
     showToast("Please provide your bank account details", "error");
-    setStatus('failed');
+    setStatus("failed");
     setModalType("error");
     setShowModal(true);
     return;
@@ -278,24 +277,24 @@ const handleSubmit = async () => {
 
   try {
     setIsSubmitting(true);
-    setStatus('sent');
+    setStatus("sent");
 
-    const accessToken = localStorage.getItem('accessToken');
+    const accessToken = localStorage.getItem("accessToken");
     if (!accessToken) {
       showToast("Please login first", "error");
-      setStatus('failed');
+      setStatus("failed");
       setModalType("error");
       setShowModal(true);
       setIsSubmitting(false);
       return;
     }
 
-    // Submit transaction
-    const response = await fetch('https://oceanic-servernz.vercel.app/api/v1/transaction', {
-      method: 'POST',
+    // Step 1: Create transaction
+    const createRes = await fetch("https://oceanic-servernz.vercel.app/api/v1/transaction", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}`
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify({
         coin: selectedCoin.symbol,
@@ -306,107 +305,58 @@ const handleSubmit = async () => {
         bankName: bankDetails.bankName,
         accountName: bankDetails.accountName,
         accountNumber: bankDetails.accountNumber,
-      })
+      }),
     });
 
-    // Store the response data in a variable
-    const responseData = await response.json();
+    const createData = await createRes.json();
 
-    if (!response.ok) {
-      showToast(responseData.message || "Transaction failed", "error");
-      throw new Error(responseData.message || "Transaction failed");
+    if (!createRes.ok) {
+      throw new Error(createData.message || "Transaction creation failed");
     }
 
-    setTransaction(responseData.data);
+    setTransaction(createData.data);
 
-    // Start polling
-    const initialPollInterval = 5000;
-    const maxPollInterval = 30000;
-    const maxTries = 20;
-    let currentPollInterval = initialPollInterval;
-    let tries = 0;
-
-    const pollTransactionStatus = async () => {
-      if (tries >= maxTries) {
-        clearPolling();
-        setStatus('failed');
-        showToast(
-          `${amount} ${selectedCoin.symbol.toUpperCase()} transaction not confirmed yet.`,
-          "error"
-        );
-        setModalType("error");
-        setShowModal(true);
-        return;
+    // Step 2: Confirm transaction using Bitget
+    const confirmRes = await fetch(
+      `https://oceanic-servernz.vercel.app/api/v2/bitget/confirm-deposit?coin=${selectedCoin.symbol}&txid=${txid}&size=${amount}`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
       }
+    );
 
-      tries++;
-      
-      try {
-        const pollRes = await fetch(
-          `http://localhost:7001/api/v1/transaction/poll?txid=${txid}&coin=${selectedCoin.symbol}`,
-          {
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-            },
-              credentials: 'include' // Only if using cookies
-          }
-        );
+    const confirmData = await confirmRes.json();
 
-        if (!pollRes.ok) {
-          throw new Error(`HTTP error! status: ${pollRes.status}`);
-        }
-
-        const pollData = await pollRes.json();
-
-        if (pollData.status === 'confirmed') {
-          clearPolling();
-          setStatus('confirmed');
-          showToast("Transaction confirmed successfully!", "success");
-          setModalType("success");
-          setShowModal(true);
-          resetForm();
-        } else {
-          currentPollInterval = Math.min(
-            currentPollInterval * 1.5,
-            maxPollInterval
-          );
-          scheduleNextPoll();
-        }
-      } catch (error) {
-        console.error("Polling error:", error);
-        currentPollInterval = Math.min(
-          currentPollInterval * 2,
-          maxPollInterval
-        );
-        scheduleNextPoll();
-      }
-    };
-
-    let pollTimeout: NodeJS.Timeout;
-    const scheduleNextPoll = () => {
-      pollTimeout = setTimeout(pollTransactionStatus, currentPollInterval);
-    };
-
-    const clearPolling = () => {
-      if (pollTimeout) clearTimeout(pollTimeout);
-    };
-
-    pollTransactionStatus();
-
+    if (confirmData.success) {
+      setStatus("confirmed");
+      showToast("Transaction confirmed successfully!", "success");
+      setModalType("success");
+      setShowModal(true);
+      resetForm();
+    } else {
+      // Bitget did not confirm it yet
+      setStatus("pending");
+      showToast(
+        "Transaction submitted but not yet confirmed. Please wait."
+      );
+      setModalType("pending");
+      setShowModal(true);
+    }
   } catch (error) {
     console.error("Transaction error:", error);
     showToast(
-      error instanceof Error ? error.message : 'Transaction failed',
+      error instanceof Error ? error.message : "Transaction failed",
       "error"
     );
-    setStatus('failed');
+    setStatus("failed");
     setModalType("error");
     setShowModal(true);
   } finally {
     setIsSubmitting(false);
   }
 };
+
     const safeCountry = selectedCountry || { currency: "USD", currencySymbol: "$" };
   
     const formatCurrency = (value: number, currency: string = safeCountry.currency || 'USD'): string => {

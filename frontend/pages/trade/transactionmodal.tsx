@@ -14,7 +14,7 @@ import {
 import { JSX } from "react";
 
 interface Props {
-  type: "success" | "error";
+  type: "success" | "error" | "pending";
   title: string;
   message: string;
    details?: {

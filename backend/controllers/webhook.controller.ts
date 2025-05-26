@@ -19,6 +19,56 @@ export const testConnection = async (req: Request, res: Response) => {
   }
 };
 
+// controller/bitget.controller.ts
+
+export const confirmDeposit = async (req: Request, res: Response) => {
+  const { coin, txid, size } = req.query;
+
+  if (!coin || !txid || !size) {
+    return res.status(400).json({
+      success: false,
+      error: 'Missing required parameters: coin, txid, or size'
+    });
+  }
+
+  // Auto-calculate 90-day window
+  const nowMs = Date.now();
+  const startTime = nowMs - 90 * 24 * 60 * 60 * 1000; // 90 days ago
+  const endTime = nowMs;
+
+  try {
+    const result = await fetchDeposits(coin as string, startTime, endTime, 100);
+
+    const deposits = result?.data?.data || [];
+
+    // Find match
+    const match = deposits.find((deposit: any) =>
+      deposit.tradeId === txid &&
+      parseFloat(deposit.size) === parseFloat(size as string)
+    );
+
+    if (match) {
+      return res.json({
+        success: true,
+        message: 'Transaction confirmed',
+        data: match
+      });
+    } else {
+      return res.status(404).json({
+        success: false,
+        error: 'No matching transaction found'
+      });
+    }
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      error: 'Failed to query Bitget',
+      details: error.message
+    });
+  }
+};
+
+
 // Get deposit records
 export const getDeposits = async (req: Request, res: Response) => {
   const { coin, startTime, endTime, limit } = req.query;
