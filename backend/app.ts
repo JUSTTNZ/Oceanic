@@ -9,20 +9,23 @@ declare global {
     }
   }
 }
+
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import http from 'http';
-import firebaseInit  from './utils/firebase.js'
+//import firebaseInit  from './utils/firebase.js'
+
 const app = express();
 const server = http.createServer(app);
 
-firebaseInit()
+//firebaseInit()
+
 // CORS Configuration
 app.use(cors({
   origin: ['http://localhost:3000', 'https://oceanic-charts.vercel.app'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'x-signature']  // Added x-signature header
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-signature', 'Cache-Control']
 }));
 
 app.options('*', cors());
@@ -32,15 +35,17 @@ import userRouter from './routes/user.route.js';
 import healthCheckRouter from "./routes/healthcheck.route.js";
 import transactionRouter from "./routes/transaction.route.js";
 import paystackWebhookRouter from "./routes/buy.route.js";
+import bitgetRouter from "./routes/webhook.route.js"; // 🆕 NEW IMPORT
 import { errorHandler } from "./middlewares/error.middleware.js";
 import google from './routes/google.route.js'
+
 // ✅ Setup raw body parsing for webhooks
-app.use('/api/v1/webhook', express.raw({ type: 'application/json' }), (req, res, next) => {
+app.use('/api/v2/webhook', express.raw({ type: 'application/json' }), (req, res, next) => {
   try {
     if (req.body && req.body.length) {
       const rawBody = req.body;
-      req.rawBody = rawBody; // Store the raw body
-      req.body = JSON.parse(rawBody.toString('utf8')); // Parse it for later use
+      req.rawBody = rawBody;
+      req.body = JSON.parse(rawBody.toString('utf8'));
     }
     next();
   } catch (error) {
@@ -49,7 +54,6 @@ app.use('/api/v1/webhook', express.raw({ type: 'application/json' }), (req, res,
   }
 });
 
-// Add similar raw body handling for Paystack if needed
 app.use('/api/v1/paystack', express.raw({ type: 'application/json' }), (req, res, next) => {
   try {
     if (req.body && req.body.length) {
@@ -66,7 +70,7 @@ app.use('/api/v1/paystack', express.raw({ type: 'application/json' }), (req, res
 
 // ✅ Use webhooks BEFORE standard body parsers
 import webhookRouter from "./routes/webhook.route.js";
-app.use('/api/v1/webhook', webhookRouter);
+app.use('/api/v2/webhook', webhookRouter);
 app.use('/api/v1/paystack', paystackWebhookRouter);
 
 // ✅ Standard body parsers for the rest of the routes
@@ -81,8 +85,9 @@ app.get('/', (req, res) => {
 // Regular routes that use parsed JSON
 app.use("/api/v1/healthCheck", healthCheckRouter);
 app.use("/api/v1/users", userRouter);
-app.use("/api/v1/transaction", transactionRouter);
-app.use("/api/v1/google", google);
+app.use("/api/v2/transaction", transactionRouter);
+app.use("/api/v2/bitget", bitgetRouter); // 🆕 NEW ROUTE
+//app.use("/api/v1/google", google);
 
 // Global error handler
 app.use(errorHandler);

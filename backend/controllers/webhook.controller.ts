@@ -1,116 +1,370 @@
 import { Request, Response } from 'express';
-import { Transaction } from '../models/transaction.model.js';
-import { sendUserNotification } from '../utils/notification.js';
-import { sendAdminEmail } from '../utils/mailer.js';
-//import { io } from '../config/socket.js';
-import crypto from 'crypto';
+import { fetchDeposits, getAccountInfo } from '../services/bitget.service.js';
 
-export const handleBitgetWebhook = async (req: Request, res: Response) => {
-  // Debug logging
-  console.log('Request headers:', req.headers);
-  console.log('Request body type:', typeof req.body);
-  console.log('Request body:', req.body);
-  console.log('Raw body exists:', !!(req as any).rawBody);
-  
-  const secret = process.env.BITGET_SECRET_KEY;
-  if (!secret) {
-    console.error("Missing BITGET_SECRET_KEY environment variable");
-    return res.status(500).json({ message: 'Server configuration error: BITGET_SECRET_KEY is not defined' });
-  }
-
-  // Check if req.body exists and is not empty
-  if (!req.body || (typeof req.body === 'object' && Object.keys(req.body).length === 0)) {
-    console.error('Request body is empty or undefined:', req.body);
-    return res.status(400).json({ message: 'Request body is empty or undefined' });
-  }
-
-  const signature = req.headers['x-signature'];
-  if (!signature || typeof signature !== 'string') {
-    console.error('Missing or invalid signature header');
-    return res.status(400).json({ message: 'Missing or invalid signature' });
-  }
-
-  let bodyData;
-  // Handle different body formats
-  if (Buffer.isBuffer(req.body)) {
-    bodyData = req.body.toString('utf8');
-  } else if (typeof req.body === 'string') {
-    bodyData = req.body;
-  } else {
-    bodyData = JSON.stringify(req.body);
-  }
-  
-  console.log('Body data used for signature:', bodyData);
-  
-  // Create the expected signature
-  const expectedSignature = crypto.createHmac('sha256', secret).update(bodyData).digest('hex');
-  console.log('Expected signature:', expectedSignature);
-  console.log('Received signature:', signature);
-  
-  if (signature !== expectedSignature) {
-    return res.status(401).json({ message: 'Invalid signature' });
-  }
-
-  // Parse body if it's a string
-  const data = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-  const { txid, status, type, coin, country, amount } = data;
-  
-  // Validate required fields
-  if (!txid) {
-    return res.status(400).json({ message: 'Missing required field: txid' });
-  }
-
+// Test API connection
+export const testConnection = async (req: Request, res: Response) => {
   try {
-    console.log(`Processing transaction with TXID: ${txid}`);
-    const transaction = await Transaction.findOne({ txid });
-    
-    if (!transaction) {
-      console.error(`Transaction not found with TXID: ${txid}`);
-      return res.status(404).json({ message: 'Transaction not found' });
+    const accountInfo = await getAccountInfo();
+    res.json({
+      success: true,
+      message: 'API connection successful',
+      data: accountInfo
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      error: 'API connection failed',
+      details: error.response?.data || error.message
+    });
+  }
+};
+
+// controller/bitget.controller.ts
+export const confirmDeposit = async (req: Request, res: Response) => {
+  const { coin, size, txid } = req.query;
+  
+  // Validate required parameters
+  if (!coin || !size || !txid) {
+    return res.status(400).json({
+      success: false,
+      error: 'Missing required parameters: coin, size, and txid'
+    });
+  }
+  
+  try {
+    // Convert size to number for comparison
+    const expectedSize = parseFloat(size as string);
+    if (isNaN(expectedSize)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid size parameter - must be a valid number'
+      });
     }
+    
+    // Set time range for search (last 90 days - Bitget's maximum allowed range)
+    const endTime = 1744873600000
+    const startTime = 1744560000000
+    
+    console.log(`Confirming deposit: ${coin} ${size} ${txid}`);
+    console.log(`Search time range: ${new Date(startTime).toISOString()} to ${new Date(endTime).toISOString()}`);
+    
+    // Fetch deposits from Bitget
+    const depositsResponse = await fetchDeposits(
+      coin as string,
+      startTime,
+      endTime,
+      100 // Increase limit to search more records
+    );
+    
+    // Debug the raw response
+    console.log('Bitget API Response:', JSON.stringify(depositsResponse, null, 2));
+    
+    // Extract deposit array from response
+    const deposits = depositsResponse?.data;
 
-    console.log(`Updating transaction status from ${transaction.status} to ${status}`);
-    transaction.status = status;
-    await transaction.save();
+if (!Array.isArray(deposits)) {
+  return res.status(500).json({
+    success: false,
+    error: 'Invalid response format from Bitget API'
+  });
+}
 
-    await sendUserNotification(transaction.userId.toString(), `Your ${type} transaction is now ${status}`);
+console.log(`Found ${deposits.length} deposits in response`);
 
-    await sendAdminEmail({
-      subject: `Transaction ${type.toUpperCase()} Update: ${status.toUpperCase()}`,
-      html: `
-        <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-          <h2 style="color: #0055cc;">🔔 Transaction ${status.toUpperCase()}</h2>
-          <p>A <strong>${type}</strong> transaction was made with the following details:</p>
-          <ul>
-            <li><strong>Transaction ID (TXID):</strong> ${txid}</li>
-            <li><strong>Coin:</strong> ${transaction.coin}</li>
-            <li><strong>Amount:</strong> $${transaction.amount}</li>
-            <li><strong>Country:</strong> ${transaction.country}</li>
-            ${transaction.walletAddressUsed ? `<li><strong>User Wallet Address:</strong> ${transaction.walletAddressUsed}</li>` : ""}
-            ${transaction.walletAddressSentTo ? `<li><strong>Wallet Sent To:</strong> ${transaction.walletAddressSentTo}</li>` : ""}
-            <li><strong>Status:</strong> ${transaction.status}</li>
-          </ul>
-          <p style="margin-top: 20px;">Please log in to the admin dashboard for more details.</p>
-          <hr>
-          <p style="font-size: 12px; color: #666;">Oceanic Charts - Crypto Transaction Management</p>
-        </div>
-      `
+    
+    // Debug each deposit for matching
+    console.log('Searching for:', {
+      coin: (coin as string).toUpperCase(),
+      size: expectedSize,
+      txid: txid as string
     });
     
+    deposits.forEach((deposit, index) => {
+      console.log(`Deposit ${index}:`, {
+        coin: deposit.coin,
+        size: deposit.size,
+        sizeAsNumber: parseFloat(deposit.size),
+        tradeId: deposit.tradeId,
+        orderId: deposit.orderId,
+        status: deposit.status
+      });
+    });
+    
+    // Search for matching deposit
+    const matchingDeposit = deposits.find(deposit => {
+      // Compare coin (both should be uppercase, but normalize just in case)
+      const coinMatch = deposit.coin === (coin as string).toUpperCase();
+      
+      // Compare size (allow small floating point differences)
+      const depositSize = parseFloat(deposit.size);
+      const sizeMatch = Math.abs(depositSize - expectedSize) < 0.000001;
+      
+      // Compare transaction ID (could be in tradeId field)
+      const txidMatch = deposit.tradeId === txid || deposit.orderId === txid;
+      
+      // Only consider successful deposits
+      const isSuccessful = deposit.status === 'success';
+      
+      console.log(`Checking deposit:`, {
+        coinMatch: `${deposit.coin} === ${(coin as string).toUpperCase()}: ${coinMatch}`,
+        sizeMatch: `${depositSize} vs ${expectedSize}: ${sizeMatch}`,
+        txidMatch: `${deposit.tradeId} === ${txid} || ${deposit.orderId} === ${txid}: ${txidMatch}`,
+        isSuccessful: `${deposit.status} === 'success': ${isSuccessful}`,
+        overallMatch: coinMatch && sizeMatch && txidMatch && isSuccessful
+      });
+      
+      return coinMatch && sizeMatch && txidMatch && isSuccessful;
+    });
+    
+    if (matchingDeposit) {
+      return res.json({
+        success: true,
+        confirmed: true,
+        message: 'Deposit confirmed successfully',
+        data: {
+          deposit: matchingDeposit,
+          verificationDetails: {
+            coin: matchingDeposit.coin,
+            size: matchingDeposit.size,
+            txid: matchingDeposit.tradeId,
+            status: matchingDeposit.status,
+            timestamp: matchingDeposit.cTime,
+            chain: matchingDeposit.chain,
+            toAddress: matchingDeposit.toAddress,
+            fromAddress: matchingDeposit.fromAddress
+          }
+        }
+      });
+    } else {
+      // Provide detailed information about why no match was found
+      const coinMatches = deposits.filter(d => 
+        d.coin === (coin as string).toUpperCase()
+      );
+      
+      const sizeMatches = deposits.filter(d => 
+        Math.abs(parseFloat(d.size) - expectedSize) < 0.000001
+      );
+      
+      const txidMatches = deposits.filter(d => 
+        d.tradeId === txid || d.orderId === txid
+      );
+      
+      return res.json({
+        success: true,
+        confirmed: false,
+        message: 'Deposit not found or does not match the provided criteria',
+        data: {
+          searchCriteria: {
+            coin: coin as string,
+            size: expectedSize,
+            txid: txid as string,
+            timeRange: {
+              startTime,
+              endTime,
+              daysSearched: 90
+            }
+          },
+          searchResults: {
+            totalDepositsFound: deposits.length,
+            coinMatches: coinMatches.length,
+            sizeMatches: sizeMatches.length,
+            txidMatches: txidMatches.length,
+            successfulDeposits: deposits.filter(d => d.status === 'success').length
+          },
+          // Include recent deposits for debugging (limit to 5)
+          recentDeposits: deposits.slice(0, 5).map(d => ({
+            coin: d.coin,
+            size: d.size,
+            txid: d.tradeId,
+            status: d.status,
+            timestamp: d.cTime
+          }))
+        }
+      });
+    }
+    
+  } catch (error: any) {
+    console.error('Error confirming deposit:', error);
+    
+    return res.status(500).json({
+      success: false,
+      confirmed: false,
+      error: 'Failed to confirm deposit',
+      details: error.message
+    });
+  }
+};
+// Alternative version with more flexible time range
+export const confirmDepositWithTimeRange = async (req: Request, res: Response) => {
+  const { coin, size, txid, startTime, endTime } = req.query;
+  
+  // Validate required parameters
+  if (!coin || !size || !txid) {
+    return res.status(400).json({
+      success: false,
+      error: 'Missing required parameters: coin, size, and txid'
+    });
+  }
+  
+  try {
+    const expectedSize = parseFloat(size as string);
+    if (isNaN(expectedSize)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid size parameter - must be a valid number'
+      });
+    }
+    
+    // Use provided time range or default to last 7 days
+    const searchEndTime = endTime ? parseInt(endTime as string) : Date.now();
+    const searchStartTime = startTime ? 
+      parseInt(startTime as string) : 
+      searchEndTime - (7 * 24 * 60 * 60 * 1000);
+    
+    console.log(`Confirming deposit with time range: ${coin} ${size} ${txid}`);
+    console.log(`Time range: ${new Date(searchStartTime).toISOString()} to ${new Date(searchEndTime).toISOString()}`);
+    
+    // Fetch deposits from Bitget
+    const depositsResponse = await fetchDeposits(
+      coin as string,
+      searchStartTime,
+      searchEndTime,
+      100
+    );
+    
+    const deposits = depositsResponse?.data?.data || [];
+    
+    // Find matching deposit with the same logic as above
+    interface Deposit {
+      coin: string;
+      size: string;
+      tradeId?: string;
+      orderId?: string;
+      status: string;
+      cTime?: number;
+      chain?: string;
+      toAddress?: string;
+      fromAddress?: string;
+    }
 
-    // io.emit('transaction_updated', {
-    //   user: transaction.userId,
-    //   txid,
-    //   status,
-    //   type,
-    //   coin,
-    //   amount,
-    //   country
-    // });
+    const matchingDeposit = (deposits as Deposit[]).find((deposit: Deposit) => {
+      const coinMatch = deposit.coin === (coin as string).toUpperCase();
+      const depositSize = parseFloat(deposit.size);
+      const sizeMatch = Math.abs(depositSize - expectedSize) < 0.000001;
+      const txidMatch = deposit.tradeId === txid || deposit.orderId === txid;
+      const isSuccessful = deposit.status === 'success';
+      
+      return coinMatch && sizeMatch && txidMatch && isSuccessful;
+    });
+    
+    return res.json({
+      success: true,
+      confirmed: !!matchingDeposit,
+      message: matchingDeposit ? 
+        'Deposit confirmed successfully' : 
+        'Deposit not found or does not match criteria',
+      data: matchingDeposit ? {
+        deposit: matchingDeposit,
+        verificationDetails: {
+          coin: matchingDeposit.coin,
+          size: matchingDeposit.size,
+          txid: matchingDeposit.tradeId,
+          status: matchingDeposit.status,
+          timestamp: matchingDeposit.cTime
+        }
+      } : {
+        searchCriteria: { coin, size: expectedSize, txid },
+        totalDepositsSearched: deposits.length
+      }
+    });
+    
+  } catch (error: any) {
+    console.error('Error confirming deposit:', error);
+    
+    return res.status(500).json({
+      success: false,
+      confirmed: false,
+      error: 'Failed to confirm deposit',
+      details: error.message
+    });
+  }
+};
 
-    res.status(200).json({ success: true });
-  } catch (error) {
-    console.error('Webhook error:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+// Get deposit records
+export const getDeposits = async (req: Request, res: Response) => {
+  const { coin, startTime, endTime, limit } = req.query;
+  
+  // Validate required parameters
+  if (!coin) {
+    return res.status(400).json({
+      success: false,
+      error: 'Missing required parameter: coin'
+    });
+  }
+  
+  if (!startTime || !endTime) {
+    return res.status(400).json({
+      success: false,
+      error: 'Missing required parameters: startTime and endTime (in milliseconds)'
+    });
+  }
+  
+  try {
+    const deposits = await fetchDeposits(
+      coin as string,
+      parseInt(startTime as string),
+      parseInt(endTime as string),
+      limit ? parseInt(limit as string) : 20
+    );
+    
+    res.json({
+      success: true,
+      data: deposits
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch deposits',
+      details: error.response?.data || error.message
+    });
+  }
+};
+
+// Get recent deposits (last 24 hours) - convenience endpoint
+export const getRecentDeposits = async (req: Request, res: Response) => {
+  const { coin, limit } = req.query;
+  
+  if (!coin) {
+    return res.status(400).json({
+      success: false,
+      error: 'Missing required parameter: coin'
+    });
+  }
+  
+  try {
+    const endTime = Date.now();
+    const startTime = endTime - (24 * 60 * 60 * 1000); // Last 24 hours
+    
+    const deposits = await fetchDeposits(
+      coin as string,
+      startTime,
+      endTime,
+      limit ? parseInt(limit as string) : 20
+    );
+    
+    res.json({
+      success: true,
+      timeRange: {
+        startTime: new Date(startTime).toISOString(),
+        endTime: new Date(endTime).toISOString()
+      },
+      data: deposits
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch recent deposits',
+      details: error.response?.data || error.message
+    });
   }
 };
