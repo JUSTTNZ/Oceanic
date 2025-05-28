@@ -155,7 +155,7 @@ const handleGoogleLogin = async () => {
     const user = credential.user;
     const idToken = await user.getIdToken();
 
-    const response = await fetch("https://oceanic-servernz.vercel.app/api/v1/google", {
+    const response = await fetch("http://localhost:7002/api/v1/google", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -194,7 +194,7 @@ const handleGoogleLogin = async () => {
         role: userData.data.role,
         fullname: userData.data.fullname,
         createdAt: userData.data.createdAt,
-        phoneNumber: userData.data.phoneNumber,
+        // phoneNumber: userData.data.phoneNumber,
         lastLogin: new Date().toISOString(),
       }));
     }
@@ -259,11 +259,11 @@ const handleGoogleLogin = async () => {
         </div>
       </div>
 
-      {error.general && (
+      {/* {error.general && (
         <div className="mb-4 p-3 bg-red-900/30 text-red-300 rounded-lg text-sm border border-red-800/50">
           {error.general}
         </div>
-      )}
+      )} */}
 
       <form onSubmit={handleLogin}>
         <div className="mb-4">
