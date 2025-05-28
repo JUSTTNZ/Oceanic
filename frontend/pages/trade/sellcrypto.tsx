@@ -166,6 +166,7 @@ const SellCrypto = () => {
   const [modalType, setModalType] = useState<"success" | "error" | "pending">("pending");
   const { showToast, ToastComponent } = useToast();
   const [transaction, setTransaction] = useState<Transaction | null>(null);
+  console.log(transaction)
 const [selectedCountry] = useState<Country>({ 
   code: "NG", 
   name: "Nigeria", 
@@ -403,6 +404,11 @@ const handleSubmit = async () => {
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500" />
       </div>
     );
+  }
+  if (error){
+    return(
+  <p className="text-red">{error}</p>
+    )
   }
 
 // if (error){
