@@ -155,7 +155,7 @@ const handleGoogleLogin = async () => {
     const user = credential.user;
     const idToken = await user.getIdToken();
 
-    const response = await fetch("http://localhost:7002/api/v1/google", {
+    const response = await fetch("https://oceanic-servernz.vercel.app/api/v1/google", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -194,7 +194,7 @@ const handleGoogleLogin = async () => {
         role: userData.data.role,
         fullname: userData.data.fullname,
         createdAt: userData.data.createdAt,
-        // phoneNumber: userData.data.phoneNumber,
+        phoneNumber: userData.data.phoneNumber,
         lastLogin: new Date().toISOString(),
       }));
     }
