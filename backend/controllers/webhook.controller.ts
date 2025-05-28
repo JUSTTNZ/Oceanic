@@ -60,7 +60,7 @@ export const confirmDeposit = async (req: Request, res: Response) => {
     console.log('Bitget API Response:', JSON.stringify(depositsResponse, null, 2));
     
     // Extract deposit array from response
-    const deposits = depositsResponse?.data?.data || [];
+    const deposits = depositsResponse?.data || [];
     console.log(`Found ${deposits.length} deposits in response`);
     
     if (!Array.isArray(deposits)) {
