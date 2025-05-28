@@ -24,7 +24,7 @@ const generateAccessAndRefreshToken = async (userId: string): Promise<{ accessTo
 }
 const handleGoogleLogin = asyncHandler(async (req, res) => {
   const { idToken } = req.body; // Frontend sends Firebase ID token
-
+ console.log("id", idToken)
   if (!idToken) {
     throw new ApiError({ statusCode: 400, message: "ID token is required" });
   }
@@ -54,7 +54,6 @@ const username = email.split("@")[0] + Math.floor(Math.random() * 1000);
         isGoogleAuth: true,
         isVerified: true,
         role,
-        phoneNumber: undefined,
         password: "firebase-auth-placeholder", 
       });
     }

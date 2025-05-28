@@ -259,11 +259,11 @@ const handleGoogleLogin = async () => {
         </div>
       </div>
 
-      {error.general && (
+      {/* {error.general && (
         <div className="mb-4 p-3 bg-red-900/30 text-red-300 rounded-lg text-sm border border-red-800/50">
           {error.general}
         </div>
-      )}
+      )} */}
 
       <form onSubmit={handleLogin}>
         <div className="mb-4">

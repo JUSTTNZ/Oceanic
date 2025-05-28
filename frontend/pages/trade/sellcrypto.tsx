@@ -15,7 +15,8 @@ import Banks from "../components/sell/bank";
 import { useToast } from "@/hooks/toast";
 import LoadingDisplay from "@/ui/loading";
 import ErrorDisplay from "@/ui/errorbuy";
-import { BYBIT_WALLET_ADDRESSES } from "./bybitaddress";
+import { BYBIT_WALLET_ADDRESSES } from "@/utils/bybitaddress";
+
 interface Coin {
   id: string;
   name: string;

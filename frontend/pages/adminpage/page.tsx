@@ -92,10 +92,10 @@ return(
         }
   return (
     
-    <div className="min-h-screen bg-gray-900 text-white py-20 px-6 font-grotesk">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-gray-900 text-white py-20  font-grotesk w-full">
+      <div className="max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center mb-12">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
+          <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
             Admin Dashboard
           </h1>
           <div className="relative">
