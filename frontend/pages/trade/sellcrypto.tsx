@@ -161,12 +161,12 @@ const SellCrypto = () => {
   const [selectedCoin, setSelectedCoin] = useState<Coin | null>(null);
   const [searchCoin, setSearchCoin] = useState("");
   const [showCoinDropdown, setShowCoinDropdown] = useState(false);
-  const [error, setError] = useState("");
+const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState<"success" | "error" | "pending">("pending");
   const { showToast, ToastComponent } = useToast();
   const [transaction, setTransaction] = useState<Transaction | null>(null);
-  // console.log(transaction)
+  console.log(transaction)
   console.log("coin", selectedCoin?.symbol, )
 console.log("t", txid)
 console.log("a", amount)
@@ -197,62 +197,62 @@ const [selectedCountry] = useState<Country>({
   const [exchangeRate, setExchangeRate] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
   useEffect(() => {
-    const fetchCoins = async () => {
+    const fetchData = async () => {
       try {
-        const res = await fetch("/api/coin");
-        if (!res.ok) setError("Failed to fetch cryptocurrencies");
-        const data = await res.json();
-        const supported = data.filter((coin: Coin) => SUPPORTED_COINS.includes(coin.symbol.toUpperCase()));
+        setLoading(true);
+        setError(null);
+  
+        // Fetch coins data
+        const responseCoins = await fetch(
+          `https://oceanic-servernz.vercel.app/api/v1/data/crypto-markets`
+        );
+        if (!responseCoins.ok) throw new Error("Failed to fetch coins");
+        const dataCoin = await responseCoins.json();
+             const supported = dataCoin.data.filter((coin: Coin) => SUPPORTED_COINS.includes(coin.symbol.toUpperCase()));
         setCoins(supported);
         if (supported.length > 0) setSelectedCoin(supported[0]);
-         setLoading(false);
-      } catch (error) {
-          console.log("Failed to fetch coins:", error);
-        setError("Failed to fetch coins:",);
-      }
-    };
-    fetchCoins();
 
 
-const fetchBanks = async () => {
-  try {
-    const response = await fetch(`/api/banks?country=${selectedCountry.name.toLowerCase()}`);
-    const data = await response.json();
-
-    if (Array.isArray(data.banks)) {
-      setBanksList(data.banks); // Set your dropdown list
-       setLoading(false);
+     // 3. Fetch banks for the default country
+      const banksResponse = await fetch(
+        `https://oceanic-servernz.vercel.app/api/v1/data/banks?country=${selectedCountry.name.toLowerCase()}`
+      );
+      if (!banksResponse.ok) throw new Error("Failed to fetch banks");
+      const banksData = await banksResponse.json();
+   if (Array.isArray(banksData.data.banks)) {
+      setBanksList(banksData.data.banks); // Set your dropdown list
     } else {
       console.log("Unexpected response format:",);
       setBanksList([]);
     }
-  } catch (error) {
-      console.log("Failed to fetch banks:", error);
-    setError("Failed to fetch banks:",);
-  }
-};
+  
 
-    fetchBanks();
-  }, [selectedCountry.code, selectedCountry.name]);
-  useEffect(() => {
-    const fetchExchangeRate = async () => {
-      if (!selectedCountry.name) return;
-
-      try {
-        const response = await fetch("/api/rate");
-        if (!response.ok) 
-          setError("Failed to fetch rate");
-        const data = await response.json();
-        setExchangeRate(data.conversion_rates[selectedCountry.currency] || 1);
-         setLoading(false);
-      } catch {
-        setExchangeRate(1);
-           setError("Failed to fetch rate");
+        
+  
+        // Fetch exchange rates
+        const responseRate = await fetch(
+          "https://oceanic-servernz.vercel.app/api/v1/data/exchange-rates"
+        );
+        if (!responseRate.ok) throw new Error("Failed to fetch rates");
+        const rateData = await responseRate.json();
+        
+        // Use the default country's currency to set initial exchange rate
+        const initialRate = rateData.data?.conversion_rates?.[selectedCountry.currency] || 1;
+        setExchangeRate(initialRate);
+  
+        setLoading(false);
+      } catch (err) {
+        setError("Failed to fetch data: " + (err as Error).message);
+        console.error(err);
+        setLoading(false);
       }
     };
-    fetchExchangeRate();
-  }, [selectedCountry.name, selectedCountry.currency]);
+  
+    fetchData();
+  }, [selectedCountry]);
+
 
 const walletAddresses = selectedCoin
   ? BYBIT_WALLET_ADDRESSES[selectedCoin.symbol.toUpperCase()] || []
