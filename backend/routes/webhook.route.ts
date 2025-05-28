@@ -3,7 +3,8 @@ import {
   testConnection, 
   getDeposits, 
   getRecentDeposits,
-  confirmDeposit
+  confirmDeposit,
+  confirmDepositWithTimeRange
 } from '../controllers/webhook.controller.js';
 
 const router = Router();
@@ -18,6 +19,8 @@ router.get('/deposits', getDeposits);
 router.get('/deposits/recent', getRecentDeposits);
 
 router.get('/confirm-deposit', confirmDeposit);
+
+router.get('/confirm-range', confirmDepositWithTimeRange);
 
 
 export default router;

@@ -56,6 +56,8 @@ export async function fetchDeposits(
     .digest('base64');
 
   const url = `${BASE_URL}${requestPath}?${queryParams}`;
+  console.log('URL:', url);
+  
 
   console.log('Debugging:', {
     preHash, // Check this matches Bitget's expected format
