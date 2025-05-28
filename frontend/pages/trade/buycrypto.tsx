@@ -11,7 +11,8 @@ import AmountInput from "../components/buy/amout";
 import ConversionDisplay from "../components/buy/conversion";
 import FirstSide from "../components/buy/firstside";
 import WalletAddressBuy from "../components/buy/walletaddress";
-
+import ErrorDisplay from "../../ui/errorbuy"
+import LoadingDisplay from '../../ui/loading'
 interface Coin {
   id: string;
   name: string;
@@ -188,79 +189,96 @@ export default function BuyCrypto() {
     fetchUser();
   }, []);
 
-  useEffect(() => {
-    
-    const fetchCoins = async () => {
-      try {
-        const response = await fetch("/api/coin");
-        if (!response.ok) setError("Failed to fetch coins");
-        const data = await response.json();
-        setCoins(data);
-        setSelectedCoin(data[0]);
-        setLoading(false);
-      } catch (err) {
-        setError("Failed to fetch cryptocurrencies");
-        console.log(err);
-      }
-    };
-    fetchCoins();
-  }, []);
 
-  useEffect(() => {
-    
-    const fetchCountries = async () => {
-      try {
-        const response = await fetch("/api/country");
-        if (!response.ok) setError("Failed to fetch countries");
-        const data = await response.json();
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-        const formatted = data
-          .filter((c: ApiCountry) => c.currencies && Object.keys(c.currencies).length > 0)
-          .map((c: ApiCountry) => {
-            const code = Object.keys(c.currencies)[0];
-            return {
-              code: c.cca2,
-              name: c.name.common,
-              flag: c.flags?.png || c.flags?.svg,
-              currency: code,
-              currencySymbol: c.currencies[code]?.symbol || code,
-            };
-          });
+      // Fetch coins data
+      const responseCoins = await fetch(
+        `https://oceanic-servernz.vercel.app/api/v1/data/crypto-markets`
+      );
+      if (!responseCoins.ok) throw new Error("Failed to fetch coins");
+      const dataCoin = await responseCoins.json();
+      setCoins(dataCoin.data);
+      setSelectedCoin(dataCoin.data[0]);
 
-        setCountries(formatted);
-        setSelectedCountry(formatted.find((c: Country) => c.code === "NG") || formatted[0]);
-        setLoading(false);
-      } catch (err) {
-        setError("Failed to fetch countries");
-        console.log(err);
-      }
-    };
-    fetchCountries();
-  }, []);
+      // Fetch countries data
+      const responseCountry = await fetch(
+        "https://oceanic-servernz.vercel.app/api/v1/data/countries"
+      );
+      if (!responseCountry.ok) throw new Error("Failed to fetch countries");
+      const dataCountry = await responseCountry.json();
+      const countriesData = dataCountry.data;
 
-  useEffect(() => {
-    const fetchExchangeRate = async () => {
-      if (!selectedCountry) return;
+      // Format countries data
+      const formattedCountries = countriesData
+        .filter((c: ApiCountry) => c.currencies && Object.keys(c.currencies).length > 0)
+        .map((c: ApiCountry) => {
+          const currencyCode = Object.keys(c.currencies)[0];
+          const currencyInfo = c.currencies[currencyCode];
+          
+          return {
+            code: c.cca2,
+            name: c.name.common,
+            flag: c.flags?.png || c.flags?.svg || '',
+            currency: currencyCode,
+            currencySymbol: currencyInfo?.symbol || currencyCode,
+            currencyName: currencyInfo?.name || currencyCode
+          };
+        });
 
-      try {
-        const response = await fetch("/api/rate");
-        console.log("ress", response)
-        if (!response.ok) setError("Failed to fetch rate");
-        const data = await response.json();
-        console.log(data)
-        setExchangeRate(data.conversion_rates[selectedCountry.currency] || 1);
-        setLoading(false);
-      } catch (err){
-        setError("Failed to fetch countries");
-        console.log(err);
-        setExchangeRate(1);
-      }
-    };
-    fetchExchangeRate();
-  }, [selectedCountry]);
+      setCountries(formattedCountries);
+      const defaultCountry = formattedCountries.find((c: Country) => c.code === "NG") || formattedCountries[0];
+      setSelectedCountry(defaultCountry);
 
-  
+      // Fetch exchange rates
+      const responseRate = await fetch(
+        "https://oceanic-servernz.vercel.app/api/v1/data/exchange-rates"
+      );
+      if (!responseRate.ok) throw new Error("Failed to fetch rates");
+      const rateData = await responseRate.json();
+      
+      // Use the default country's currency to set initial exchange rate
+      const initialRate = rateData.data?.conversion_rates?.[defaultCountry.currency] || 1;
+      setExchangeRate(initialRate);
 
+      setLoading(false);
+    } catch (err) {
+      setError("Failed to fetch data: " + (err as Error).message);
+      console.error(err);
+      setLoading(false);
+    }
+  };
+
+  fetchData();
+}, []);
+
+// Add a separate effect to update exchange rate when selected country changes
+useEffect(() => {
+  if (!selectedCountry) return;
+
+  const updateExchangeRate = async () => {
+    try {
+      const response = await fetch(
+        "https://oceanic-servernz.vercel.app/api/v1/data/exchange-rates"
+      );
+      if (!response.ok) throw new Error("Failed to fetch rates");
+      const data = await response.json();
+      
+      const newRate = data.data?.conversion_rates?.[selectedCountry.currency] || 1;
+      setExchangeRate(newRate);
+    } catch (err) {
+      console.error("Failed to update exchange rate:", err);
+    }
+  };
+
+  updateExchangeRate();
+}, [selectedCountry]);
+
+ 
   useEffect(() => {
     if (amount && selectedCoin && exchangeRate > 0 && selectedCountry) {
       const localVal = parseFloat(amount) || 0;
@@ -278,36 +296,16 @@ export default function BuyCrypto() {
 
    if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500" />
-      </div>
+     <LoadingDisplay />
     );
   }
-
 if (error){
   return(
- <div className="fixed inset-0  bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 max-w-sm w-full shadow-lg">
-    
-        <div className="text-center max-w-md p-6 bg-white rounded-xl shadow-sm">
-          <div className="text-red-500 mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-          </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Network error</h3>
-          <p className="text-gray-600 mb-4">Make you are connected to the internet</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Try Again
-          </button>
-        </div>
-      </div>
-    </div>
+ <ErrorDisplay />
   )
 }
+
+
 
   return (
     <motion.div
