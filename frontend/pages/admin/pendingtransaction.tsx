@@ -21,6 +21,7 @@ interface Transaction {
 export default function AdminPendingPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
+    const [loadingConfirm, setLoadingConfrim] = useState<string | null>(null)
   const { ToastComponent, showToast } = useToast();
 
   const fetchPendingTransactions = useCallback(async () => {
@@ -49,6 +50,7 @@ export default function AdminPendingPage() {
 
   const handleUpdateStatus = async (txid: string, status: string) => {
     const token = localStorage.getItem("accessToken");
+    setLoadingConfrim(txid)
     try {
       await fetch(`https://oceanic-servernz.vercel.app/api/v1/transaction/status/${txid}`, {
         method: "PATCH",
@@ -58,10 +60,14 @@ export default function AdminPendingPage() {
         },
         body: JSON.stringify({ status }),
       });
+     
       setTransactions(transactions.filter(tx => tx.txid !== txid));
+       showToast("confirmed transaction", "success");
     } catch (err) {
       showToast("Failed to update transaction status", "error");
       console.error("Failed to update transaction status", err);
+    } finally{
+      setLoadingConfrim(null)
     }
   };
 
@@ -70,8 +76,8 @@ export default function AdminPendingPage() {
   }, [fetchPendingTransactions]);
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100 font-grotesk pt-20">
-      <main className="container mx-auto px-4 sm:px-6 py-8">
+    <div className="min-h-screen bg-gray-900 text-gray-100 font-grotesk pt-20 ">
+      <main className="container mx-auto   py-8">
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
             Pending Approvals
@@ -80,6 +86,8 @@ export default function AdminPendingPage() {
             {transactions.length} requests
           </span>
         </div>
+<div className="overflow-hidden">
+
 
         {loading ? (
           <p>Loading...</p>
@@ -108,20 +116,30 @@ export default function AdminPendingPage() {
       </div>
 
 
-                <div className="mb-6 max-w-2xl">
+                <div className="mb-6 ">
                   <p className="text-2xl font-bold text-white">
                     {tx.amount} {tx.coin.toUpperCase()}
                   </p>
-                  <p className="text-xs text-gray-400 mt-1 max-w-2xl">Transaction ID: {tx.txid}</p>
+<p className="text-xs text-gray-400 mt-1  overflow-hidden text-ellipsis ">
+  Transaction ID: {tx.txid}
+</p>
+
                 </div>
 
                 <div className="flex space-x-3">
                   <button
                     onClick={() => handleUpdateStatus(tx.txid, "confirmed")}
                     className="flex-1 flex items-center justify-center space-x-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3 px-4 rounded-lg transition-all hover:shadow-lg hover:shadow-blue-500/20"
+                    disabled={loadingConfirm === tx.txid}
                   >
-                    <FaCheck />
-                    <span>Confirm</span>
+                    {loadingConfirm === tx.txid ? (
+    <div className="animate-spin h-5 w-5 border-4 border-t-transparent border-white rounded-full"></div>
+  ) : (
+    <>
+      <FaCheck />
+      <span>Confirm</span>
+    </>
+  )}
                   </button>
                  
                 </div>
@@ -129,6 +147,7 @@ export default function AdminPendingPage() {
             ))}
           </div>
         )}
+        </div>
       </main>
       {ToastComponent}
     </div>
