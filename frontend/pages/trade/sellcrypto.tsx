@@ -319,10 +319,10 @@ console.log("a", amount)
     <div className="min-h-screen">
       <motion.div 
         key="sell" 
-        initial={{ opacity: 0, x: 30 }} 
-        animate={{ opacity: 1, x: 0 }} 
-        exit={{ opacity: 0, x: -30 }} 
-        transition={{ duration: 0.3 }} 
+       initial={{ opacity: 0, y: 30 }} // Start from below
+  animate={{ opacity: 1, y: 0 }} // Animate to original position
+  exit={{ opacity: 0, y: -30 }} // Exit upwards
+  transition={{ duration: 0.3 }}
         className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl mx-auto py-14 px-4"
       >
 
