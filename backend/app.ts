@@ -85,7 +85,7 @@ app.get('/', (req, res) => {
 // Regular routes that use parsed JSON
 app.use("/api/v1/healthCheck", healthCheckRouter);
 app.use("/api/v1/users", userRouter);
-app.use("/api/v2/transaction", transactionRouter);
+app.use("/api/v1/transaction", transactionRouter);
 app.use("/api/v2/bitget", bitgetRouter); // 🆕 NEW ROUTE
 //app.use("/api/v1/google", google);
 
