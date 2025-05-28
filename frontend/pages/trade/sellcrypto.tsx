@@ -38,6 +38,7 @@ interface Transaction {
   coin: string;
   status: string;
 }
+
 const BYBIT_WALLET_ADDRESSES: Record<string, WalletAddress[]> = {
   USDT: [
     {
@@ -177,6 +178,14 @@ const [selectedCountry] = useState<Country>({
     bankName: "",
     bankCode: ""
   });
+
+  const [confirmedTransaction, setConfirmedTransaction] = useState<{
+  coin?: string;
+  amount?: number;
+  status?: string;
+  txid?: string;
+} | null>(null);
+
   const [banksList, setBanksList] = useState<{name: string, code: string}[]>([]);
   const [bankErrors, setBankErrors] = useState<{ accountNumber?: string; accountName?: string }>({});
 
@@ -318,7 +327,7 @@ const handleSubmit = async () => {
 
     // Step 2: Confirm transaction using Bitget
     const confirmRes = await fetch(
-      `https://oceanic-servernz.vercel.app/api/v2/bitget/confirm-deposit?coin=${selectedCoin.symbol}&txid=${txid}&size=${amount}`,
+      `http://localhost:7001/api/v2/bitget/confirm-deposit?coin=${selectedCoin.symbol}&txid=${txid}&size=${amount}`,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -328,18 +337,33 @@ const handleSubmit = async () => {
 
     const confirmData = await confirmRes.json();
 
-    if (confirmData.success) {
-      setStatus("confirmed");
-      showToast("Transaction confirmed successfully!", "success");
-      setModalType("success");
-      setShowModal(true);
-      resetForm();
-    } else {
+    if (confirmData.success && confirmData.confirmed) {
+    setStatus("confirmed");
+    showToast("Transaction confirmed successfully!", "success");
+
+    setConfirmedTransaction({
+      coin: selectedCoin?.symbol.toUpperCase(),
+      amount,
+      status: "confirmed",
+      txid,
+    });
+
+    setModalType("success");
+    setShowModal(true);
+    resetForm();
+    }
+    else {
       // Bitget did not confirm it yet
       setStatus("pending");
       showToast(
         "Transaction submitted but not yet confirmed. Please wait."
       );
+      setConfirmedTransaction({
+        coin: selectedCoin?.symbol.toUpperCase(),
+        amount,
+        status: "pending",
+        txid,
+      });
       setModalType("pending");
       setShowModal(true);
     }
@@ -511,21 +535,22 @@ const handleSubmit = async () => {
       {showModal && (
         <TransactionStatusModal
           type={modalType}
-          title={modalType === "success" ? "Transaction Successful" : "Transaction Failed"}
+          title={
+            modalType === "success"
+              ? "Transaction Successful"
+              : modalType === "pending"
+              ? "Transaction Pending"
+              : "Transaction Failed"
+          }
           message={
             modalType === "success"
-              ? `Your transaction was completed successfully.Your account will be credited after being confirm by our team.
-      This usually takes 5-10 minutes`
+              ? "Your transaction was completed successfully. Your account will be credited after confirmation by our team. This usually takes 5-10 minutes."
               : `${amount} ${selectedCoin?.symbol.toUpperCase()} is pending. We are yet to confirm your transaction.`
           }
-          details={{
-            coin: transaction?.coin || "",
-            amount,
-            status: transaction?.status || "failed",
-            txid
-          }}
+          details={confirmedTransaction || {}}
           onClose={() => setShowModal(false)}
         />
+
       )}
          {ToastComponent}
     </div>

@@ -60,15 +60,17 @@ export const confirmDeposit = async (req: Request, res: Response) => {
     console.log('Bitget API Response:', JSON.stringify(depositsResponse, null, 2));
     
     // Extract deposit array from response
-    const deposits = depositsResponse?.data || [];
-    console.log(`Found ${deposits.length} deposits in response`);
-    
-    if (!Array.isArray(deposits)) {
-      return res.status(500).json({
-        success: false,
-        error: 'Invalid response format from Bitget API'
-      });
-    }
+    const deposits = depositsResponse?.data;
+
+if (!Array.isArray(deposits)) {
+  return res.status(500).json({
+    success: false,
+    error: 'Invalid response format from Bitget API'
+  });
+}
+
+console.log(`Found ${deposits.length} deposits in response`);
+
     
     // Debug each deposit for matching
     console.log('Searching for:', {
