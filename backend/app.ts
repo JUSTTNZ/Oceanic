@@ -38,7 +38,7 @@ import paystackWebhookRouter from "./routes/buy.route.js";
 import bitgetRouter from "./routes/webhook.route.js"; // 🆕 NEW IMPORT
 import { errorHandler } from "./middlewares/error.middleware.js";
 import google from './routes/google.route.js'
-
+import apiRouter from "./routes/coinbankrate.js"
 // ✅ Setup raw body parsing for webhooks
 app.use('/api/v2/webhook', express.raw({ type: 'application/json' }), (req, res, next) => {
   try {
@@ -81,6 +81,7 @@ app.use(cookieParser());
 app.get('/', (req, res) => {
   res.send('Welcome to the backend!');
 });
+app.use("/api/v1/data", apiRouter);
 
 // Regular routes that use parsed JSON
 app.use("/api/v1/healthCheck", healthCheckRouter);

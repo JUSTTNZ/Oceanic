@@ -166,7 +166,10 @@ const SellCrypto = () => {
   const [modalType, setModalType] = useState<"success" | "error" | "pending">("pending");
   const { showToast, ToastComponent } = useToast();
   const [transaction, setTransaction] = useState<Transaction | null>(null);
-  console.log(transaction)
+  // console.log(transaction)
+  console.log("coin", selectedCoin?.symbol, )
+console.log("t", txid)
+console.log("a", amount)
 const [selectedCountry] = useState<Country>({ 
   code: "NG", 
   name: "Nigeria", 
@@ -317,27 +320,30 @@ const handleSubmit = async () => {
         accountNumber: bankDetails.accountNumber,
       }),
     });
-
+    
     const createData = await createRes.json();
-
+console.log("cre", createData)
     if (!createRes.ok) {
       throw new Error(createData.message || "Transaction creation failed");
     }
 
     setTransaction(createData.data);
-
+console.log("coin", selectedCoin.symbol, coins)
+console.log("t", txid)
+console.log("a", amount)
     // Step 2: Confirm transaction using Bitget
     const confirmRes = await fetch(
-      `http://localhost:7001/api/v2/bitget/confirm-deposit?coin=${selectedCoin.symbol}&txid=${txid}&size=${amount}`,
+      `https://oceanic-servernz.vercel.app/api/v2/bitget/confirm-deposit?coin=${selectedCoin.symbol}&txid=${txid}&size=${amount}`,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
       }
     );
+    console.log("res", confirmRes)
 
     const confirmData = await confirmRes.json();
-
+  console.log("con", confirmData)
     if (confirmData.success && confirmData.confirmed) {
     setStatus("confirmed");
     showToast("Transaction confirmed successfully!", "success");
@@ -369,11 +375,11 @@ const handleSubmit = async () => {
       setShowModal(true);
     }
   } catch (error) {
-    console.error("Transaction error:", error);
-    showToast(
-      error instanceof Error ? error.message : "Transaction failed",
-      "error"
-    );
+    console.log("Transaction error:", error);
+    // showToast(
+    //   error instanceof Error ? error.message : "Transaction failed",
+    //   "error"
+    // );
     setStatus("failed");
     setModalType("error");
     setShowModal(true);
