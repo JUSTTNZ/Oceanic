@@ -143,6 +143,7 @@ const loginUser = asyncHandler(async (req, res, next) => {
             secure: process.env.NODE_ENV === "production",
             sameSite: 'none' as 'none',
             domain: '.vercel.app',  // Share across subdomains
+            expires: new Date(Date.now() + 60 * 60 * 1000)
 
             
         }
