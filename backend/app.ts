@@ -21,11 +21,22 @@ const server = http.createServer(app);
 firebaseInit()
 
 // CORS Configuration
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://oceanic-charts.vercel.app',
+];
+
 app.use(cors({
-  origin: ['http://localhost:3000', 'https://oceanic-charts.vercel.app'],
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'x-signature', 'Cache-Control']
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-signature', 'Cache-Control'],
 }));
 
 app.options('*', cors());
