@@ -65,85 +65,62 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     return isValid;
   };
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+const handleLogin = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setError({ email: "", password: "", general: "" });
 
-    setError({
-      email: "",
-      password: "",
-      general: "",
-    });
+  if (!validateForm()) return;
 
-    if (!validateForm()) return;
+  try {
+    setLoading(true);
 
-    try {
-      setLoading(true);
-
-      const response = await fetch("https://oceanic-servernz.vercel.app/api/v1/users/login", {
+    // Step 1: Login request (returns user data)
+    const response = await fetch(
+      "https://oceanic-servernz.vercel.app/api/v1/users/login",
+      {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-      console.log(data)
-      if (!response.ok || !data.data) {
-        const errorMessage = data.message || data.error || "Login failed";
-        // setError((prev) => ({ ...prev, general: errorMessage }));
-        showToast(errorMessage, "error"); 
-        return;
+        credentials: "include", // For cookies
       }
+    );
 
-      localStorage.setItem("accessToken", data.data.accessToken);
-      localStorage.setItem("refreshToken", data.data.refreshToken);
-      
-      // Fetch user data from /auth/me
-      const userRes = await fetch("https://oceanic-servernz.vercel.app/api/v1/users/getCurrentUser", {
-        headers: {
-          Authorization: `Bearer ${data.data.accessToken}`,
-        },
-      });
+    const data = await response.json();
 
-      console.log(userRes)
-      const userData = await userRes.json();
-
-      if (userRes.ok && userData?.data) {
-        console.log(userData)
-        dispatch(setUser({
-          uid: userData.data._id,
-          email: userData.data.email,
-          username: userData.data.username,
-          role: userData.data.role,
-          fullname: userData.data.fullname,
-          createdAt: userData.data.createdAt,
-          phoneNumber: userData.data.phoneNumber,
-          lastLogin: new Date().toISOString(),
-        }));
-      }
-      console.log(data.user?.role)
-      if (userData.data.role === "admin" || userData.data.role === "superadmin") {
-        showToast("Welcome Admin!", "success");
-        
-        setTimeout(() => {
-  router.push("/adminpage");
-}, 2000);
-      } else {
-        showToast("Login successful", "success");
-        
-        setTimeout(() => {
- router.push("/markets");
-}, 2000);
-      }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Login failed";
-      showToast(errorMessage, "error"); // ✅ Red toast
-      console.error("Login error:", err);
+    if (!response.ok || !data.data) {
+      throw new Error(data.message || "Login failed");
     }
 
- finally {
-      setLoading(false);
+    // Step 2: Use the user data FROM THE LOGIN RESPONSE
+    const user = data.data.user; // Already available!
+    dispatch(
+      setUser({
+        uid: user._id,
+        email: user.email,
+        username: user.username,
+        role: user.role,
+        fullname: user.fullname,
+        createdAt: user.createdAt,
+        phoneNumber: user.phoneNumber,
+        lastLogin: new Date().toISOString(),
+      })
+    );
+
+    // Step 3: Redirect based on role
+    if (user.role === "admin" || user.role === "superadmin") {
+      showToast("Welcome Admin!", "success");
+      setTimeout(() => router.push("/adminpage"), 2000);
+    } else {
+      showToast("Login successful", "success");
+      setTimeout(() => router.push("/markets"), 2000);
     }
-  };
+  } catch (err) {
+    const errorMessage = err instanceof Error? err.message : "Login failed";
+    showToast(errorMessage, "error");
+  } finally {
+    setLoading(false);
+  }
+};
 
 
 

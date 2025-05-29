@@ -60,12 +60,10 @@ export default function CryptoTransactions() {
    const [loading, setLoading] = useState(true);
     useEffect(() => {
       const fetchTransactions = async () => {
-        const token = localStorage.getItem("accessToken");
+
         try {
           const res = await fetch("https://oceanic-servernz.vercel.app/api/v1/transaction/user", {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+          credentials: "include"
           });
   
           const data = await res.json();
