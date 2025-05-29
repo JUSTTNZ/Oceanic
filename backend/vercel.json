@@ -1,21 +1,5 @@
 {
-	"version": 2,
-	"builds": [
-		{
-			"src": "index.ts",
-			"use": "@vercel/node"
-		}
-	],
-	"routes": [
-		{
-			"src": "/(.*)",
-			"dest": "index.ts",
-			"headers": {
-				"Access-Control-Allow-Origin": "https://oceanic-charts.vercel.app",
-				"Access-Control-Allow-Credentials": "true",
-				"Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
-				"Access-Control-Allow-Headers": "Content-Type, Authorization, x-signature, Cache-Control"
-			}
-		}
-	]
+  "version": 2,
+  "builds": [{ "src": "index.ts", "use": "@vercel/node" }],
+  "routes": [{ "src": "/(.*)", "dest": "index.ts" }]
 }
