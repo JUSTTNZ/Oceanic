@@ -9,7 +9,13 @@
 	"routes": [
 		{
 			"src": "/(.*)",
-			"dest": "index.ts"
+			"dest": "index.ts",
+			"headers": {
+				"Access-Control-Allow-Origin": "https://oceanic-charts.vercel.app",
+				"Access-Control-Allow-Credentials": "true",
+				"Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+				"Access-Control-Allow-Headers": "Content-Type, Authorization, x-signature, Cache-Control"
+			}
 		}
 	]
 }
