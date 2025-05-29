@@ -141,6 +141,9 @@ const loginUser = asyncHandler(async (req, res, next) => {
         const options = {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
+            sameSite: 'none' as 'none',
+            domain: 'oceanic-servernz.vercel.app',
+            
         }
 
         return res
