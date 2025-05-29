@@ -142,6 +142,8 @@ const loginUser = asyncHandler(async (req, res, next) => {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: 'none' as 'none',
+            domain: '.vercel.app',  // Share across subdomains
+
             
         }
 
