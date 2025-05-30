@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { FaCheck,  } from "react-icons/fa";
 import { useToast } from "../../hooks/toast";
+import { authFetch } from "@/utils/api";
 interface Transaction {
   txid: string;
   userId: {
@@ -25,9 +26,8 @@ export default function AdminPendingPage() {
   const { ToastComponent, showToast } = useToast();
 
   const fetchPendingTransactions = useCallback(async () => {
-
     try {
-      const res = await fetch("https://oceanic-servernz.vercel.app/api/v1/transaction/admin", {
+      const res = await authFetch("https://oceanic-servernz.vercel.app/api/v1/transaction/admin", {
        method: 'GET',
           credentials: "include"
       });
@@ -50,7 +50,7 @@ export default function AdminPendingPage() {
   const handleUpdateStatus = async (txid: string, status: string) => {
     setLoadingConfrim(txid)
     try {
-      await fetch(`https://oceanic-servernz.vercel.app/api/v1/transaction/status/${txid}`, {
+      await authFetch(`https://oceanic-servernz.vercel.app/api/v1/transaction/status/${txid}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

@@ -20,6 +20,7 @@ import { BellIcon } from "@heroicons/react/24/outline";
 import { AnimatePresence, motion } from "framer-motion";
 import AllTransaction from '../admin/alltransaction'
 import PendingTransaction from '../admin/pendingtransaction'
+import { authFetch } from "@/utils/api";
 
 
 export default function AdminDashboard() {
@@ -34,7 +35,7 @@ export default function AdminDashboard() {
     
     const fetchPendingTransactions = async () => {
       try {
-        const res = await fetch("https://oceanic-servernz.vercel.app/api/v1/transaction/admin", {
+        const res = await authFetch("https://oceanic-servernz.vercel.app/api/v1/transaction/admin", {
             method: 'GET',
           credentials: "include"
         });

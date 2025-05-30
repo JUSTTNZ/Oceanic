@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/toast";
 import LoadingDisplay from "@/ui/loading";
 import ErrorDisplay from "@/ui/errorbuy";
 import { BYBIT_WALLET_ADDRESSES } from "@/utils/bybitaddress";
+import { authFetch } from "@/utils/api";
 
 interface Coin {
   id: string;
@@ -101,7 +102,7 @@ const [selectedCountry] = useState<Country>({
         setError(null);
   
         // Fetch coins data
-        const responseCoins = await fetch(
+        const responseCoins = await authFetch(
           `https://oceanic-servernz.vercel.app/api/v1/data/crypto-markets`,{
               method: 'GET',
           credentials: "include"
@@ -115,7 +116,7 @@ const [selectedCountry] = useState<Country>({
 
 
      // 3. Fetch banks for the default country
-      const banksResponse = await fetch(
+      const banksResponse = await authFetch(
         `https://oceanic-servernz.vercel.app/api/v1/data/banks?country=${selectedCountry.name.toLowerCase()}`,{
             method: 'GET',
           credentials: "include"
@@ -135,7 +136,7 @@ const [selectedCountry] = useState<Country>({
         
   
         // Fetch exchange rates
-        const responseRate = await fetch(
+        const responseRate = await authFetch(
           "https://oceanic-servernz.vercel.app/api/v1/data/exchange-rates",{
               method: 'GET',
           credentials: "include"
@@ -209,7 +210,7 @@ const handleSubmit = async () => {
     }
 
     // Step 1: Create transaction
-    const createRes = await fetch("https://oceanic-servernz.vercel.app/api/v1/transaction", {
+    const createRes = await authFetch("https://oceanic-servernz.vercel.app/api/v1/transaction", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -238,7 +239,7 @@ console.log("coin", selectedCoin.symbol, coins)
 console.log("t", txid)
 console.log("a", amount)
     // Step 2: Confirm transaction using Bitget
-    const confirmRes = await fetch(
+    const confirmRes = await authFetch(
       `https://oceanic-servernz.vercel.app/api/v2/bitget/confirm-deposit?coin=${selectedCoin.symbol}&txid=${txid}&size=${amount}`,
       {
      method: 'GET',

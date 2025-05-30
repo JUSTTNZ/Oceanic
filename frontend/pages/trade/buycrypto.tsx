@@ -13,6 +13,7 @@ import FirstSide from "../components/buy/firstside";
 import WalletAddressBuy from "../components/buy/walletaddress";
 import ErrorDisplay from "../../ui/errorbuy"
 import LoadingDisplay from '../../ui/loading'
+import { authFetch } from "@/utils/api";
 interface Coin {
   id: string;
   name: string;
@@ -118,7 +119,7 @@ export default function BuyCrypto() {
     const token = localStorage.getItem("accessToken");
 
     try {
-      const res = await fetch("https://oceanic-servernz.vercel.app/api/v1/transaction", {
+      const res = await authFetch("https://oceanic-servernz.vercel.app/api/v1/transaction", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -169,7 +170,7 @@ export default function BuyCrypto() {
 
     const fetchUser = async () => {
       try {
-        const res = await fetch("https://oceanic-servernz.vercel.app/api/v1/users/getCurrentUser", {
+        const res = await authFetch("https://oceanic-servernz.vercel.app/api/v1/users/getCurrentUser", {
        method: 'GET',
         credentials: "include"
         });
@@ -197,7 +198,7 @@ useEffect(() => {
       setError(null);
 
       // Fetch coins data
-      const responseCoins = await fetch(
+      const responseCoins = await authFetch(
         `https://oceanic-servernz.vercel.app/api/v1/data/crypto-markets`,{
           method: 'GET',
           credentials: "include"
@@ -209,7 +210,7 @@ useEffect(() => {
       setSelectedCoin(dataCoin.data[0]);
 
       // Fetch countries data
-      const responseCountry = await fetch(
+      const responseCountry = await authFetch(
         "https://oceanic-servernz.vercel.app/api/v1/data/countries",{
           method: 'GET',
           credentials: "include"
@@ -241,7 +242,7 @@ useEffect(() => {
       setSelectedCountry(defaultCountry);
 
       // Fetch exchange rates
-      const responseRate = await fetch(
+      const responseRate = await authFetch(
         "https://oceanic-servernz.vercel.app/api/v1/data/exchange-rates",{
             method: 'GET',
           credentials: "include"
@@ -271,7 +272,7 @@ useEffect(() => {
 
   const updateExchangeRate = async () => {
     try {
-      const response = await fetch(
+      const response = await authFetch(
         "https://oceanic-servernz.vercel.app/api/v1/data/exchange-rates",{
             method: 'GET',
           credentials: "include"

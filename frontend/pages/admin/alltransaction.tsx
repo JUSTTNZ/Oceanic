@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
 import { useToast } from "../../hooks/toast";
+import { authFetch } from "@/utils/api";
 interface Transaction {
   txid: string;
   amount: number;
@@ -39,7 +40,7 @@ export default function AllTransactionsPage() {
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
-        const res = await fetch("https://oceanic-servernz.vercel.app/api/v1/transaction/admin", {
+        const res = await authFetch("https://oceanic-servernz.vercel.app/api/v1/transaction/admin", {
        method: 'GET',
           credentials: "include"
         });
