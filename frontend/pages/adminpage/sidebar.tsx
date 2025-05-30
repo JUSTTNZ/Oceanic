@@ -4,6 +4,7 @@ import Link from "next/link";
 import { LiaTimesSolid } from "react-icons/lia";
 import { useSelector } from "react-redux";
 import { useState } from "react";
+import LogoutModal from "./logoutModal";
 
 interface RootState {
   user: {
@@ -22,7 +23,9 @@ interface SidebarProps {
 export default function Sidebar({ isOpen, closeSidebar }: SidebarProps) {
   const user = useSelector((state: RootState) => state.user);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
+  
   return (
     <>
       <div
@@ -52,23 +55,28 @@ export default function Sidebar({ isOpen, closeSidebar }: SidebarProps) {
 
             
                 <div className="flex flex-col gap-2 mt-2">
+                    <Link
+                    href="/adminpage"
+                    onClick={closeSidebar}
+                    className="px-4 py-2 rounded hover:bg-blue-400"
+                  >
+                    Dashboard
+                  </Link>
                   <Link
-                    href="/profile"
+                    href="/adminprofile"
                     onClick={closeSidebar}
                     className="px-4 py-2 rounded hover:bg-blue-400"
                   >
                     My Account
                   </Link>
-                  <Link
-                    href="/transaction"
-                    onClick={closeSidebar}
-                    className="px-4 py-2 rounded hover:bg-blue-400"
-                  >
-                    Activity History
-                  </Link>
+                
                   <Link
                     href="#"
-                    onClick={closeSidebar}
+                      onClick={(e) => {
+        e.preventDefault();
+        setShowModal(true);
+        closeSidebar();
+      }}
                     className="px-4 py-2 rounded hover:bg-blue-400"
                   >
                     Sign out
@@ -101,7 +109,12 @@ export default function Sidebar({ isOpen, closeSidebar }: SidebarProps) {
           )}
         </nav>
       </div>
-
+     {showModal && (
+      <LogoutModal
+        showModal={showModal}
+        setShowModal={() => setShowModal(false)}
+      />
+      )}
       {isOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-40 transition-opacity duration-300"

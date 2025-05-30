@@ -138,7 +138,7 @@ const loginUser = asyncHandler(async (req, res, next) => {
             throw new ApiError({ statusCode: 401, message: "Something went wrong while user was logging in" })
         }
 
-  
+  console.log("loginuser",loggedInUser)
 const options: {
     httpOnly: boolean;
     secure: boolean;
@@ -190,48 +190,82 @@ catch(error){
 }
 })
 
-const refreshAccessToken = asyncHandler(async (req, res) => {
-    const { refreshToken } = req.cookies || req.body
+const refreshAccessToken = asyncHandler(async (req: Request, res: Response) => {
+    // Define interfaces inside the function
+      console.log('Refresh token endpoint hit');
+    console.log('Cookies:', req.cookies);
+    interface TokenPayload extends jwt.JwtPayload {
+        _id: string;
+    }
 
-    const incomingRefreshToken = refreshToken
+    interface CookieOptions {
+        httpOnly: boolean;
+        secure: boolean;
+        sameSite: 'none' | 'lax' | 'strict';
+        maxAge: number;
+    }
 
-    if(!incomingRefreshToken) {
-        throw new ApiError({ statusCode: 401, message: "Refresh token is invalid" })
+    interface Tokens {
+        accessToken: string;
+        refreshToken: string;
+    }
+
+    const incomingRefreshToken = req.cookies?.refreshToken || req.body?.refreshToken;
+    console.log("refresh", incomingRefreshToken)
+    if (!incomingRefreshToken) {
+        throw new ApiError({ statusCode: 401, message: "Unauthorized - No refresh token provided" });
     }
 
     try {
-        const decodedToken = jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET) 
-
-        const userId = (decodedToken as jwt.JwtPayload)?._id;
+        const decodedToken = jwt.verify(
+            incomingRefreshToken, 
+            process.env.REFRESH_TOKEN_SECRET as string
+        ) as TokenPayload;
+        
+        const userId = decodedToken?._id;
+        
         if (!userId) {
             throw new ApiError({ statusCode: 401, message: "Invalid token payload" });
         }
+
         const user = await User.findById(userId);
-
-        if(!user) {
-            throw new ApiError({ statusCode: 401, message: "Unauthorized" })
+        if (!user) {
+            throw new ApiError({ statusCode: 401, message: "User not found" });
         }
 
-        if(incomingRefreshToken !== user?.refreshToken) {
-            throw new ApiError({ statusCode: 401, message: "Invalid refresh token" })
+        if (incomingRefreshToken !== user?.refreshToken?.trim()) {
+            throw new ApiError({ statusCode: 401, message: "Refresh token mismatch" });
         }
 
-        const options = {
+        const options: CookieOptions = {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production"
-        }
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+            maxAge: 60 * 60 * 1000 // 1 hour
+        };
 
-        const { accessToken, refreshToken: newRefreshToken } = await generateAccessAndRefreshToken(user._id.toString());
+        const { accessToken, refreshToken: newRefreshToken }: Tokens = 
+            await generateAccessAndRefreshToken(user._id.toString());
 
         return res
-        .status(200)
-        .cookie("accessToken", accessToken, options)
-        .cookie("refreshToken", newRefreshToken, options)
-        .json(new ApiResponse(200, "Access token refreshed successfully", {accessToken, refreshToken: newRefreshToken}))
-    } catch (error) {
-        throw new ApiError({ statusCode: 400, message: "Something happened while refreshing token" })
+            .status(200)
+            .cookie("accessToken", accessToken, options)
+            .cookie("refreshToken", newRefreshToken, options)
+            .json(new ApiResponse(200, "Access token refreshed", {
+                accessToken, 
+                refreshToken: newRefreshToken
+            }));
+    } catch (error: unknown) {
+        if (error instanceof jwt.TokenExpiredError) {
+            throw new ApiError({ statusCode: 401, message: "Refresh token expired" });
+        } else if (error instanceof jwt.JsonWebTokenError) {
+            throw new ApiError({ statusCode: 401, message: "Invalid refresh token" });
+        } else if (error instanceof Error) {
+            throw new ApiError({ statusCode: 400, message: error.message });
+        }
+        throw new ApiError({ statusCode: 400, message: "Unknown error occurred" });
     }
-})
+});
 
 const changeUserCurrentPassword = asyncHandler(async(req, res) => {
     const { email, currentPassword, newPassword } = req.body;

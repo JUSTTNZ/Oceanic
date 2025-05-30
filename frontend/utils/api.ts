@@ -8,7 +8,7 @@ export async function authFetch(input: RequestInfo, init?: RequestInit): Promise
     if (response.status === 401) {
         try {
             const refreshResponse = await fetch(
-                'http://localhost:7001/api/v1/users/refreshToken', 
+                'https://oceanic-servernz.vercel.app/api/v1/users/refreshToken', 
                 {
                     method: 'POST',
                     credentials: 'include'
@@ -31,6 +31,14 @@ export async function authFetch(input: RequestInfo, init?: RequestInit): Promise
             throw new Error('Session expired. Please login again.');
         }
     }
-
+ // Handle other potential errors (like 500 Internal Server Error)
+    if (!response.ok) {
+        console.error('Request failed with status:', response.status);
+        if (response.status === 500) {
+            // Optionally redirect or handle 500 errors
+            window.location.href = '/login'; // or show an error message
+        }
+        return Promise.reject(new Error('Request failed with status: ' + response.status));
+    }
     return response;
 }

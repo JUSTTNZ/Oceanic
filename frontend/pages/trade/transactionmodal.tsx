@@ -100,7 +100,7 @@ const TransactionStatusModal = ({ type, title, message, details, onClose }: Prop
           exit={{ opacity: 0 }}
         >
           <motion.div
-            className="bg-gray-800 text-white p-6 rounded-2xl w-full max-w-sm relative shadow-xl"
+            className="bg-gradient-to-r from-gray-900 to-gray-500 text-white p-6 rounded-2xl w-full max-w-sm relative shadow-xl"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
