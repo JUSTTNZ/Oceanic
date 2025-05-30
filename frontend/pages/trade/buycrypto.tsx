@@ -122,8 +122,10 @@ export default function BuyCrypto() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          
         },
+        
+        credentials: "include",
         body: JSON.stringify({
           coin: selectedCoin?.symbol,
           amount: parseFloat(amount),
@@ -163,15 +165,13 @@ export default function BuyCrypto() {
   }, []);
 
   useEffect(() => {
-    const token = localStorage.getItem("accessToken");
-    if (!token) return;
+    
 
     const fetchUser = async () => {
       try {
         const res = await fetch("https://oceanic-servernz.vercel.app/api/v1/users/getCurrentUser", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+       method: 'GET',
+        credentials: "include"
         });
 
         const data = await res.json();
@@ -198,7 +198,10 @@ useEffect(() => {
 
       // Fetch coins data
       const responseCoins = await fetch(
-        `https://oceanic-servernz.vercel.app/api/v1/data/crypto-markets`
+        `https://oceanic-servernz.vercel.app/api/v1/data/crypto-markets`,{
+          method: 'GET',
+          credentials: "include"
+        }
       );
       if (!responseCoins.ok) throw new Error("Failed to fetch coins");
       const dataCoin = await responseCoins.json();
@@ -207,7 +210,10 @@ useEffect(() => {
 
       // Fetch countries data
       const responseCountry = await fetch(
-        "https://oceanic-servernz.vercel.app/api/v1/data/countries"
+        "https://oceanic-servernz.vercel.app/api/v1/data/countries",{
+          method: 'GET',
+          credentials: "include"
+        }
       );
       if (!responseCountry.ok) throw new Error("Failed to fetch countries");
       const dataCountry = await responseCountry.json();
@@ -236,7 +242,10 @@ useEffect(() => {
 
       // Fetch exchange rates
       const responseRate = await fetch(
-        "https://oceanic-servernz.vercel.app/api/v1/data/exchange-rates"
+        "https://oceanic-servernz.vercel.app/api/v1/data/exchange-rates",{
+            method: 'GET',
+          credentials: "include"
+        }
       );
       if (!responseRate.ok) throw new Error("Failed to fetch rates");
       const rateData = await responseRate.json();
@@ -263,7 +272,10 @@ useEffect(() => {
   const updateExchangeRate = async () => {
     try {
       const response = await fetch(
-        "https://oceanic-servernz.vercel.app/api/v1/data/exchange-rates"
+        "https://oceanic-servernz.vercel.app/api/v1/data/exchange-rates",{
+            method: 'GET',
+          credentials: "include"
+        }
       );
       if (!response.ok) throw new Error("Failed to fetch rates");
       const data = await response.json();

@@ -31,15 +31,12 @@ export default function AdminDashboard() {
 
 
   useEffect(() => {
-    const token = localStorage.getItem("accessToken");
-    if (!token) return;
-
+    
     const fetchPendingTransactions = async () => {
       try {
         const res = await fetch("https://oceanic-servernz.vercel.app/api/v1/transaction/admin", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+            method: 'GET',
+          credentials: "include"
         });
 
         const data = await res.json();

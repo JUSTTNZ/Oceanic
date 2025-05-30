@@ -33,14 +33,13 @@ export default function EditProfileModal({ user, onClose }: {
     setIsSubmitting(true);
 
     try {
-      const token = localStorage.getItem("accessToken");
       const response = await fetch('https://oceanic-servernz.vercel.app/api/v1/users/updateUser', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(formData),
+          credentials: "include"
       });
 
       const data = await response.json();

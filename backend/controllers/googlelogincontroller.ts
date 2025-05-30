@@ -54,6 +54,7 @@ const username = email.split("@")[0] + Math.floor(Math.random() * 1000);
         isGoogleAuth: true,
         isVerified: true,
         role,
+          phoneNumber: null,
         password: "firebase-auth-placeholder", 
       });
     }
@@ -62,10 +63,17 @@ const username = email.split("@")[0] + Math.floor(Math.random() * 1000);
     const { accessToken, refreshToken } = await generateAccessAndRefreshToken(user._id.toString());
     const loggedInUser = await User.findById(user._id).select("-password -refreshToken");
 
-    const options = {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-    };
+ const options: {
+    httpOnly: boolean;
+    secure: boolean;
+    sameSite: 'none' | 'lax' | 'strict';
+    maxAge: number;
+} = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    maxAge: 60 * 60 * 1000, // 1 hour
+};
 
     return res
       .status(200)
@@ -74,8 +82,7 @@ const username = email.split("@")[0] + Math.floor(Math.random() * 1000);
       .json(
         new ApiResponse(200, "Google login successful", {
           user: loggedInUser,
-          accessToken,
-          refreshToken,
+        
         })
       );
   } catch (error) {

@@ -38,12 +38,10 @@ export default function AllTransactionsPage() {
 
   useEffect(() => {
     const fetchTransactions = async () => {
-      const token = localStorage.getItem("accessToken");
       try {
         const res = await fetch("https://oceanic-servernz.vercel.app/api/v1/transaction/admin", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+       method: 'GET',
+          credentials: "include"
         });
 
         const data = await res.json();
