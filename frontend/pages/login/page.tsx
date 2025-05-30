@@ -148,36 +148,23 @@ const handleGoogleLogin = async () => {
 
     const data = await response.json();
     console.log("goo", data);
-
-    localStorage.setItem("accessToken", data.data.accessToken);
-    localStorage.setItem("refreshToken", data.data.refreshToken);
     
-    // Fetch user data from /auth/me
-    const userRes = await fetch("https://oceanic-servernz.vercel.app/api/v1/users/getCurrentUser", {
-      headers: {
-        Authorization: `Bearer ${data.data.accessToken}`,
-      },
-    });
-    
-    console.log(userRes);
-    const userData = await userRes.json();
-
-    if (userRes.ok && userData?.data) {
+ const userData = data.data.user; 
       console.log(userData);
       dispatch(setUser({
-        uid: userData.data._id,
-        email: userData.data.email,
-        username: userData.data.username,
-        role: userData.data.role,
-        fullname: userData.data.fullname,
-        createdAt: userData.data.createdAt,
-        phoneNumber: userData.data.phoneNumber,
+        uid: userData._id,
+        email: userData.email,
+        username: userData.username,
+        role: userData.role,
+        fullname: userData.fullname,
+        createdAt: userData.createdAt,
+        phoneNumber: userData.phoneNumber,
         lastLogin: new Date().toISOString(),
       }));
-    }
     
-    console.log(data.user?.role);
-    if (userData.data.role === "admin" || userData.data.role === "superadmin") {
+    
+
+    if (userData.role === "admin" || userData.role === "superadmin") {
       showToast("Welcome Admin!", "success");
       setTimeout(() => {
         router.push("/adminpage");

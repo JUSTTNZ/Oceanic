@@ -25,12 +25,11 @@ export default function AdminPendingPage() {
   const { ToastComponent, showToast } = useToast();
 
   const fetchPendingTransactions = useCallback(async () => {
-    const token = localStorage.getItem("accessToken");
+
     try {
       const res = await fetch("https://oceanic-servernz.vercel.app/api/v1/transaction/admin", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+       method: 'GET',
+          credentials: "include"
       });
       if (!res.ok) {
         setTransactions([]);
@@ -49,16 +48,15 @@ export default function AdminPendingPage() {
   }, [showToast]);
 
   const handleUpdateStatus = async (txid: string, status: string) => {
-    const token = localStorage.getItem("accessToken");
     setLoadingConfrim(txid)
     try {
       await fetch(`https://oceanic-servernz.vercel.app/api/v1/transaction/status/${txid}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ status }),
+          credentials: "include"
       });
      
       setTransactions(transactions.filter(tx => tx.txid !== txid));

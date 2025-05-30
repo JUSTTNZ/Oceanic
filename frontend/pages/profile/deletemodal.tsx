@@ -25,13 +25,13 @@ export default function DeleteModal({ user, onClose }: {
     setIsDeleting(true);
     
     try {
-      const token = localStorage.getItem("accessToken");
+     
       const response = await fetch('https://oceanic-servernz.vercel.app/api/v1/users/deleteUser', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
         },
+          credentials: "include"
       });
 
       const data = await response.json();

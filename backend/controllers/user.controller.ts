@@ -138,15 +138,7 @@ const loginUser = asyncHandler(async (req, res, next) => {
             throw new ApiError({ statusCode: 401, message: "Something went wrong while user was logging in" })
         }
 
-        // const options = {
-        //     httpOnly: true,
-        //     secure: process.env.NODE_ENV === "production",
-        //     sameSite: 'none' as 'none',
-        //     domain: '.vercel.app',  // Share across subdomains
-        //     expires: new Date(Date.now() + 60 * 60 * 1000)
-
-            
-        // }
+  
 const options: {
     httpOnly: boolean;
     secure: boolean;

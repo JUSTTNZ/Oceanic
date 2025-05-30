@@ -102,7 +102,10 @@ const [selectedCountry] = useState<Country>({
   
         // Fetch coins data
         const responseCoins = await fetch(
-          `https://oceanic-servernz.vercel.app/api/v1/data/crypto-markets`
+          `https://oceanic-servernz.vercel.app/api/v1/data/crypto-markets`,{
+              method: 'GET',
+          credentials: "include"
+          }
         );
         if (!responseCoins.ok) throw new Error("Failed to fetch coins");
         const dataCoin = await responseCoins.json();
@@ -113,7 +116,11 @@ const [selectedCountry] = useState<Country>({
 
      // 3. Fetch banks for the default country
       const banksResponse = await fetch(
-        `https://oceanic-servernz.vercel.app/api/v1/data/banks?country=${selectedCountry.name.toLowerCase()}`
+        `https://oceanic-servernz.vercel.app/api/v1/data/banks?country=${selectedCountry.name.toLowerCase()}`,{
+            method: 'GET',
+          credentials: "include"
+        }
+        
       );
       if (!banksResponse.ok) throw new Error("Failed to fetch banks");
       const banksData = await banksResponse.json();
@@ -129,7 +136,10 @@ const [selectedCountry] = useState<Country>({
   
         // Fetch exchange rates
         const responseRate = await fetch(
-          "https://oceanic-servernz.vercel.app/api/v1/data/exchange-rates"
+          "https://oceanic-servernz.vercel.app/api/v1/data/exchange-rates",{
+              method: 'GET',
+          credentials: "include"
+          }
         );
         if (!responseRate.ok) throw new Error("Failed to fetch rates");
         const rateData = await responseRate.json();
@@ -203,8 +213,8 @@ const handleSubmit = async () => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
       },
+      credentials: "include",
       body: JSON.stringify({
         coin: selectedCoin.symbol,
         amount,
@@ -231,9 +241,8 @@ console.log("a", amount)
     const confirmRes = await fetch(
       `https://oceanic-servernz.vercel.app/api/v2/bitget/confirm-deposit?coin=${selectedCoin.symbol}&txid=${txid}&size=${amount}`,
       {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
+     method: 'GET',
+    credentials: "include"
       }
     );
     console.log("res", confirmRes)

@@ -30,15 +30,16 @@ export default function PasswordChangeModal({ user, onClose }: {
       setIsLoading(false);
       return;
     }
-    const token = localStorage.getItem("accessToken");
     try {
       const response = await fetch('https://oceanic-servernz.vercel.app/api/v1/users/changePassword', {
         
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
-         Authorization: `Bearer ${token}`,
+    
         },
+  
+          credentials: "include",
         body: JSON.stringify({
           email: user.email,
           currentPassword,
