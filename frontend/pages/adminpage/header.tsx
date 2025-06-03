@@ -82,7 +82,7 @@ export default function Header() {
               {/* <li>
                 <Link href="/transaction" className="block px-4 py-3 hover:bg-blue-500/50 transition-colors">Activity History</Link>
               </li> */}
-              <li onClick={() => setShowModal(true)}>
+              <li onClick={() => setShowModal(true)} >
                 <Link href="#" className="block px-4 py-3 hover:bg-blue-500/50 transition-colors">Sign out</Link>
               </li>
             </ul>
