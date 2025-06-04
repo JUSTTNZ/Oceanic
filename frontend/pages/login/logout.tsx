@@ -10,7 +10,7 @@ interface LogoutProps {
   setShowModal: (show: boolean) => void;
 }
 
-export default function LogoutModal({ setShowModal }: LogoutProps) {
+export default function LogoutM({ setShowModal }: LogoutProps) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const router = useRouter();
   const dispatch = useDispatch();

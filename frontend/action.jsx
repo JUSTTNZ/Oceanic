@@ -7,3 +7,6 @@ export const updateUser = (updatedFields) => ({
   type: "UPDATE_USER",
   payload: updatedFields
 });
+export const clearUser = () => ({
+  type: "CLEAR_USER"
+});

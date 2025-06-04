@@ -43,7 +43,7 @@ export default function DeleteModal({ user, onClose }: {
 
       toast.success('Account deleted successfully');
       // Clear user data from storage/local state
-      localStorage.removeItem("accessToken");
+     
 
      router.push("/login");
     } catch (error) {
