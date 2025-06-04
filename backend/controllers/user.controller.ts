@@ -139,17 +139,12 @@ const loginUser = asyncHandler(async (req, res, next) => {
         }
 
   console.log("loginuser",loggedInUser)
-const options: {
-    httpOnly: boolean;
-    secure: boolean;
-    sameSite: 'none' | 'lax' | 'strict';
-    maxAge: number;
-} = {
-    httpOnly: true,
-    secure: true,
-    // secure: process.env.NODE_ENV === 'production',
-    sameSite:'none' ,
-    maxAge: 60 * 60 * 1000, // 1 hour
+const options = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: 'none',
+  maxAge: 60 * 60 * 1000, // 1 hour
+  path: '/', // ✅ add this
 };
         return res
             .status(200)
