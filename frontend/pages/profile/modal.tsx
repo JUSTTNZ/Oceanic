@@ -3,7 +3,7 @@ import { FiX, FiCheck } from "react-icons/fi";
 import { toast } from "react-hot-toast";
 import { updateUser } from "@/action";
 import { useDispatch } from "react-redux";
-import { authFetch } from "@/utils/api";
+
 
 export default function EditProfileModal({ user, onClose }: {
   user: {
@@ -34,7 +34,7 @@ export default function EditProfileModal({ user, onClose }: {
     setIsSubmitting(true);
 
     try {
-      const response = await authFetch('https://oceanic-servernz.vercel.app/api/v1/users/updateUser', {
+      const response = await fetch('https://oceanic-servernz.vercel.app/api/v1/users/updateUser', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

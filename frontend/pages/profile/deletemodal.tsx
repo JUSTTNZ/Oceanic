@@ -1,4 +1,4 @@
-import { authFetch } from "@/utils/api";
+
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { toast } from "react-hot-toast";
@@ -27,7 +27,7 @@ export default function DeleteModal({ user, onClose }: {
     
     try {
      
-      const response = await authFetch('https://oceanic-servernz.vercel.app/api/v1/users/deleteUser', {
+      const response = await fetch('https://oceanic-servernz.vercel.app/api/v1/users/deleteUser', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
