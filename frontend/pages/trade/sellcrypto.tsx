@@ -16,7 +16,7 @@ import { useToast } from "@/hooks/toast";
 import LoadingDisplay from "@/ui/loading";
 import ErrorDisplay from "@/ui/errorbuy";
 import { BYBIT_WALLET_ADDRESSES } from "@/utils/bybitaddress";
-import { authFetch } from "@/utils/api";
+
 
 interface Coin {
   id: string;
@@ -102,7 +102,7 @@ const [selectedCountry] = useState<Country>({
         setError(null);
   
         // Fetch coins data
-        const responseCoins = await authFetch(
+        const responseCoins = await fetch(
           `https://oceanic-servernz.vercel.app/api/v1/data/crypto-markets`,{
               method: 'GET',
           credentials: "include"
@@ -116,7 +116,7 @@ const [selectedCountry] = useState<Country>({
 
 
      // 3. Fetch banks for the default country
-      const banksResponse = await authFetch(
+      const banksResponse = await fetch(
         `https://oceanic-servernz.vercel.app/api/v1/data/banks?country=${selectedCountry.name.toLowerCase()}`,{
             method: 'GET',
           credentials: "include"
@@ -136,7 +136,7 @@ const [selectedCountry] = useState<Country>({
         
   
         // Fetch exchange rates
-        const responseRate = await authFetch(
+        const responseRate = await fetch(
           "https://oceanic-servernz.vercel.app/api/v1/data/exchange-rates",{
               method: 'GET',
           credentials: "include"

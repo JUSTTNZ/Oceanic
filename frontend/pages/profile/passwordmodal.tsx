@@ -1,4 +1,4 @@
-import { authFetch } from "@/utils/api";
+
 import { useState } from "react";
 import { toast } from "react-hot-toast";
 
@@ -32,7 +32,7 @@ export default function PasswordChangeModal({ user, onClose }: {
       return;
     }
     try {
-      const response = await authFetch('https://oceanic-servernz.vercel.app/api/v1/users/changePassword', {
+      const response = await fetch('https://oceanic-servernz.vercel.app/api/v1/users/changePassword', {
         
         method: 'PUT',
         headers: {
