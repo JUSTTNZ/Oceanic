@@ -24,6 +24,7 @@ firebaseInit()
 const allowedOrigins = [
   'http://localhost:3000',
   'https://oceanic-charts.vercel.app',
+  "/https:\/\/oceanic-charts(-[\w-]+)?\.vercel\.app/"
 ];
 
 app.use(cors({
@@ -35,10 +36,20 @@ app.use(cors({
     }
   },
   credentials: true,
-  exposedHeaders: ['Set-Cookie'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], // Explicit methods
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'X-Requested-With',
+    'Cookie',
+    'Set-Cookie'
+  ]
 }));
 
-app.options('*', cors());
+app.options('*', cors({
+  origin: allowedOrigins,
+  credentials: true
+}));
 
 // Import routers
 import userRouter from './routes/user.route.js';

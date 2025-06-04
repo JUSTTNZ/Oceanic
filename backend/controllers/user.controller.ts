@@ -146,8 +146,9 @@ const options: {
     maxAge: number;
 } = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    secure: true,
+    // secure: process.env.NODE_ENV === 'production',
+    sameSite:'none' ,
     maxAge: 60 * 60 * 1000, // 1 hour
 };
         return res
@@ -172,12 +173,18 @@ const logOutUser = asyncHandler(async (req, res,next) => {
     }
    
     // clear token 
-    const options = {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: process.env.NODE_ENV === "production" ? 'none' : 'lax',  // IMPORTANT
-  expires: new Date(0),  // expire immediately
-};
+    const options : {
+    httpOnly: boolean;
+    secure: boolean;
+    sameSite: 'none' | 'lax' | 'strict';
+    expires: Date;
+} = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite:  'none',
+        expires: new Date(0) // set to expire now now
+    }
+
     return res 
     .status(200)
     // clear cookies here
