@@ -184,6 +184,7 @@ const logOutUser = asyncHandler(async (req, res,next) => {
         sameSite:  'none',
         expires: new Date(0) // set to expire now now
     }
+
     return res 
     .status(200)
     // clear cookies here
