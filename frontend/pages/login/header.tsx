@@ -7,7 +7,8 @@ import { RiMenu3Line } from "react-icons/ri";
 import {  FaChevronDown } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/router";
-import { persistor } from "@/store";
+import { toast } from "react-hot-toast";
+import { clearUser } from "@/action";
 interface RootState {
   user: {
     uid: number;
@@ -21,32 +22,39 @@ export default function Header() {
   const [showModal, setShowModal] = useState(false);
   const dispatch = useDispatch()
   const router = useRouter()
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
   const handleSignOut = async () => {
+    setIsLoggingOut(true);
     try {
-      // const response = await fetch('http://localhost:7001//api/v1/users/logout', {
-      //   method: 'POST',
-      //   credentials: 'include', // Required for sending cookies
-      // });
-  
-      // const contentType = response.headers.get('Content-Type');
-      // if (contentType && contentType.includes('application/json')) {
-      //   const data = await response.json();
-      //   console.log("Logout success:", data);
-      // } else {
-      //   throw new Error("Expected JSON, but got something else.");
-      // }
-  
-      // Clear Redux state and persist store
-      dispatch({ type: "SET_USER", payload: '' });
-      persistor.purge(); // clear persisted data
-  
-      setShowModal(false);
-      router.push('/login'); 
+      // 1. Call logout endpoint (clears cookies server-side)
+      const response = await fetch(
+        'https://oceanic-servernz.vercel.app/api/v1/users/logout',
+        {
+          method: 'POST',
+          credentials: 'include', // Required for cookies!
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Logout failed');
+      }
+
+      // 2. Clear client-side state
+      dispatch(clearUser()); // Redux
+    
+
+      // 3. Redirect to login
+      router.push('/login');
+      toast.success('Logged out successfully');
+
     } catch (error) {
-      console.error("Logout failed:", error);
+      console.error('Logout error:', error);
+      toast.error('Logout failed. Please try again.');
+    } finally {
+      setIsLoggingOut(false);
+      setShowModal(false);
     }
   };
-  
  
   const [isDropDownOpen, setIsDropDownOpen] = useState(false)
   const toggleDropdown = () => {
@@ -155,9 +163,10 @@ export default function Header() {
               </button>
               <button
                 onClick={handleSignOut}
+                 disabled={isLoggingOut}
                 className="px-4 py-2 rounded bg-red-500 text-white hover:bg-red-600"
               >
-                Sign Out
+              {isLoggingOut ? 'Signing Out...' : 'Sign Out'}
               </button>
             </div>
           </div>

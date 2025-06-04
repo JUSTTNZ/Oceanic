@@ -45,7 +45,10 @@ const reducer = (state = initialState, action) => {
           ...state.user, // Keep existing user data
           ...action.payload // Merge with updated fields
         }
+        
       };
+      case "CLEAR_USER":
+      return { ...state, user: null };
     default:
       return state;
   }
