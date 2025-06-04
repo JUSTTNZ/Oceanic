@@ -173,10 +173,11 @@ const logOutUser = asyncHandler(async (req, res,next) => {
    
     // clear token 
     const options = {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        expires: new Date(0) // set to expire now now
-    }
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: process.env.NODE_ENV === "production" ? 'none' : 'lax',  // IMPORTANT
+  expires: new Date(0),  // expire immediately
+};
     return res 
     .status(200)
     // clear cookies here
