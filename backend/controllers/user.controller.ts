@@ -168,17 +168,13 @@ const logOutUser = asyncHandler(async (req, res,next) => {
     }
    
     // clear token 
-    const options : {
-    httpOnly: boolean;
-    secure: boolean;
-    sameSite: 'none' | 'lax' | 'strict';
-    expires: Date;
-} = {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite:  'none',
-        expires: new Date(0) // set to expire now now
-    }
+    const options = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: 'none',
+  expires: new Date(0),
+  path: '/', // ✅ this is critical
+};
 
     return res 
     .status(200)
