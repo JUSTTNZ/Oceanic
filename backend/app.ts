@@ -17,7 +17,7 @@ import firebaseInit  from './utils/firebase.js'
 
 const app = express();
 const server = http.createServer(app);
-
+app.set('trust proxy', 1);
 firebaseInit()
 
 // CORS Configuration
