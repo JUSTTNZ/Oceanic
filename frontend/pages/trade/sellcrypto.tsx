@@ -199,18 +199,10 @@ const handleSubmit = async () => {
     setIsSubmitting(true);
     setStatus("sent");
 
-    const accessToken = localStorage.getItem("accessToken");
-    if (!accessToken) {
-      showToast("Please login first", "error");
-      setStatus("failed");
-      setModalType("error");
-      setShowModal(true);
-      setIsSubmitting(false);
-      return;
-    }
+ 
 
     // Step 1: Create transaction
-    const createRes = await authFetch("https://oceanic-servernz.vercel.app/api/v1/transaction", {
+    const createRes = await fetch("https://oceanic-servernz.vercel.app/api/v1/transaction", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -239,7 +231,7 @@ console.log("coin", selectedCoin.symbol, coins)
 console.log("t", txid)
 console.log("a", amount)
     // Step 2: Confirm transaction using Bitget
-    const confirmRes = await authFetch(
+    const confirmRes = await fetch(
       `https://oceanic-servernz.vercel.app/api/v2/bitget/confirm-deposit?coin=${selectedCoin.symbol}&txid=${txid}&size=${amount}`,
       {
      method: 'GET',
