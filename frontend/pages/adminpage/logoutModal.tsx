@@ -20,7 +20,7 @@ export default function LogoutModal({ setShowModal }: LogoutProps) {
     try {
       // 1. Call logout endpoint (clears cookies server-side)
       const response = await fetch(
-        `${process.env.SERVER_BASE_URL}/api/v1/users/logout`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/logout`,
         {
           method: 'POST',
           credentials: 'include', // Required for cookies!

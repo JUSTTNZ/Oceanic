@@ -76,7 +76,7 @@ const handleLogin = async (e: React.FormEvent) => {
 
     // Step 1: Login request (returns user data)
     const response = await fetch(
-      `${process.env.SERVER_BASE_URL}/api/v1/users/login`,
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/login`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -132,7 +132,7 @@ const handleGoogleLogin = async () => {
     const user = credential.user;
     const idToken = await user.getIdToken();
 
-    const response = await fetch("https://oceanic-servernz.vercel.app/api/v1/google", {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}//api/v1/google`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

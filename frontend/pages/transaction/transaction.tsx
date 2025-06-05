@@ -62,7 +62,7 @@ export default function CryptoTransactions() {
       const fetchTransactions = async () => {
 
         try {
-          const res = await fetch(`${process.env.SERVER_BASE_URL}/api/v1/transaction/user`, {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction/user`, {
           method: 'GET',
           credentials: "include"
           });
