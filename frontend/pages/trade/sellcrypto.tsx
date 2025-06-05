@@ -103,7 +103,7 @@ const [selectedCountry] = useState<Country>({
   
         // Fetch coins data
         const responseCoins = await fetch(
-          `https://oceanic-servernz.vercel.app/api/v1/data/crypto-markets`,{
+          `${process.env.SERVER_BASE_URL}/api/v1/data/crypto-markets`,{
               method: 'GET',
           credentials: "include"
           }
@@ -117,7 +117,7 @@ const [selectedCountry] = useState<Country>({
 
      // 3. Fetch banks for the default country
       const banksResponse = await fetch(
-        `https://oceanic-servernz.vercel.app/api/v1/data/banks?country=${selectedCountry.name.toLowerCase()}`,{
+        `${process.env.SERVER_BASE_URL}/api/v1/data/banks?country=${selectedCountry.name.toLowerCase()}`,{
             method: 'GET',
           credentials: "include"
         }
@@ -137,7 +137,7 @@ const [selectedCountry] = useState<Country>({
   
         // Fetch exchange rates
         const responseRate = await fetch(
-          "https://oceanic-servernz.vercel.app/api/v1/data/exchange-rates",{
+          `${process.env.SERVER_BASE_URL}/api/v1/data/exchange-rates`,{
               method: 'GET',
           credentials: "include"
           }
@@ -202,7 +202,7 @@ const handleSubmit = async () => {
  
 
     // Step 1: Create transaction
-    const createRes = await fetch("https://oceanic-servernz.vercel.app/api/v1/transaction", {
+    const createRes = await fetch(`${process.env.SERVER_BASE_URL}/api/v1/transaction`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -232,7 +232,7 @@ console.log("t", txid)
 console.log("a", amount)
     // Step 2: Confirm transaction using Bitget
     const confirmRes = await fetch(
-      `https://oceanic-servernz.vercel.app/api/v2/bitget/confirm-deposit?coin=${selectedCoin.symbol}&txid=${txid}&size=${amount}`,
+      `${process.env.SERVER_BASE_URL}/api/v2/bitget/confirm-deposit?coin=${selectedCoin.symbol}&txid=${txid}&size=${amount}`,
       {
      method: 'GET',
     credentials: "include"
