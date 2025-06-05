@@ -27,7 +27,7 @@ export default function AdminPendingPage() {
 
   const fetchPendingTransactions = useCallback(async () => {
     try {
-      const res = await fetch(`${process.env.SERVER_BASE_URL}/api/v1/transaction/admin`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction/admin`, {
        method: 'GET',
           credentials: "include"
       });
@@ -50,7 +50,7 @@ export default function AdminPendingPage() {
   const handleUpdateStatus = async (txid: string, status: string) => {
     setLoadingConfrim(txid)
     try {
-      await fetch(`https://oceanic-servernz.vercel.app/api/v1/transaction/status/${txid}`, {
+      await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction/status/${txid}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

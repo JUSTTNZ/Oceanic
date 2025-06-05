@@ -34,7 +34,7 @@ export default function EditProfileModal({ user, onClose }: {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(`${process.env.SERVER_BASE_URL}/api/v1/users/updateUser`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/updateUser`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

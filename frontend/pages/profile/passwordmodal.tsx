@@ -32,7 +32,7 @@ export default function PasswordChangeModal({ user, onClose }: {
       return;
     }
     try {
-      const response = await fetch(`${process.env.SERVER_BASE_URL}/api/v1/users/changePassword`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/changePassword`, {
         
         method: 'PUT',
         headers: {

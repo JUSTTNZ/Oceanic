@@ -27,7 +27,7 @@ export default function DeleteModal({ user, onClose }: {
     
     try {
      
-      const response = await fetch(`${process.env.SERVER_BASE_URL}/api/v1/users/deleteUser`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/deleteUser`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

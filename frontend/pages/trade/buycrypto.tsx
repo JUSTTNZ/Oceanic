@@ -91,7 +91,7 @@ export default function BuyCrypto() {
     const paystackPop = (window as { PaystackPop?: PaystackPopType }).PaystackPop;
     const handler = paystackPop?.setup({
       key: process.env.NEXT_PUBLIC_PAYSTACK_KEY,
-      email: userEmail || "user@example.com",
+      email: userEmail ,
       amount: Math.round(calculatedLocalCurrencyAmount * 100),
       currency: "NGN",
       ref,
@@ -119,7 +119,7 @@ export default function BuyCrypto() {
   
 
     try {
-      const res = await fetch(`${process.env.SERVER_BASE_URL}/api/v1/transaction`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -170,7 +170,7 @@ export default function BuyCrypto() {
 
     const fetchUser = async () => {
       try {
-        const res = await fetch(`${process.env.SERVER_BASE_URL}/api/v1/users/getCurrentUser`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/getCurrentUser`, {
        method: 'GET',
         credentials: "include"
         });
@@ -199,7 +199,7 @@ useEffect(() => {
 
       // Fetch coins data
       const responseCoins = await fetch(
-        `${process.env.SERVER_BASE_URL}/api/v1/data/crypto-markets`,{
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/data/crypto-markets`,{
           method: 'GET',
           credentials: "include"
         }
@@ -243,7 +243,7 @@ useEffect(() => {
 
       // Fetch exchange rates
       const responseRate = await fetch(
-        `${process.env.SERVER_BASE_URL}/api/v1/data/exchange-rates`,{
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/data/exchange-rates`,{
             method: 'GET',
           credentials: "include"
         }
@@ -273,7 +273,7 @@ useEffect(() => {
   const updateExchangeRate = async () => {
     try {
       const response = await fetch(
-        `${process.env.SERVER_BASE_URL}/api/v1/data/exchange-rates`,{
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/data/exchange-rates`,{
             method: 'GET',
           credentials: "include"
         }
