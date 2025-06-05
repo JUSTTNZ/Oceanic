@@ -32,7 +32,7 @@ export default function PasswordChangeModal({ user, onClose }: {
       return;
     }
     try {
-      const response = await fetch('https://oceanic-servernz.vercel.app/api/v1/users/changePassword', {
+      const response = await fetch(`${process.env.SERVER_BASE_URL}/api/v1/users/changePassword`, {
         
         method: 'PUT',
         headers: {

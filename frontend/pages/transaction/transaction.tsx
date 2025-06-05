@@ -62,7 +62,7 @@ export default function CryptoTransactions() {
       const fetchTransactions = async () => {
 
         try {
-          const res = await fetch("https://oceanic-servernz.vercel.app/api/v1/transaction/user", {
+          const res = await fetch(`${process.env.SERVER_BASE_URL}/api/v1/transaction/user`, {
           method: 'GET',
           credentials: "include"
           });

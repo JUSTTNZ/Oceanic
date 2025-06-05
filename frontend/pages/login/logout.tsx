@@ -20,7 +20,7 @@ export default function LogoutM({ setShowModal }: LogoutProps) {
     try {
       // 1. Call logout endpoint (clears cookies server-side)
       const response = await fetch(
-        'https://oceanic-servernz.vercel.app/api/v1/users/logout',
+        `${process.env.SERVER_BASE_URL}/api/v1/users/logout`,
         {
           method: 'POST',
           credentials: 'include', // Required for cookies!

@@ -119,7 +119,7 @@ export default function BuyCrypto() {
   
 
     try {
-      const res = await fetch("https://oceanic-servernz.vercel.app/api/v1/transaction", {
+      const res = await fetch(`${process.env.SERVER_BASE_URL}/api/v1/transaction`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -170,7 +170,7 @@ export default function BuyCrypto() {
 
     const fetchUser = async () => {
       try {
-        const res = await fetch("https://oceanic-servernz.vercel.app/api/v1/users/getCurrentUser", {
+        const res = await fetch(`${process.env.SERVER_BASE_URL}/api/v1/users/getCurrentUser`, {
        method: 'GET',
         credentials: "include"
         });
@@ -199,7 +199,7 @@ useEffect(() => {
 
       // Fetch coins data
       const responseCoins = await fetch(
-        `https://oceanic-servernz.vercel.app/api/v1/data/crypto-markets`,{
+        `${process.env.SERVER_BASE_URL}/api/v1/data/crypto-markets`,{
           method: 'GET',
           credentials: "include"
         }
@@ -211,7 +211,7 @@ useEffect(() => {
 
       // Fetch countries data
       const responseCountry = await fetch(
-        "https://oceanic-servernz.vercel.app/api/v1/data/countries",{
+        `${process.env.SERVER_BASE_URL}/api/v1/data/countries`,{
           method: 'GET',
           credentials: "include"
         }
@@ -243,7 +243,7 @@ useEffect(() => {
 
       // Fetch exchange rates
       const responseRate = await fetch(
-        "https://oceanic-servernz.vercel.app/api/v1/data/exchange-rates",{
+        `${process.env.SERVER_BASE_URL}/api/v1/data/exchange-rates`,{
             method: 'GET',
           credentials: "include"
         }
@@ -273,7 +273,7 @@ useEffect(() => {
   const updateExchangeRate = async () => {
     try {
       const response = await fetch(
-        "https://oceanic-servernz.vercel.app/api/v1/data/exchange-rates",{
+        `${process.env.SERVER_BASE_URL}/api/v1/data/exchange-rates`,{
             method: 'GET',
           credentials: "include"
         }

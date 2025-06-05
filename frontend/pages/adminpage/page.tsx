@@ -33,7 +33,7 @@ export default function AdminDashboard() {
     
     const fetchPendingTransactions = async () => {
       try {
-        const res = await fetch("https://oceanic-servernz.vercel.app/api/v1/transaction/admin", {
+        const res = await fetch(`${process.env.SERVER_BASE_URL}/api/v1/transaction/admin`, {
             method: 'GET',
             credentials: "include"
         });
