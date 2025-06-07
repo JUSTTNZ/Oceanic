@@ -139,18 +139,26 @@ const loginUser = asyncHandler(async (req, res, next) => {
         }
 
   console.log("loginuser",loggedInUser)
-const options = {
+const options:{
+       httpOnly: boolean;
+    secure: boolean;
+    sameSite: 'none' | 'lax' | 'strict';
+    maxAge: number;
+}
+
+= {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
   sameSite: 'none',
   maxAge: 60 * 60 * 1000, // 1 hour
-  path: '/', // ✅ add this
+
 };
         return res
             .status(200)
             .cookie("refreshToken", refreshToken, options)
             .cookie("accessToken", accessToken, options)
-            .json(new ApiResponse(200, "User logged in successfully", { user: loggedInUser, }))
+            .json(new ApiResponse(200, "User logged in successfully", { user: loggedInUser,  accessToken, // Include in response body for Redux
+    refreshToken }))
     }
     catch (error) {
         console.log("User login failed", error);
@@ -168,12 +176,17 @@ const logOutUser = asyncHandler(async (req, res,next) => {
     }
    
     // clear token 
-    const options = {
+    const options :{
+         httpOnly: boolean;
+            secure: boolean;
+            sameSite: 'none' | 'lax' | 'strict';
+            expires: Date;
+    } = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
   sameSite: 'none',
   expires: new Date(0),
-  path: '/', // ✅ this is critical
+
 };
 
     return res 

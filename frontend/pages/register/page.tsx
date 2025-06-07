@@ -5,7 +5,8 @@ import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useDispatch } from 'react-redux';
-import {setUser} from '../../action'
+import { setUser } from '@/action';
+
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);

@@ -1,6 +1,6 @@
 "use client";
 
-import { setUser } from "@/action";
+
 //import toast from 'react-hot-toast';
 import { useToast } from "../../hooks/toast";
 import Link from "next/link";
@@ -10,6 +10,7 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import {  signInWithPopup,  } from "firebase/auth";
 import { auth, googleProvider } from '../../firebase';
+import { setTokens, setUser } from "@/action";
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const { showToast, ToastComponent } = useToast();
@@ -74,14 +75,13 @@ const handleLogin = async (e: React.FormEvent) => {
   try {
     setLoading(true);
 
-    // Step 1: Login request (returns user data)
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/login`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
-        credentials: "include", // For cookies
+        credentials: "include",
       }
     );
 
@@ -91,8 +91,9 @@ const handleLogin = async (e: React.FormEvent) => {
       throw new Error(data.message || "Login failed");
     }
 
-    // Step 2: Use the user data FROM THE LOGIN RESPONSE
-    const user = data.data.user; // Already available!
+    const { user, accessToken, refreshToken } = data.data;
+
+    // Dispatch actions separately to match your action creators
     dispatch(
       setUser({
         uid: user._id,
@@ -106,7 +107,14 @@ const handleLogin = async (e: React.FormEvent) => {
       })
     );
 
-    // Step 3: Redirect based on role
+    dispatch(
+      setTokens({
+        accessToken,
+        refreshToken,
+      })
+    );
+
+    // Redirect logic
     if (user.role === "admin" || user.role === "superadmin") {
       showToast("Welcome Admin!", "success");
       setTimeout(() => router.push("/adminpage"), 2000);
@@ -115,7 +123,7 @@ const handleLogin = async (e: React.FormEvent) => {
       setTimeout(() => router.push("/markets"), 2000);
     }
   } catch (err) {
-    const errorMessage = err instanceof Error? err.message : "Login failed";
+    const errorMessage = err instanceof Error ? err.message : "Login failed";
     showToast(errorMessage, "error");
   } finally {
     setLoading(false);

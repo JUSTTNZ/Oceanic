@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { FaCheck,  } from "react-icons/fa";
 import { useToast } from "../../hooks/toast";
+import { apiClient } from "@/utils/apiclient";
 
 interface Transaction {
   txid: string;
@@ -26,48 +27,59 @@ export default function AdminPendingPage() {
   const { ToastComponent, showToast } = useToast();
 
   const fetchPendingTransactions = useCallback(async () => {
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction/admin`, {
-       method: 'GET',
-          credentials: "include"
-      });
-      if (!res.ok) {
-        setTransactions([]);
-        setLoading(false);
-        return;
+  try {
+    const response = await apiClient.request(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction/admin`,
+      {
+        method: 'GET',
+        credentials: 'include'
       }
-      const data = await res.json();
-      const pending = Array.isArray(data.data) ? data.data.filter((tx: Transaction) => tx.status === "pending") : [];
-      setTransactions(pending);
-    } catch (err) {
-      showToast("Failed to load transactions", "error");
-      console.error("Failed to load transactions", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [showToast]);
+    );
 
-  const handleUpdateStatus = async (txid: string, status: string) => {
-    setLoadingConfrim(txid)
-    try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction/status/${txid}`, {
+    if (!response.ok) {
+      setTransactions([]);
+      setLoading(false);
+      return;
+    }
+
+    const data = await response.json();
+    const pending = Array.isArray(data.data) 
+      ? data.data.filter((tx: Transaction) => tx.status === "pending") 
+      : [];
+    setTransactions(pending);
+  } catch (err) {
+    showToast("Failed to load transactions", "error");
+    console.error("Failed to load transactions", err);
+  } finally {
+    setLoading(false);
+  }
+}, [showToast]);
+
+ const handleUpdateStatus = async (txid: string, status: string) => {
+  setLoadingConfrim(txid);
+  try {
+    // Using apiClient instead of direct fetch
+    await apiClient.request(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction/status/${txid}`,
+      {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ status }),
-          credentials: "include"
-      });
-     
-      setTransactions(transactions.filter(tx => tx.txid !== txid));
-       showToast("confirmed transaction", "success");
-    } catch (err) {
-      showToast("Failed to update transaction status", "error");
-      console.error("Failed to update transaction status", err);
-    } finally{
-      setLoadingConfrim(null)
-    }
-  };
+        credentials: "include"
+      }
+    );
+    
+    setTransactions(transactions.filter(tx => tx.txid !== txid));
+    showToast("Confirmed transaction", "success");
+  } catch (err) {
+    showToast("Failed to update transaction status", "error");
+    console.error("Failed to update transaction status", err);
+  } finally {
+    setLoadingConfrim(null);
+  }
+};
 
   useEffect(() => {
     fetchPendingTransactions();
