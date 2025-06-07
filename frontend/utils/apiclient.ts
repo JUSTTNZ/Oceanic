@@ -1,58 +1,57 @@
 // apiClient.ts
-
-import { store } from "@/store";
-
-
-// Add this interface to describe your Redux state shape
-interface RootState {
-  auth: {
-    tokens: {
-      accessToken: string;
-      refreshToken: string;
-    } | null;
-  };
-}
-
 export const apiClient = {
   async request(url: string, options: RequestInit = {}) {
-    const state = store.getState() as unknown as RootState; // Cast to RootState
-    const accessToken = state.auth?.tokens?.accessToken;
-
+    // Get token from localStorage
+    const token = localStorage.getItem('accessToken');
+    console.log("access token",token)
+    
     const headers = new Headers(options.headers || {});
-    headers.set("Content-Type", "application/json");
-
-    if (accessToken) {
-      headers.set("Authorization", `Bearer ${accessToken}`);
+    headers.set('Content-Type', 'application/json');
+    
+    if (token) {
+      headers.set('Authorization', `Bearer ${token}`);
     }
 
     const response = await fetch(url, {
       ...options,
       headers,
-      credentials: "include",
+      credentials: 'include', // Still include cookies for http-only tokens
     });
 
     if (response.status === 401) {
-//        try {
-//     // Attempt to refresh tokens
-//     const refreshResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/auth/refresh`, {
-//       method: 'POST',
-//       credentials: 'include'
-//     });
-    
-//     if (refreshResponse.ok) {
-//       // Retry original request
-//       return apiClient.request(url, options);
-//     } else {
-//       // Force logout if refresh fails
-//       store.dispatch(clearUser());
-//       window.location.href = '/login';
-//     }
-//   } catch (refreshError) {
-//     store.dispatch(clearUser());
-//     window.location.href = '/login';
-//   }
+      // Handle token refresh here if needed
+    //   await handleTokenRefresh();
     }
 
     return response;
   },
 };
+
+// const handleTokenRefresh = async () => {
+//   try {
+//     const refreshToken = localStorage.getItem('refreshToken');
+//     if (!refreshToken) throw new Error('No refresh token');
+    
+//     const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/auth/refresh`, {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json',
+//       },
+//       body: JSON.stringify({ refreshToken }),
+//     });
+
+//     const data = await response.json();
+//     if (response.ok && data.accessToken) {
+//       localStorage.setItem('accessToken', data.accessToken);
+//       return true;
+//     }
+//     throw new Error('Refresh failed');
+//   } catch (error) {
+//     console.log(error)
+//     // Clear tokens and redirect to login if refresh fails
+//     localStorage.removeItem('accessToken');
+//     localStorage.removeItem('refreshToken');
+//     window.location.href = '/login';
+//     return false;
+//   }
+// };

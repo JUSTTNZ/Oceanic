@@ -1,51 +1,54 @@
-// store.js
 import { configureStore } from "@reduxjs/toolkit";
 import { persistReducer, persistStore, createTransform } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 
-const EXPIRE_AFTER = 60 * 60 * 1000; // 1 hour
+// Set expiration time in milliseconds (1 hour)
+const EXPIRE_AFTER = 60 * 60 * 1000; // 1 hour = 3600000 ms
 
+// Transform to add and check expiry
 const expireTransform = createTransform(
-  (inboundState, key) => ({
-    ...inboundState,
-    _persistedAt: Date.now(),
-  }),
+  // transform state before saving to storage
+  (inboundState, key) => {
+    return {
+      ...inboundState,
+      _persistedAt: Date.now(),
+    };
+  },
+  // transform state being rehydrated
   (outboundState, key) => {
-    if (Date.now() - (outboundState?._persistedAt || 0) > EXPIRE_AFTER) {
+    const currentTime = Date.now();
+    const savedTime = outboundState?._persistedAt || 0;
+
+    if (currentTime - savedTime > EXPIRE_AFTER) {
+      // Expired - return initial state
       return undefined;
     }
+
     return outboundState;
   }
 );
 
 const initialState = {
-  user: null,
-  tokens: null,
+  user: '',
 };
-
 const reducer = (state = initialState, action) => {
   switch (action.type) {
     case "SET_USER":
       return {
         ...state,
-        user: action.payload.user,
-        tokens: action.payload.tokens,
+        user: action.payload,
       };
     case "UPDATE_USER":
       return {
         ...state,
         user: {
-          ...state.user,
-          ...action.payload,
-        },
+          ...state.user, // Keep existing user data
+          ...action.payload // Merge with updated fields
+        }
+        
       };
-    case "SET_TOKENS":
-      return {
-        ...state,
-        tokens: action.payload,
-      };
-    case "CLEAR_USER":
-      return initialState;
+      case "CLEAR_USER":
+      return { ...state, user: null };
     default:
       return state;
   }
@@ -55,19 +58,12 @@ const persistConfig = {
   key: "root",
   storage,
   transforms: [expireTransform],
-  whitelist: ["user", "tokens"], // Only persist these
 };
 
 const persistedReducer = persistReducer(persistConfig, reducer);
 
 export const store = configureStore({
   reducer: persistedReducer,
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({
-      serializableCheck: false, // For redux-persist
-    }),
 });
 
 export const persistor = persistStore(store);
-
-
