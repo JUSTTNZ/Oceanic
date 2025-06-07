@@ -5,6 +5,7 @@ import { useDispatch } from 'react-redux';
 
 import { toast } from "react-hot-toast";
 import { clearUser } from '@/action';
+
 interface LogoutProps {
   showModal: boolean;
   setShowModal: (show: boolean) => void;
