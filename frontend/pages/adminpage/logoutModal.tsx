@@ -5,6 +5,7 @@ import { useDispatch } from 'react-redux';
 
 import { toast } from "react-hot-toast";
 import { clearUser } from '@/action';
+import { apiClient } from '@/utils/apiclient';
 
 interface LogoutProps {
   showModal: boolean;
@@ -16,39 +17,37 @@ export default function LogoutModal({ setShowModal }: LogoutProps) {
   const router = useRouter();
   const dispatch = useDispatch();
 
-  const handleSignOut = async () => {
-    setIsLoggingOut(true);
-    try {
-      // 1. Call logout endpoint (clears cookies server-side)
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/logout`,
-        {
-          method: 'POST',
-          credentials: 'include', // Required for cookies!
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error('Logout failed');
+ const handleSignOut = async () => {
+  setIsLoggingOut(true);
+  try {
+    // 1. Call logout endpoint using apiClient
+    const response = await apiClient.request(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/logout`,
+      {
+        method: 'POST',
+        credentials: 'include' // Still needed for cookies
       }
+    );
 
-      // 2. Clear client-side state
-      dispatch(clearUser()); // Redux
-    
-
-      // 3. Redirect to login
-      router.push('/login');
-      toast.success('Logged out successfully');
-
-    } catch (error) {
-      console.error('Logout error:', error);
-      toast.error('Logout failed. Please try again.');
-    } finally {
-      setIsLoggingOut(false);
-      setShowModal(false);
+    if (!response.ok) {
+      throw new Error('Logout failed');
     }
-  };
 
+    // 2. Clear client-side state
+    dispatch(clearUser()); // Redux action
+
+    // 3. Redirect to login
+    router.push('/login');
+    toast.success('Logged out successfully');
+
+  } catch (error) {
+    console.error('Logout error:', error);
+    toast.error('Logout failed. Please try again.');
+  } finally {
+    setIsLoggingOut(false);
+    setShowModal(false);
+  }
+};
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
       <div className="bg-gray-900 rounded-lg p-6 w-full max-w-sm shadow-lg">

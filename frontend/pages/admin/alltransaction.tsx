@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
 import { useToast } from "../../hooks/toast";
+import { apiClient } from "@/utils/apiclient";
 interface Transaction {
   txid: string;
   amount: number;
@@ -37,22 +38,24 @@ export default function AllTransactionsPage() {
 
 
   useEffect(() => {
-    const fetchTransactions = async () => {
-      try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction/admin`, {
-       method: 'GET',
-          credentials: "include"
-        });
-
-        const data = await res.json();
-        setTransactions(Array.isArray(data.data) ? data.data : []);
-      } catch (err) {
-        showToast("Failed to fetch transactions", "error");
-        console.error(err);
-      } finally {
-        setLoading(false);
+   const fetchTransactions = async () => {
+  try {
+    const { data } = await apiClient.request(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction/admin`,
+      {
+        method: 'GET',
+        credentials: 'include'
       }
-    };
+    ).then(res => res.json());
+
+    setTransactions(Array.isArray(data) ? data : []);
+  } catch (err) {
+    showToast("Failed to fetch transactions", "error");
+    console.error(err);
+  } finally {
+    setLoading(false);
+  }
+};
     fetchTransactions();
   }, [showToast]);
 

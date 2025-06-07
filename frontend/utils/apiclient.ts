@@ -32,7 +32,25 @@ export const apiClient = {
     });
 
     if (response.status === 401) {
-      // Add token refresh logic here
+//        try {
+//     // Attempt to refresh tokens
+//     const refreshResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/auth/refresh`, {
+//       method: 'POST',
+//       credentials: 'include'
+//     });
+    
+//     if (refreshResponse.ok) {
+//       // Retry original request
+//       return apiClient.request(url, options);
+//     } else {
+//       // Force logout if refresh fails
+//       store.dispatch(clearUser());
+//       window.location.href = '/login';
+//     }
+//   } catch (refreshError) {
+//     store.dispatch(clearUser());
+//     window.location.href = '/login';
+//   }
     }
 
     return response;

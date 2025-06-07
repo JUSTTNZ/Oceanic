@@ -20,6 +20,7 @@ import { BellIcon } from "@heroicons/react/24/outline";
 import { AnimatePresence, motion } from "framer-motion";
 import AllTransaction from '../admin/alltransaction'
 import PendingTransaction from '../admin/pendingtransaction'
+import { apiClient } from "@/utils/apiclient";
 
 export default function AdminDashboard() {
   const [pendingCount, setPendingCount] = useState(0);
@@ -32,30 +33,35 @@ export default function AdminDashboard() {
   useEffect(() => {
     
     const fetchPendingTransactions = async () => {
-      try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction/admin`, {
-            method: 'GET',
-            credentials: "include"
-        });
-
-        const data = await res.json();
-        console.log("API response:", data);
-
-        if (!res.ok || !Array.isArray(data.data)) {
-          setError(data.message || "Failed to load transactions");
-          setLoading(false);
-          return;
-        }
-        const pending = data.data.filter((txid: Transaction) => txid.status === "pending");
-        setPendingCount(pending.length);
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : "Failed to load transactions";
-        setError(errorMessage);
-        console.error("Fetch error:", err);
-      } finally {
-        setLoading(false);
+  try {
+    // Using apiClient instead of direct fetch
+    const response = await apiClient.request(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction/admin`,
+      {
+        method: 'GET',
+        credentials: 'include'
       }
-    };
+    );
+
+    const data = await response.json();
+    console.log("API response:", data);
+
+    if (!response.ok || !Array.isArray(data.data)) {
+      setError(data.message || "Failed to load transactions");
+      setLoading(false);
+      return;
+    }
+
+    const pending = data.data.filter((tx: Transaction) => tx.status === "pending");
+    setPendingCount(pending.length);
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : "Failed to load transactions";
+    setError(errorMessage);
+    console.error("Fetch error:", err);
+  } finally {
+    setLoading(false);
+  }
+};
 
     fetchPendingTransactions();
   }, []);
