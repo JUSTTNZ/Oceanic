@@ -14,7 +14,7 @@ import AmountInputSell from "../components/sell/amout";
 import Banks from "../components/sell/bank";
 import { useToast } from "@/hooks/toast";
 import LoadingDisplay from "@/ui/loading";
-import ErrorDisplay from "@/ui/errorbuy";
+//import ErrorDisplay from "@/ui/errorbuy";
 import { BYBIT_WALLET_ADDRESSES } from "@/utils/bybitaddress";
 
 
@@ -308,11 +308,11 @@ console.log("a", amount)
       <LoadingDisplay />
      );
    }
- if (error){
+ /*if (error){
    return(
   <ErrorDisplay />
    )
- }
+ }*/
 
 
 
