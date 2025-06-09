@@ -5,6 +5,7 @@ import { useDispatch } from 'react-redux';
 
 import { toast } from "react-hot-toast";
 import { clearUser } from '@/action';
+import { apiClient } from '@/utils/apiclient';
 interface LogoutProps {
   showModal: boolean;
   setShowModal: (show: boolean) => void;
@@ -19,7 +20,7 @@ export default function LogoutM({ setShowModal }: LogoutProps) {
     setIsLoggingOut(true);
     try {
       // 1. Call logout endpoint (clears cookies server-side)
-      const response = await fetch(
+      const response = await apiClient.request(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/logout`,
         {
           method: 'POST',
