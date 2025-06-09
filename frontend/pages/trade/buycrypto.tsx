@@ -13,6 +13,7 @@ import FirstSide from "../components/buy/firstside";
 import WalletAddressBuy from "../components/buy/walletaddress";
 //import ErrorDisplay from "../../ui/errorbuy"
 import LoadingDisplay from '../../ui/loading'
+import { apiClient } from "../../utils/apiclient";
 
 interface Coin {
   id: string;
@@ -119,7 +120,7 @@ export default function BuyCrypto() {
   
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction`, {
+      const res = await apiClient.request(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -170,7 +171,7 @@ export default function BuyCrypto() {
 
     const fetchUser = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/getCurrentUser`, {
+        const res = await apiClient.request(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/getCurrentUser`, {
        method: 'GET',
         credentials: "include"
         });
@@ -198,7 +199,7 @@ useEffect(() => {
       setError(null);
 
       // Fetch coins data
-      const responseCoins = await fetch(
+      const responseCoins = await apiClient.request(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/data/crypto-markets`,{
           method: 'GET',
           credentials: "include"
@@ -210,7 +211,7 @@ useEffect(() => {
       setSelectedCoin(dataCoin.data[0]);
 
       // Fetch countries data
-      const responseCountry = await fetch(
+      const responseCountry = await apiClient.request(
         `${process.env.SERVER_BASE_URL}/api/v1/data/countries`,{
           method: 'GET',
           credentials: "include"
@@ -242,7 +243,7 @@ useEffect(() => {
       setSelectedCountry(defaultCountry);
 
       // Fetch exchange rates
-      const responseRate = await fetch(
+      const responseRate = await apiClient.request(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/data/exchange-rates`,{
             method: 'GET',
           credentials: "include"
@@ -272,7 +273,7 @@ useEffect(() => {
 
   const updateExchangeRate = async () => {
     try {
-      const response = await fetch(
+      const response = await apiClient.request(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/data/exchange-rates`,{
             method: 'GET',
           credentials: "include"
