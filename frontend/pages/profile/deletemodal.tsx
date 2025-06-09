@@ -1,4 +1,5 @@
 
+import { apiClient } from "@/utils/apiclient";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { toast } from "react-hot-toast";
@@ -27,7 +28,7 @@ export default function DeleteModal({ user, onClose }: {
     
     try {
      
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/deleteUser`, {
+      const response = await apiClient.request(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/deleteUser`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

@@ -3,6 +3,7 @@ import { FiX, FiCheck } from "react-icons/fi";
 import { toast } from "react-hot-toast";
 import { updateUser } from "@/action";
 import { useDispatch } from "react-redux";
+import { apiClient } from "@/utils/apiclient";
 
 
 export default function EditProfileModal({ user, onClose }: {
@@ -34,7 +35,7 @@ export default function EditProfileModal({ user, onClose }: {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/updateUser`, {
+      const response = await apiClient.request(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/updateUser`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
