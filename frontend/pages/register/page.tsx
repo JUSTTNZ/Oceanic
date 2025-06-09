@@ -4,9 +4,6 @@ import { useToast } from "../../hooks/toast";
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import { useDispatch } from 'react-redux';
-import { setUser } from '@/action';
-
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -34,7 +31,7 @@ export default function RegisterPage() {
   });
 
   const router = useRouter();
-  const dispatch = useDispatch();
+ 
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -139,18 +136,10 @@ export default function RegisterPage() {
       }
 
       // Dispatch user data and redirect
-      dispatch(setUser({
-        uid: data.data?._id,
-        email: data.data?.email,
-        username: data.data?.username,
-        role: data.data?.role,
-        fullname: data.data?.fullname,
-        createdAt: data.data?.createdAt,
-        phoneNumber: data.data?.phoneNumber,
-        lastLogin: new Date().toISOString()
-      }));
+   
       showToast("Registration successful!", "success"); 
-      router.push('/markets');
+      setTimeout(() => router.push("/login"), 2000);
+     
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Registration failed';
