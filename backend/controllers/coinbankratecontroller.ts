@@ -43,7 +43,7 @@ const getExchangeRates = asyncHandler(async (req, res) => {
  */
 const getAllCountries = asyncHandler(async (req, res) => {
   try {
-    const response = await fetch('https://restcountries.com/v3.1/all?fields=name,capital,currencies,languages');
+    const response = await fetch('https://restcountries.com/v3.1/all?fields=name,capital,currencies,languages,flags');
     
     if (!response.ok) {
       throw new ApiError({
