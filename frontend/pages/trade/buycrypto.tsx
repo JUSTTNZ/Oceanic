@@ -139,7 +139,7 @@ export default function BuyCrypto() {
       });
 
       const data = await res.json();
-
+  console.log(data)
       if (!res.ok || !data?.data?.txid) {
         showToast("Failed to create transaction.", "error");
         setLoadingPayment(false);
@@ -212,7 +212,7 @@ useEffect(() => {
 
       // Fetch countries data
       const responseCountry = await apiClient.request(
-        `${process.env.SERVER_BASE_URL}/api/v1/data/countries`,{
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/data/countries`,{
           method: 'GET',
           credentials: "include"
         }

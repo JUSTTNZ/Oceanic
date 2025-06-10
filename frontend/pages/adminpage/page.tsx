@@ -45,6 +45,7 @@ export default function AdminDashboard() {
 
     const data = await response.json();
     console.log("API response:", data);
+    
 
     if (!response.ok || !Array.isArray(data.data)) {
       setError(data.message || "Failed to load transactions");
