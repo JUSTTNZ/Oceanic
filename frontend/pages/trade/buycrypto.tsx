@@ -11,7 +11,7 @@ import AmountInput from "../components/buy/amout";
 import ConversionDisplay from "../components/buy/conversion";
 import FirstSide from "../components/buy/firstside";
 import WalletAddressBuy from "../components/buy/walletaddress";
-import ErrorDisplay from "../../ui/errorbuy"
+//import ErrorDisplay from "../../ui/errorbuy"
 import LoadingDisplay from '../../ui/loading'
 import { apiClient } from "../../utils/apiclient";
 
@@ -313,11 +313,11 @@ useEffect(() => {
      <LoadingDisplay />
     );
   }
-if (error){
+/*if (error){
   return(
  <ErrorDisplay />
   )
-}
+}*/
 
 
 
