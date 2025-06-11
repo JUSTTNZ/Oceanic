@@ -10,7 +10,7 @@ export default function WalletAddressBuy({
 
   const isValidAddress = (address: string) => {
    
-    return address.length >= 20 && address.startsWith("0x");
+    return address.length >= 5 ;
   };
 
   const isError = walletAddress && !isValidAddress(walletAddress);
@@ -34,7 +34,7 @@ export default function WalletAddressBuy({
       />
       {isError && (
         <p className="text-red-500 text-xs mt-1">
-          Please enter a valid wallet address (should start with 0x and be at least 20 characters long)
+          Please enter a valid wallet address 
         </p>
       )}
     </div>

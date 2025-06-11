@@ -20,38 +20,41 @@ export const apiClient = {
 
     if (response.status === 401) {
       // Handle token refresh here if needed
-    //   await handleTokenRefresh();
+      await handleTokenRefresh();
     }
 
     return response;
   },
 };
 
-// const handleTokenRefresh = async () => {
-//   try {
-//     const refreshToken = localStorage.getItem('refreshToken');
-//     if (!refreshToken) throw new Error('No refresh token');
+const handleTokenRefresh = async () => {
+  try {
+    const refreshToken = localStorage.getItem('refreshToken');
+    console.log("refreshe", refreshToken)
+    if (!refreshToken) throw new Error('No refresh token');
     
-//     const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/auth/refresh`, {
-//       method: 'POST',
-//       headers: {
-//         'Content-Type': 'application/json',
-//       },
-//       body: JSON.stringify({ refreshToken }),
-//     });
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/refreshToken`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ refreshToken }),
+    });
 
-//     const data = await response.json();
-//     if (response.ok && data.accessToken) {
-//       localStorage.setItem('accessToken', data.accessToken);
-//       return true;
-//     }
-//     throw new Error('Refresh failed');
-//   } catch (error) {
-//     console.log(error)
-//     // Clear tokens and redirect to login if refresh fails
-//     localStorage.removeItem('accessToken');
-//     localStorage.removeItem('refreshToken');
-//     window.location.href = '/login';
-//     return false;
-//   }
-// };
+    const data = await response.json();
+    console.log("d", data)
+    if (response.ok && data.accessToken) {
+      localStorage.setItem('accessToken', data.accessToken);
+      return true;
+    }
+    throw new Error('Refresh failed');
+  } catch (error) {
+    console.log(error)
+    // Clear tokens and redirect to login if refresh fails
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    window.location.href = '/login';
+    return false;
+  }
+};
+
