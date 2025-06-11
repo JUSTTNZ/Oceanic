@@ -126,9 +126,7 @@ return(
           {activeTab === "pending" ? (
             <motion.div
               key="pending"
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -30 }}
+           
               transition={{ duration: 0.3 }}
             >
               <Link href="#" className="block bg-gray-800/30 hover:border-blue-500 border border-gray-700/20 rounded-xl p-6 transition-all backdrop-blur-sm shadow hover:shadow-blue-500/10">
@@ -140,9 +138,7 @@ return(
           ) : (
             <motion.div
               key="all"
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -30 }}
+         
               transition={{ duration: 0.3 }}
             >
               <Link href="#" className="block bg-gray-800/30 hover:border-blue-500 border border-gray-700/20 rounded-xl p-6 transition-all backdrop-blur-sm shadow hover:shadow-blue-500/10">
