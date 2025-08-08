@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion, useAnimation } from "framer-motion";
+import { AnimatePresence, motion, useAnimation, Variants } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Check, X } from "lucide-react";
 
@@ -35,25 +35,21 @@ const TransactionStatusModal = ({ type, title, message, details, onClose }: Prop
     setTimeout(onClose, 300); // Wait for animation to complete
   };
 
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0, scale: 0.9 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       scale: 1,
-      transition: {
-        duration: 0.3
-      }
+      transition: { duration: 0.3 }
     },
     exit: {
       opacity: 0,
       scale: 0.9,
-      transition: {
-        duration: 0.3
-      }
+      transition: { duration: 0.3 }
     }
   };
 
-  const circleVariants = {
+  const circleVariants: Variants = {
     hidden: { pathLength: 0, rotate: 0 },
     drawCircle: {
       pathLength: 1,
@@ -65,7 +61,7 @@ const TransactionStatusModal = ({ type, title, message, details, onClose }: Prop
     }
   };
 
-  const iconVariants = {
+  const iconVariants: Variants = {
     hidden: { pathLength: 0, scale: 0 },
     drawIcon: {
       pathLength: 1,
@@ -78,14 +74,14 @@ const TransactionStatusModal = ({ type, title, message, details, onClose }: Prop
     }
   };
 
-  const pulseVariants = {
+  const pulseVariants: Variants = {
     initial: { scale: 1 },
     pulse: {
       scale: [1, 1.05, 1],
       transition: {
         duration: 1.5,
         repeat: Infinity,
-        ease: "easeInOut"
+        ease: [0.42, 0, 0.58, 1] // ✅ type-safe easing
       }
     }
   };
@@ -116,7 +112,7 @@ const TransactionStatusModal = ({ type, title, message, details, onClose }: Prop
                 initial="initial"
                 animate="pulse"
               />
-              
+
               {/* Animated Circle */}
               <motion.svg
                 width="96"
@@ -146,17 +142,9 @@ const TransactionStatusModal = ({ type, title, message, details, onClose }: Prop
                 animate="drawIcon"
               >
                 {type === "success" ? (
-                  <Check
-                    size={48}
-                    strokeWidth={2.5}
-                    className="text-green-500"
-                  />
+                  <Check size={48} strokeWidth={2.5} className="text-green-500" />
                 ) : (
-                  <X
-                    size={48}
-                    strokeWidth={2.5}
-                    className="text-red-500"
-                  />
+                  <X size={48} strokeWidth={2.5} className="text-red-500" />
                 )}
               </motion.div>
             </div>
@@ -167,12 +155,12 @@ const TransactionStatusModal = ({ type, title, message, details, onClose }: Prop
             {details && (
               <div className="mt-5 text-sm space-y-3 max-h-60 overflow-y-auto pr-2">
                 {Object.entries(details).map(([key, value]) => (
-                  <motion.div 
-                    key={key} 
+                  <motion.div
+                    key={key}
                     className="flex items-start space-x-2"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 + (parseInt(key) * 0.1) }}
+                    transition={{ delay: 0.2 }}
                   >
                     <div>
                       <p className="font-medium capitalize text-gray-100">{key}</p>

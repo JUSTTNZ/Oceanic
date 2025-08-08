@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image, { StaticImageData } from "next/image";
+import SafeImage from "../components/safeImage"; 
 import Img from "../../public/Images/blog.png";
 import author from "../../public/Images/blogp.png";
 import Footer from "../login/footer";
@@ -13,11 +13,12 @@ interface NewsArticle {
   title: string;
   excerpt: string;
   date: string;
-  image: string | StaticImageData;
+  image: string;
   author: string;
-  authorImage: string | StaticImageData;
+  authorImage: string;
   link: string;
 }
+
 interface NewsApiResult {
   title: string;
   description?: string;
@@ -35,48 +36,49 @@ export default function CryptoBlog() {
   const [page, setPage] = useState<number>(1);
 
   useEffect(() => {
-  const fetchPosts = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(
-        `https://newsdata.io/api/1/news?apikey=pub_87223795e358ba915e269e1c15e6c3cfa49a6&q=cryptocurrency&language=en&category=business`
-      );
+    const fetchPosts = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(
+          `https://newsdata.io/api/1/news?apikey=pub_87223795e358ba915e269e1c15e6c3cfa49a6&q=cryptocurrency&language=en&category=business`
+        );
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch news");
+        if (!response.ok) {
+          throw new Error("Failed to fetch news");
+        }
+
+        const data = await response.json();
+
+        if (!data.results || data.results.length === 0) {
+          throw new Error("No news data available");
+        }
+
+        setPosts(prevPosts => [
+          ...prevPosts,
+          ...data.results.map((item: NewsApiResult, index: number) => ({
+            id: index + 1 + prevPosts.length,
+            title: item.title,
+            excerpt: item.description || "No description available",
+            date: new Date(item.pubDate).toLocaleDateString(),
+            image: item.image_url || (Img as unknown as string),
+            author: item.source_id || "Unknown Source",
+            authorImage: item.source_icon || (author as unknown as string),
+            link: item.link,
+          })),
+        ]);
+        setError(null);
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : "An unknown error occurred";
+        setError(errorMessage);
+        console.error("API Error:", errorMessage);
+      } finally {
+        setLoading(false);
       }
+    };
 
-      const data = await response.json();
+    fetchPosts();
+  }, [page]);
 
-      if (!data.results || data.results.length === 0) {
-        throw new Error("No news data available");
-      }
-
-      setPosts(prevPosts => [
-        ...prevPosts,
-        ...data.results.map((item: NewsApiResult, index: number) => ({
-          id: index + 1 + prevPosts.length,
-          title: item.title,
-          excerpt: item.description || "No description available",
-          date: new Date(item.pubDate).toLocaleDateString(),
-          image: item.image_url || Img,
-          author: item.source_id || "Unknown Source",
-          authorImage: item.source_icon || author,
-          link: item.link,
-        })),
-      ]);
-      setError(null);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "An unknown error occurred";
-      setError(errorMessage);
-      console.error("API Error:", errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchPosts();
-}, [page]);
   const loadMorePosts = () => {
     if (!loading) setPage(prev => prev + 1);
   };
@@ -113,11 +115,11 @@ export default function CryptoBlog() {
             <h2 className="text-2xl font-semibold mb-4 bg-gradient-to-r from-blue-700 to-blue-800 bg-clip-text text-transparent text-center md:text-left">
               Featured Articles
             </h2>
-{error && (
-  <div className="bg-red-500/10 border border-red-500/50 text-red-300 px-4 py-3 rounded mb-6 text-center">
-    {error}
-  </div>
-)}
+            {error && (
+              <div className="bg-red-500/10 border border-red-500/50 text-red-300 px-4 py-3 rounded mb-6 text-center">
+                {error}
+              </div>
+            )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
               {posts.map((post) => (
@@ -125,7 +127,7 @@ export default function CryptoBlog() {
                   key={post.id}
                   className="rounded-lg overflow-hidden bg-gray-800/30 border border-gray-700/20 rounded-xl text-white hover:border-blue-500/30 transition-all backdrop-blur-sm shadow-lg hover:shadow-blue-500/10"
                 >
-                  <Image
+                  <SafeImage
                     src={post.image}
                     alt={post.title}
                     width={400}
@@ -139,11 +141,11 @@ export default function CryptoBlog() {
                       </Link>
                     </h3>
                     <p className="mt-2 text-gray-100 text-sm md:text-base">
-                      {post.excerpt.split(' ').slice(0, 20).join(' ')}
-                      {post.excerpt.split(' ').length > 20 ? '...' : ''}
+                      {post.excerpt.split(" ").slice(0, 20).join(" ")}
+                      {post.excerpt.split(" ").length > 20 ? "..." : ""}
                     </p>
                     <div className="flex items-center gap-3 mt-4">
-                      <Image
+                      <SafeImage
                         src={post.authorImage}
                         alt={post.author}
                         width={40}

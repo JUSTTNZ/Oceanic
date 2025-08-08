@@ -7,6 +7,8 @@ import {
     refreshAccessToken,
     logOutUser,
     changeUserCurrentPassword,
+    forgotPassword,
+    resetPassword,
     updateUserDetails,
     deleteUser
     
@@ -22,6 +24,8 @@ router.route("/getCurrentUser").get(verifyJWT, getCurrentUser);
 router.route("/refreshToken").post(verifyJWT, refreshAccessToken);
 router.route("/logout").post(verifyJWT, logOutUser);
 router.route("/changePassword").put(verifyJWT, changeUserCurrentPassword);
+router.route("/forgotPassword").post(forgotPassword);
+router.route("/resetPassword").post(resetPassword);
 router.route("/updateUser").put(verifyJWT, updateUserDetails);
 router.route("/deleteUser").delete(verifyJWT, deleteUser);
 export default router
