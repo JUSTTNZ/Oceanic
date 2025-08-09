@@ -5,12 +5,10 @@
   "main": "index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.ts",
-    "seed": "node --no-warnings --loader ts-node/esm populate.ts",
-    "time": "node --no-warnings --loader ts-node/esm time.ts",
-    "dns": "node --no-warnings --loader ts-node/esm dns.ts",
-    "generate-signature": "node --loader ts-node/esm generateSignature.ts",
-    "dev": "nodemon --watch ./ --exec \"node --no-warnings --loader ts-node/esm\" ./index.ts"
+    "start": "node dist/index.js",
+    "dev": "nodemon --exec tsx index.ts",
+    "build": "tsc --outDir dist",
+    "vercel-build": "npm install --legacy-peer-deps && npm run build"
   },
   "keywords": [
     "nodejs",
@@ -22,6 +20,7 @@
   "license": "ISC",
   "description": "A project for my crypto brother",
   "dependencies": {
+    "@supabase/supabase-js": "^2.54.0",
     "@types/joi": "^17.2.3",
     "@types/socket.io": "^3.0.2",
     "axios": "^1.8.4",
@@ -46,6 +45,7 @@
     "validator": "^13.15.0"
   },
   "devDependencies": {
+    "@tsconfig/node18": "^18.2.4",
     "@types/axios": "^0.14.4",
     "@types/bcrypt": "^5.0.2",
     "@types/bcryptjs": "^3.0.0",

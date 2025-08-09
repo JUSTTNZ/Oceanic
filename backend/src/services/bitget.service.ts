@@ -15,7 +15,7 @@ const BASE_URL = 'https://api.bitget.com';
 
 // Generate signature according to Bitget API specs
 function generateSignature(timestamp: string, method: string, requestPath: string, queryParams: string) {
-  // Format: timestamp + method + requestPath + '?' + queryParams
+  
   const preHash = timestamp + method + requestPath + (queryParams ? `?${queryParams}` : '');
   
   return crypto

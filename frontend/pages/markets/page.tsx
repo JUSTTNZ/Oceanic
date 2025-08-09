@@ -78,7 +78,7 @@ export default function Markets() {
       }
     };
     fetchCoins();
-    const interval = setInterval(fetchCoins, 60000); // Refresh every minute
+    const interval = setInterval(fetchCoins, 60000); 
 
     return () => clearInterval(interval);
   }, []);

@@ -19,7 +19,6 @@ export const testConnection = async (req: Request, res: Response) => {
   }
 };
 
-// controller/bitget.controller.ts
 export const confirmDeposit = async (req: Request, res: Response) => {
   const { coin, size, txid } = req.query;
   

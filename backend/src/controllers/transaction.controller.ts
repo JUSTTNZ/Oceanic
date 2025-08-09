@@ -4,7 +4,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { Transaction } from "../models/transaction.model.js";
 //import { getIO } from '../config/socket.js';
 import { CoinWallet } from "../models/coinWallet.model.js";
-import coins from "../coindata/coin.json" with { type: "json" };
+import coins from "../coindata/coin.json";
 
 // Create Transaction (Buy or Sell)
 const createTransaction = asyncHandler(async (req, res) => {
