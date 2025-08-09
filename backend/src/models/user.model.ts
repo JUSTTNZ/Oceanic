@@ -19,7 +19,7 @@ export interface IUser {
   updatedAt: Date;
 }
 
-type UserDocument = IUser & mongoose.Document;
+export type UserDocument = IUser & mongoose.Document;
 
 const UserSchema = new Schema<UserDocument>(
   {

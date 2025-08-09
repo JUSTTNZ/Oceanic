@@ -66,15 +66,6 @@ export const handlePaystackWebhook = async (req: Request, res: Response) => {
       `
     });
 
-    // io.emit('transaction_updated', {
-    //   user: transaction.userId,
-    //   txid: transaction.txid,
-    //   status: transaction.status,
-    //   type: transaction.type,
-    //   coin: transaction.coin,
-    //   amount: transaction.amount,
-    //   country: transaction.country
-    // });
 
     res.status(200).json({ success: true });
   } catch (error) {

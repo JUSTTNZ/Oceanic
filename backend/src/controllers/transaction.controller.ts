@@ -2,12 +2,12 @@ import { asyncHandler } from "../utils/AsyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Transaction } from "../models/transaction.model.js";
-//import { getIO } from '../config/socket.js';
 import { CoinWallet } from "../models/coinWallet.model.js";
 import coins from "../coindata/coin.json";
+import { Request, Response } from "express";
 
 // Create Transaction (Buy or Sell)
-const createTransaction = asyncHandler(async (req, res) => {
+const createTransaction = asyncHandler(async (req: Request, res: Response)  => {
   try {
     const {
       coin,
@@ -21,7 +21,6 @@ const createTransaction = asyncHandler(async (req, res) => {
       accountNumber
     } = req.body;
 
-    // Validate required fields
     if (!coin || !amount || !txid || !type || !country) {
       throw new ApiError({ statusCode: 400, message: "Missing required fields" });
     }
@@ -36,10 +35,10 @@ const createTransaction = asyncHandler(async (req, res) => {
     }
 
     const data: any = {
-      userId: req.user._id,
-      userFullname: req.user.fullname,
-      userUsername: req.user.username,
-      userEmail: req.user.email,
+      userId: req.profile._id,
+      userFullname: req.profile.fullname,
+      userUsername: req.profile.username,
+      userEmail: req.profile.email,
       coin,
       amount,
       txid,
@@ -47,7 +46,6 @@ const createTransaction = asyncHandler(async (req, res) => {
       country,
     };
 
-    // Handle buy transaction
     if (type === "buy") {
       if (!walletAddressUsed) {
         throw new ApiError({
@@ -57,7 +55,6 @@ const createTransaction = asyncHandler(async (req, res) => {
       }
       data.walletAddressUsed = walletAddressUsed;
     }
-
 
     if (type === "sell") {
       if (!bankName || !accountName || !accountNumber) {
@@ -86,7 +83,6 @@ const createTransaction = asyncHandler(async (req, res) => {
       data.accountNumber = accountNumber;
     }
 
-    // Set receiving wallet address (for both buy/sell)
     const walletInfo = await CoinWallet.findOne({ coin });
 
     if (!walletInfo) {
@@ -106,26 +102,12 @@ const createTransaction = asyncHandler(async (req, res) => {
 
     const transaction = await Transaction.create(data);
 
-    res
-      .status(201)
-      .json(new ApiResponse(201, "Transaction created successfully", transaction));
-
-    console.log("Transaction created:", transaction);
+    res.status(201).json(new ApiResponse(201, "Transaction created successfully", transaction));
   } catch (error) {
-    console.error("Error creating transaction:", error);
-
-    if (error instanceof ApiError) {
-      throw error;
-    }
-
-    const errorMessage =
-      error instanceof Error
-        ? error.message
-        : "Something went wrong while creating transaction";
-
+    if (error instanceof ApiError) throw error;
     throw new ApiError({
       statusCode: 500,
-      message: errorMessage,
+      message: error instanceof Error ? error.message : "Something went wrong while creating transaction",
     });
   }
 });
@@ -159,7 +141,7 @@ const getAllTransactions = asyncHandler(async (req, res) => {
 const getUserTransactions = asyncHandler(async (req, res) => {
   try {
     const { sort = 'desc', coin, type } = req.query;
-    const filter: { userId: any; coin?: string; type?: string } = { userId: req.user._id };
+    const filter: { userId: any; coin?: string; type?: string } = { userId: req.profile._id };
 
     if (coin && typeof coin === 'string') filter.coin = coin;
     if (type && typeof type === 'string') filter.type = type;

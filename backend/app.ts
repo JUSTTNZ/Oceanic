@@ -62,7 +62,7 @@ import transactionRouter from './src/routes/transaction.route.js'
 import paystackWebhookRouter from './src/routes/buy.route.js'
 import bitgetRouter from './src/routes/webhook.route.js'
 import { errorHandler } from './src/middlewares/error.middleware.js'
-import google from './src/routes/google.route.js'
+// import google from './src/routes/google.route.js'
 import apiRouter from './src/routes/coinbankrate.js'
 
 // ✅ Setup raw body parsing for webhooks
@@ -117,7 +117,7 @@ app.use('/api/v1/healthCheck', healthCheckRouter)
 app.use('/api/v1/users', userRouter)
 app.use('/api/v1/transaction', transactionRouter)
 app.use('/api/v2/bitget', bitgetRouter)
-app.use('/api/v1/google', google)
+// app.use('/api/v1/google', google)
 
 // Global error handler
 app.use(errorHandler)

@@ -1,13 +1,14 @@
-import { Router } from 'express';
-import { verifyJWT, superAdminAuth, adminOrSuperadminAuth } from '../middlewares/auth.middleware.js';
-import { createTransaction, getUserTransactions, getAllTransactions, updateTransactionStatus } from '../controllers/transaction.controller.js';
-// import { pollTxidStatus } from '../controllers/poll.controller.js';
-const router = Router();
+// src/routes/transaction.route.ts
+import { Router } from 'express'
+import { requireSupabaseUser, adminOrSuperadminAuth, superAdminAuth } from '../middlewares/supabaseAuth.js'
+import { createTransaction, getUserTransactions, getAllTransactions, updateTransactionStatus } from '../controllers/transaction.controller.js'
 
-router.route("/").post(verifyJWT, createTransaction)
-router.route("/user").get(verifyJWT, getUserTransactions);
-// router.get('/poll', pollTxidStatus)
-router.route("/admin").get(verifyJWT,adminOrSuperadminAuth, getAllTransactions)
-router.route("/status/:txid").patch(verifyJWT, superAdminAuth, updateTransactionStatus)
+const router = Router()
 
-export default router;
+router.post('/', requireSupabaseUser, createTransaction)
+router.get('/user', requireSupabaseUser, getUserTransactions)
+router.get('/admin', requireSupabaseUser, adminOrSuperadminAuth, getAllTransactions)
+router.patch('/status/:txid', requireSupabaseUser, superAdminAuth, updateTransactionStatus)
+
+export default router
+         
