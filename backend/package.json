@@ -8,7 +8,7 @@
     "start": "node dist/index.js",
     "dev": "nodemon --exec tsx index.ts",
     "build": "tsc --outDir dist",
-    "vercel-build": "npm install --legacy-peer-deps && npm run build"
+    "vercel-build": "npm run build"
   },
   "keywords": [
     "nodejs",
