@@ -1,9 +1,9 @@
 {
   "version": 2,
   "functions": {
-    "api/index.ts": { "runtime": "@vercel/node@3.0.0" }
-  },
-  "routes": [
-    { "src": "/(.*)", "dest": "/api/index.ts" }
-  ]
+  "api/index.js": { "runtime": "@vercel/node@3.0.0" }
 }
+,
+  "routes": [{ "src": "/(.*)", "dest": "/api/index.ts" }]
+}
+
