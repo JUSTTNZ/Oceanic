@@ -1,2 +1,3 @@
-import {app} from "../app.js";
+//api/index.ts
+import app from "../app.js";
 export default app

@@ -1,31 +1,24 @@
+// index.ts
 import dotenv from 'dotenv'
-import { app, server } from './app.js'
+import { fileURLToPath } from 'url'
+import { dirname, join } from 'path'
 import connectDB from './src/config/db.js'
+import app from './app.js'
 
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
-//import { initSocket } from './config/socket.js';
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-// Load the .env file from backend folder
-dotenv.config({ path: join(__dirname, '.env') });
-//console.log('Loaded ENV VARS:', process.env);
+dotenv.config({ path: join(__dirname, '.env') })
 
 const PORT = process.env.PORT || 7001
 
 connectDB()
-//console.log("This should print after the DB connection is established")
-.then(() => {
+  .then(() => {
     app.listen(PORT, () => {
-        console.log(`Server is running on port ${PORT}`);
-        // if (process.env.NODE_ENV !== 'production') {
-        //     initSocket(server); // only in development
-        // }
+      console.log(`Server running on port ${PORT}`)
     })
-})
-.catch((err) => {
-    console.log("Error in starting server", err);
-    process.exit(1);
-})
+  })
+  .catch((err) => {
+    console.error('Error starting server', err)
+    process.exit(1)
+  })
