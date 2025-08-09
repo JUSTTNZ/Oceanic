@@ -1,4 +1,5 @@
 "use client"
+import { supabase } from '@/lib/supabase'
 import Link from 'next/link';
 import { useToast } from "../../hooks/toast";
 import { useRouter } from 'next/router';
@@ -95,60 +96,46 @@ export default function RegisterPage() {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Reset errors
-    setError({ 
-      username: '',
-      fullname: '',
-      email: '', 
-      password: '', 
-      confirmPassword: '',
-      phoneNumber: '',
-      general: '' 
-    });
+  e.preventDefault()
+  setError({ /* reset */ } as any)
+  if (!validateForm()) return
 
-    // Validate form
-    if (!validateForm()) {
-      return;
-    }
+  try {
+    setLoading(true)
 
-    try {
-      setLoading(true);
+    const { data, error } = await supabase.auth.signUp({
+      email: formData.email,
+      password: formData.password,
+      options: { data: {
+        username: formData.username,
+        fullname: formData.fullname,
+        phoneNumber: formData.phoneNumber
+      }}
+    })
+    if (error) throw error
 
-      const { confirmPassword, ...dataToSend } = formData;
-      console.log("Sending data:", dataToSend);
-     console.log(confirmPassword)
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/register`, {
+    // Create Mongo profile & assign role
+    const accessToken = data.session?.access_token
+    if (accessToken) {
+      await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/profile/init`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(dataToSend),
-        credentials: 'include'
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        const errorMessage = data.message || data.error || 'Registration failed';
-        setError(prev => ({ ...prev, general: errorMessage }));
-        showToast(errorMessage, "error"); // Show error toast
-        return;
-      }
-
-      // Dispatch user data and redirect
-   
-      showToast("Registration successful!", "success"); 
-      setTimeout(() => router.push("/login"), 2000);
-     
-
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Registration failed';
-      setError(prev => ({ ...prev, general: errorMessage }));
-      console.error("Registration error:", err);
-    } finally {
-      setLoading(false);
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+        body: JSON.stringify({
+          username: formData.username,
+          fullname: formData.fullname,
+          phoneNumber: formData.phoneNumber
+        })
+      })
     }
-  };
+
+    showToast('Registration successful! Check your email to verify (if enabled).', 'success')
+    setTimeout(() => router.push('/login'), 1500)
+  } catch (err: any) {
+    showToast(err.message || 'Registration failed', 'error')
+  } finally {
+    setLoading(false)
+  }
+}
 
   return (    
   <div className="flex justify-center items-center min-h-screen bg-gray-900 p-4">

@@ -1,7 +1,7 @@
 "use client";
 
 import { setUser } from "@/action";
-//import toast from 'react-hot-toast';
+import { supabase } from "@/lib/supabase";
 import { useToast } from "../../hooks/toast";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -66,124 +66,74 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   };
 
 const handleLogin = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setError({ email: "", password: "", general: "" });
-
-  if (!validateForm()) return;
+  e.preventDefault()
+  setError({ email: "", password: "", general: "" })
+  if (!validateForm()) return
 
   try {
-    setLoading(true);
+    setLoading(true)
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: formData.email,
+      password: formData.password
+    })
+    if (error) throw error
 
-    // Step 1: Login request (returns user data)
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/login`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-        credentials: "include", // For cookies
-      }
-    );
+    // Ensure profile exists in Mongo and fetch it
+    const accessToken = data.session?.access_token
+    const r = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/init`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`
+      },
+      body: JSON.stringify({}) // you can pass fullname/username if you want to sync
+    })
+    const { profile } = await r.json()
 
-    const data = await response.json();
+    // Dispatch to Redux with Supabase + profile
+    dispatch(setUser({
+      uid: profile.supabase_user_id,
+      email: profile.email,
+      username: profile.username,
+      role: profile.role,
+      fullname: profile.fullname,
+      createdAt: profile.createdAt,
+      phoneNumber: profile.phoneNumber,
+      lastLogin: new Date().toISOString(),
+    }))
 
-    if (!response.ok || !data.data) {
-      throw new Error(data.message || "Login failed");
-    }
- localStorage.setItem('accessToken', data.data.accessToken);
-  localStorage.setItem('refreshToken', data.data.refreshToken);
-    // Step 2: Use the user data FROM THE LOGIN RESPONSE
-    const user = data.data.user; // Already available!
-    dispatch(
-      setUser({
-        uid: user._id,
-        email: user.email,
-        username: user.username,
-        role: user.role,
-        fullname: user.fullname,
-        createdAt: user.createdAt,
-        phoneNumber: user.phoneNumber,
-        lastLogin: new Date().toISOString(),
-      })
-    );
-
-    // Step 3: Redirect based on role
-    if (user.role === "admin" || user.role === "superadmin") {
-      showToast("Welcome Admin!", "success");
-      setTimeout(() => router.push("/adminpage"), 2000);
+    if (profile.role === 'superadmin') {
+      showToast('Welcome Admin!', 'success')
+      setTimeout(() => router.push('/adminpage'), 1200)
     } else {
-      showToast("Login successful", "success");
-      setTimeout(() => router.push("/markets"), 2000);
+      showToast('Login successful', 'success')
+      setTimeout(() => router.push('/markets'), 1200)
     }
-  } catch (err) {
-    const errorMessage = err instanceof Error? err.message : "Login failed";
-    showToast(errorMessage, "error");
+  } catch (err: any) {
+    showToast(err.message || 'Login failed', 'error')
   } finally {
-    setLoading(false);
+    setLoading(false)
   }
-};
+}
 
 
 
 const handleGoogleLogin = async () => {
+  setLoading(true)
   try {
-    setLoading(true); // Set loading state
-    
-    const credential = await signInWithPopup(auth, googleProvider);
-    const user = credential.user;
-    const idToken = await user.getIdToken();
-
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}//api/v1/google`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ idToken }),
-      credentials: "include" 
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Google login failed");
-    }
-
-    const data = await response.json();
-    console.log("goo", data);
-    
- const userData = data.data.user; 
-      console.log(userData);
-      dispatch(setUser({
-        uid: userData._id,
-        email: userData.email,
-        username: userData.username,
-        role: userData.role,
-        fullname: userData.fullname,
-        createdAt: userData.createdAt,
-        phoneNumber: userData.phoneNumber,
-        lastLogin: new Date().toISOString(),
-      }));
-    
-    
-
-    if (userData.role === "admin" || userData.role === "superadmin") {
-      showToast("Welcome Admin!", "success");
-      setTimeout(() => {
-        router.push("/adminpage");
-      }, 2000);
-    } else {
-      showToast("Google login successful", "success");
-      setTimeout(() => {
-        router.push("/markets");  
-      }, 2000);
-    }
-  } catch (error) {
-    console.error("Google login error:", error);
-    const errorMessage = error instanceof Error ? error.message : 'Google login failed. Please try again.';
-    showToast(errorMessage, "error");
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: `${window.location.origin}/auth/callback` }
+    })
+    if (error) throw error
+    // This will redirect; handle the session in /auth/callback page
+  } catch (e: any) {
+    showToast(e.message || 'Google login failed', 'error')
   } finally {
-    setLoading(false);
+    setLoading(false)
   }
-};
+}
+
 
   return (
   <div className="flex justify-center items-center min-h-screen bg-gray-900 p-4">
