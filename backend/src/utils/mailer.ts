@@ -3,6 +3,7 @@ import nodemailer from 'nodemailer';
 interface SendMailProps {
   subject: string;
   text?: string;
+  to: string;
   html?: string;
 }
  const sendAdminEmail = async ({ subject, text, html }: SendMailProps): Promise<void> => {
