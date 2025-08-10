@@ -254,7 +254,7 @@ export const requestPasswordRecovery = async (req: Request, res: Response, next:
     }
 
     const { error } = await supabaseRecoverPassword.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
-      redirectTo: `${process.env.APP_URL}/resetpassword`, // e.g. http://localhost:3000/auth/reset
+      redirectTo: `${process.env.APP_URL}/resetpassword`,
     });
 
     if (error) {
