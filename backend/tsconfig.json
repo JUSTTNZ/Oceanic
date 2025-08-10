@@ -2,7 +2,7 @@
   "extends": "@tsconfig/node18/tsconfig.json",
   "compilerOptions": {
     "module": "ESNext",
-    "moduleResolution": "bundler",
+    "moduleResolution": "Node",  // ← Change this from "bundler" to "Node"
     "target": "ES2022",
     "outDir": "dist",
     "resolveJsonModule": true,
@@ -25,5 +25,3 @@
     "src/utils/generateSignature.ts"
   ]
 }
-
-
