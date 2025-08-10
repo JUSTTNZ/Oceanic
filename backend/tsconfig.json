@@ -1,6 +1,9 @@
 {
   "extends": "@tsconfig/node18/tsconfig.json",
   "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "target": "ES2022",
     "outDir": "dist",
     "resolveJsonModule": true,
     "noEmitOnError": false,
@@ -14,13 +17,12 @@
     "forceConsistentCasingInFileNames": true
   },
   "include": ["src/**/*", "src/clearTransaction.ts"],
-  "exclude": 
-  [ "node_modules",
+  "exclude": [
+    "node_modules",
     "src/middlewares/auth.middleware.ts",
     "src/utils/generateAccessToken.ts",
     "src/services/user.service.ts"
   ]
 }
-
 
 
