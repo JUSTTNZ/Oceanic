@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
 import { useToast } from "../../hooks/toast";
-import { apiClient } from "@/utils/apiclient";
+import { apiClients } from "@/lib/apiClient";
 interface Transaction {
   txid: string;
   amount: number;
@@ -40,7 +40,7 @@ export default function AllTransactionsPage() {
   useEffect(() => {
    const fetchTransactions = async () => {
   try {
-    const { data } = await apiClient.request(
+    const { data } = await apiClients.request(
       `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction/admin`,
       {
         method: 'GET',

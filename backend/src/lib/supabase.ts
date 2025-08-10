@@ -6,6 +6,7 @@ import { createClient } from '@supabase/supabase-js'
 export const supabaseAdmin = createClient(
   process.env.SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
+  
 )
 
 // Optional: a public client you can use on the server for re-auth checks
@@ -14,3 +15,9 @@ export const supabasePublic = createClient(
   process.env.SUPABASE_URL!,
   process.env.SUPABASE_ANON_KEY!
 )
+
+export const supabaseRecoverPassword = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!, // never expose this to the browser
+  { auth: { persistSession: false } }
+);

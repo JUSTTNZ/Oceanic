@@ -3,15 +3,18 @@
 import { useEffect, useState, useCallback } from "react";
 import { FaCheck,  } from "react-icons/fa";
 import { useToast } from "../../hooks/toast";
-import { apiClient } from "@/utils/apiclient";
+import { apiClients } from "@/lib/apiClient";
+
+type UserRef = {
+  email?: string;
+  username?: string;
+  fullname?: string;
+} | null; // <-- can be null
+
 
 interface Transaction {
   txid: string;
-  userId: {
-    email: string;
-    username: string;
-    fullname?: string;
-  };
+  userId: UserRef;              
   coin: string;
   amount: number;
   walletAddressUsed: string;
@@ -23,12 +26,12 @@ interface Transaction {
 export default function AdminPendingPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
-    const [loadingConfirm, setLoadingConfrim] = useState<string | null>(null)
+  const [loadingConfirm, setLoadingConfirm] = useState<string | null>(null);
   const { ToastComponent, showToast } = useToast();
 
   const fetchPendingTransactions = useCallback(async () => {
   try {
-    const response = await apiClient.request(
+    const response = await apiClients.request(
       `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction/admin`,
       {
         method: 'GET',
@@ -55,35 +58,40 @@ export default function AdminPendingPage() {
   }
 }, [showToast]);
 
- const handleUpdateStatus = async (txid: string, status: string) => {
-  setLoadingConfrim(txid);
+const handleUpdateStatus = async (txid: string, status: string) => {
+  setLoadingConfirm(txid);
   try {
-    // Using apiClient instead of direct fetch
-    await apiClient.request(
+    const res = await apiClients.request(
       `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction/status/${txid}`,
       {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status }),
-        credentials: "include"
+        credentials: "include",
       }
     );
-    
-    setTransactions(transactions.filter(tx => tx.txid !== txid));
+
+    if (!res.ok) {
+      const t = await res.text().catch(() => "");
+      console.error("Update status failed:", t);
+      showToast("Failed to update transaction status", "error");
+      return;
+    }
+
+    // remove the confirmed one from list
+    setTransactions(prev => prev.filter(tx => tx.txid !== txid));
     showToast("Confirmed transaction", "success");
   } catch (err) {
+    console.error(err);
     showToast("Failed to update transaction status", "error");
-    console.error("Failed to update transaction status", err);
   } finally {
-    setLoadingConfrim(null);
+    setLoadingConfirm(null);
   }
 };
 
   useEffect(() => {
     fetchPendingTransactions();
-  }, [fetchPendingTransactions]);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 font-grotesk pt-20 ">
@@ -115,9 +123,9 @@ export default function AdminPendingPage() {
               >
                  <div className="flex justify-between items-start mb-4">
         <div className="flex-1">
-          <h3 className="font-medium text-blue-300">{tx.userId.username}</h3>
+          <h3 className="font-medium text-blue-300">{tx.userId?.username ?? '(unknown user)'}</h3>
           <p className="text-xs text-gray-400 mt-1 overflow-hidden text-ellipsis whitespace-nowrap">
-            {tx.walletAddressUsed}
+            {tx.walletAddressUsed || 'no wallet'}
           </p>
         </div>
         <span className="text-xs bg-gray-800/50 text-gray-300 px-2 py-1 rounded-full backdrop-blur-sm">

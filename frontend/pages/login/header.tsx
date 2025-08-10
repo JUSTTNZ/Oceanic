@@ -9,7 +9,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/router";
 import { toast } from "react-hot-toast";
 import { clearUser } from "@/action";
-import { apiClient } from "@/utils/apiclient";
+import { apiClients } from "@/lib/apiClient";
 interface RootState {
   user: {
     uid: number;
@@ -28,7 +28,7 @@ export default function Header() {
     setIsLoggingOut(true);
     try {
       // 1. Call logout endpoint (clears cookies server-side)
-      const response = await apiClient.request(
+      const response = await apiClients.request(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/logout`,
         {
           method: 'POST',
