@@ -1,5 +1,5 @@
 
-import { apiClient } from "@/utils/apiclient";
+import { apiClients } from "@/lib/apiClient";
 import { useState } from "react";
 import { toast } from "react-hot-toast";
 
@@ -33,7 +33,7 @@ export default function PasswordChangeModal({ user, onClose }: {
       return;
     }
     try {
-      const response = await apiClient.request(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/changePassword`, {
+      const response = await apiClients.request(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/changepassword`, {
         
         method: 'PUT',
         headers: {

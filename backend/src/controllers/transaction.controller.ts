@@ -35,10 +35,10 @@ const createTransaction = asyncHandler(async (req: Request, res: Response)  => {
     }
 
     const data: any = {
-      userId: req.profile._id,
-      userFullname: req.profile.fullname,
-      userUsername: req.profile.username,
-      userEmail: req.profile.email,
+      userId: req.profile?._id,
+      userFullname: req.profile?.fullname,
+      userUsername: req.profile?.username,
+      userEmail: req.profile?.email,
       coin,
       amount,
       txid,
@@ -141,7 +141,7 @@ const getAllTransactions = asyncHandler(async (req, res) => {
 const getUserTransactions = asyncHandler(async (req, res) => {
   try {
     const { sort = 'desc', coin, type } = req.query;
-    const filter: { userId: any; coin?: string; type?: string } = { userId: req.profile._id };
+    const filter: { userId: any; coin?: string; type?: string } = { userId: req.profile?._id };
 
     if (coin && typeof coin === 'string') filter.coin = coin;
     if (type && typeof type === 'string') filter.type = type;

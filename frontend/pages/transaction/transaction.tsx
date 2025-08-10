@@ -3,7 +3,7 @@ import { useToast } from "../../hooks/toast";
 import {  FaSort, FaSortUp, FaSortDown, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import Footer from "../login/footer";
 import Header from "../login/header";
-import { apiClient } from "@/utils/apiclient";
+import { apiClients } from "@/lib/apiClient";
 
 interface Transaction {
   id: string;
@@ -63,7 +63,7 @@ export default function CryptoTransactions() {
       const fetchTransactions = async () => {
 
         try {
-          const res = await apiClient.request(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction/user`, {
+          const res = await apiClients.request(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction/user`, {
           method: 'GET',
           credentials: "include"
           });

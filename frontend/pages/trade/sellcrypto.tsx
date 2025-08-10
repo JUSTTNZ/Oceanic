@@ -16,7 +16,7 @@ import { useToast } from "@/hooks/toast";
 import LoadingDisplay from "@/ui/loading";
 import ErrorDisplay from "@/ui/errorbuy";
 import { BYBIT_WALLET_ADDRESSES } from "@/utils/bybitaddress";
-import { apiClient } from "@/utils/apiclient";
+import { apiClients } from "@/lib/apiClient";
 
 
 interface Coin {
@@ -103,7 +103,7 @@ const [selectedCountry] = useState<Country>({
         setError(null);
   
         // Fetch coins data
-        const responseCoins = await apiClient.request(
+        const responseCoins = await apiClients.request(
           `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/data/crypto-markets`,{
               method: 'GET',
           credentials: "include"
@@ -117,7 +117,7 @@ const [selectedCountry] = useState<Country>({
 
 
      // 3. Fetch banks for the default country
-      const banksResponse = await apiClient.request(
+      const banksResponse = await apiClients.request(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/data/banks?country=${selectedCountry.name.toLowerCase()}`,{
             method: 'GET',
           credentials: "include"
@@ -137,7 +137,7 @@ const [selectedCountry] = useState<Country>({
         
   
         // Fetch exchange rates
-        const responseRate = await apiClient.request(
+        const responseRate = await apiClients.request(
           `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/data/exchange-rates`,{
               method: 'GET',
           credentials: "include"
@@ -203,7 +203,7 @@ const handleSubmit = async () => {
  
 
     // Step 1: Create transaction
-    const createRes = await apiClient.request(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction`, {
+    const createRes = await apiClients.request(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -232,7 +232,7 @@ console.log("coin", selectedCoin.symbol, coins)
 console.log("t", txid)
 console.log("a", amount)
     // Step 2: Confirm transaction using Bitget
-    const confirmRes = await apiClient.request(
+    const confirmRes = await apiClients.request(
       `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v2/bitget/confirm-deposit?coin=${selectedCoin.symbol}&txid=${txid}&size=${amount}`,
       {
      method: 'GET',

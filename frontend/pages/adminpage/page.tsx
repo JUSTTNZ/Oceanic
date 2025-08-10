@@ -1,4 +1,15 @@
 "use client";
+
+
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { BellIcon } from "@heroicons/react/24/outline";
+import { AnimatePresence, motion } from "framer-motion";
+import AllTransaction from '../admin/alltransaction'
+import PendingTransaction from '../admin/pendingtransaction'
+import { apiClients } from "@/lib/apiClient";
+//import { useRequireAdmin } from "@/hooks/useRequireAdmin";
+
 interface Transaction {
   txid: string; // Transaction ID (format: alphanumeric with optional hyphens)
   amount: number;
@@ -14,13 +25,6 @@ interface Transaction {
   };
 }
 
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { BellIcon } from "@heroicons/react/24/outline";
-import { AnimatePresence, motion } from "framer-motion";
-import AllTransaction from '../admin/alltransaction'
-import PendingTransaction from '../admin/pendingtransaction'
-import { apiClient } from "@/utils/apiclient";
 
 export default function AdminDashboard() {
   const [pendingCount, setPendingCount] = useState(0);
@@ -35,7 +39,7 @@ export default function AdminDashboard() {
     const fetchPendingTransactions = async () => {
   try {
     // Using apiClient instead of direct fetch
-    const response = await apiClient.request(
+    const response = await apiClients.request(
       `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction/admin`,
       {
         method: 'GET',
@@ -67,10 +71,10 @@ export default function AdminDashboard() {
     fetchPendingTransactions();
   }, []);
 
+  //const ready = useRequireAdmin();
+
      if(loading){
 return(
-
-
 
           <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
            <div className="flex justify-center items-center h-screen">

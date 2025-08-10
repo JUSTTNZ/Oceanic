@@ -19,10 +19,10 @@ const createTransaction = asyncHandler(async (req, res) => {
             throw new ApiError({ statusCode: 400, message: "Transaction with this TXID already exists" });
         }
         const data = {
-            userId: req.profile._id,
-            userFullname: req.profile.fullname,
-            userUsername: req.profile.username,
-            userEmail: req.profile.email,
+            userId: req.profile?._id,
+            userFullname: req.profile?.fullname,
+            userUsername: req.profile?.username,
+            userEmail: req.profile?.email,
             coin,
             amount,
             txid,
@@ -112,7 +112,7 @@ const getAllTransactions = asyncHandler(async (req, res) => {
 const getUserTransactions = asyncHandler(async (req, res) => {
     try {
         const { sort = 'desc', coin, type } = req.query;
-        const filter = { userId: req.profile._id };
+        const filter = { userId: req.profile?._id };
         if (coin && typeof coin === 'string')
             filter.coin = coin;
         if (type && typeof type === 'string')

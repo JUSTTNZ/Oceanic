@@ -13,7 +13,7 @@
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "src/clearTransaction.ts"],
   "exclude": 
   [ "node_modules",
     "src/middlewares/auth.middleware.ts",
