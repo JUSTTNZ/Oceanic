@@ -2,13 +2,13 @@
   "extends": "@tsconfig/node18/tsconfig.json",
   "compilerOptions": {
     "module": "ESNext",
-    "moduleResolution": "Node",  // ← Change this from "bundler" to "Node"
+    "moduleResolution": "Node",
     "target": "ES2022",
     "outDir": "dist",
     "resolveJsonModule": true,
     "noEmitOnError": false,
     "checkJs": false,
-    "rootDir": "src",
+    "rootDir": ".",
     "typeRoots": ["./src/types", "./node_modules/@types"],
     "strict": true,
     "sourceMap": true,
@@ -16,12 +16,9 @@
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src/**/*", "src/clearTransaction.ts"],
+  "include": ["src/**/*", "api/**/*"],
   "exclude": [
     "node_modules",
-    "src/middlewares/auth.middleware.ts",
-    "src/utils/generateAccessToken.ts",
-    "src/services/user.service.ts",
-    "src/utils/generateSignature.ts"
+    "dist"
   ]
 }

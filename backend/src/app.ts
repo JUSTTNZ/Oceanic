@@ -3,7 +3,7 @@ import express from 'express'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import http from 'http'
-import firebaseInit from './src/utils/firebase.js'
+import firebaseInit from '../src/utils/firebase.js'
 
 // Extend Express types
 declare global {
@@ -72,8 +72,8 @@ app.use('/api/v1/paystack', express.raw({ type: 'application/json' }), (req, res
 })
 
 // ✅ Webhook routes first
-import webhookRouter from './src/routes/webhook.route.js'
-import paystackWebhookRouter from './src/routes/buy.route.js'
+import webhookRouter from '../src/routes/webhook.route.js'
+import paystackWebhookRouter from '../src/routes/buy.route.js'
 app.use('/api/v2/webhook', webhookRouter)
 app.use('/api/v1/paystack', paystackWebhookRouter)
 
@@ -83,12 +83,12 @@ app.use(express.urlencoded({ extended: true, limit: '16kb' }))
 app.use(cookieParser())
 
 // ===== ROUTES =====
-import userRouter from './src/routes/user.route.js'
-import healthCheckRouter from './src/routes/healthcheck.route.js'
-import transactionRouter from './src/routes/transaction.route.js'
-import bitgetRouter from './src/routes/webhook.route.js'
-import apiRouter from './src/routes/coinbankrate.js'
-import { errorHandler } from './src/middlewares/error.middleware.js'
+import userRouter from '../src/routes/user.route.js'
+import healthCheckRouter from '../src/routes/healthcheck.route.js'
+import transactionRouter from '../src/routes/transaction.route.js'
+import bitgetRouter from '../src/routes/webhook.route.js'
+import apiRouter from '../src/routes/coinbankrate.js'
+import { errorHandler } from '../src/middlewares/error.middleware.js'
 
 app.get('/', (_, res) => res.send('Welcome to the backend!'))
 app.use('/api/v1/data', apiRouter)
