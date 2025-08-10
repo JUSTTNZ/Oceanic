@@ -3,8 +3,15 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Transaction } from "../models/transaction.model.js";
 import { CoinWallet } from "../models/coinWallet.model.js";
-import coins from "../coindata/coin.json";
 import { Request, Response } from "express";
+import coins from "../coindata/coin.json" with { type: "json" };
+interface CoinData {
+  coin: string;
+  network: string;
+  walletAddress: string;
+}
+
+const coinsData: CoinData[] = coins as CoinData[];
 
 // Create Transaction (Buy or Sell)
 const createTransaction = asyncHandler(async (req: Request, res: Response)  => {
@@ -86,7 +93,7 @@ const createTransaction = asyncHandler(async (req: Request, res: Response)  => {
     const walletInfo = await CoinWallet.findOne({ coin });
 
     if (!walletInfo) {
-      const fallback = coins.find((c) => c.coin.toUpperCase() === coin.toUpperCase());
+      const fallback = coinsData.find((c: CoinData) => c.coin.toUpperCase() === coin.toUpperCase());
 
       if (!fallback) {
         throw new ApiError({
