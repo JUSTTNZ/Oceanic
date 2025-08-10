@@ -245,7 +245,6 @@ export const requestPasswordRecovery = async (req: Request, res: Response, next:
       return res.status(400).json({ message: 'Email and captchaToken are required' });
     }
 
-    // 1) Verify CAPTCHA server-side
     const result = await verifyRecaptcha(captchaToken, req.ip);
     if (!result?.success) {
       return res.status(400).json({
