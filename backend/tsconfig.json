@@ -21,7 +21,8 @@
     "node_modules",
     "src/middlewares/auth.middleware.ts",
     "src/utils/generateAccessToken.ts",
-    "src/services/user.service.ts"
+    "src/services/user.service.ts",
+    "src/utils/generateSignature.ts"
   ]
 }
 
