@@ -70,24 +70,26 @@ const handleLogin = async (e: React.FormEvent) => {
 
 
     // Handle common auth errors nicely
-    if (error) {
-      console.error("❌ Supabase Login Error Details:", {
-    code: (error as any).code || "NO_CODE",
+if (error) {
+  console.error("❌ Supabase Login Error Details:", {
+    status: (error as { status?: number }).status ?? null,
     message: error.message,
     name: error.name,
-    stack: error.stack,
   });
-      if (error.message?.toLowerCase().includes("email not confirmed")) {
-        showToast("Please confirm your email before logging in.", "warning");
-        return;
-      }
-      if (error.message?.toLowerCase().includes("invalid login credentials")) {
-        showToast("Invalid email or password.", "error");
-        return;
-      }
-      showToast(error.message || "Login failed", "error");
-      return;
-    }
+
+  const msg = error.message.toLowerCase();
+  if (msg.includes("email not confirmed")) {
+    showToast("Please confirm your email before logging in.", "warning");
+    return;
+  }
+  if (msg.includes("invalid login credentials")) {
+    showToast("Invalid email or password.", "error");
+    return;
+  }
+  showToast(error.message || "Login failed", "error");
+  return;
+}
+
 
     const user = data.user;
     const accessToken = data.session?.access_token;
@@ -149,12 +151,13 @@ const handleLogin = async (e: React.FormEvent) => {
       showToast("Login successful", "success");
       setTimeout(() => router.push("/markets"), 1200);
     }
-  } catch (err: any) {
-    console.error("Login error:", err);
-    showToast(err?.message || "Login failed", "error");
-  } finally {
-    setLoading(false);
-  }
+ } catch (err: unknown) {
+  const msg = err instanceof Error ? err.message : String(err);
+  console.error("Login error:", err);
+  showToast(msg || "Login failed", "error");
+} finally {
+  setLoading(false);
+}
 };
 
 
@@ -169,11 +172,12 @@ const handleGoogleLogin = async () => {
     })
     if (error) throw error
     // This will redirect; handle the session in /auth/callback page
-  } catch (e: any) {
-    showToast(e.message || 'Google login failed', 'error')
-  } finally {
-    setLoading(false)
-  }
+  } catch (e: unknown) {
+  const msg = e instanceof Error ? e.message : String(e);
+  showToast(msg || 'Google login failed', 'error');
+} finally {
+  setLoading(false);
+}
 }
 
 

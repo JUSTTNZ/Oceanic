@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { FaCheck,  } from "react-icons/fa";
 import { useToast } from "../../hooks/toast";
 import { apiClients } from "@/lib/apiClient";
@@ -29,34 +29,40 @@ export default function AdminPendingPage() {
   const [loadingConfirm, setLoadingConfirm] = useState<string | null>(null);
   const { ToastComponent, showToast } = useToast();
 
-  const fetchPendingTransactions = useCallback(async () => {
-  try {
-    const response = await apiClients.request(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction/admin`,
-      {
-        method: 'GET',
-        credentials: 'include'
+useEffect(() => {
+  const fetchPendingTransactions = async () => {
+    try {
+      const response = await apiClients.request(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction/admin`,
+        {
+          method: 'GET',
+          credentials: 'include'
+        }
+      );
+
+      if (!response.ok) {
+        setTransactions([]);
+        setLoading(false);
+        return;
       }
-    );
 
-    if (!response.ok) {
-      setTransactions([]);
+      const data = await response.json();
+      const pending = Array.isArray(data.data) 
+        ? data.data.filter((tx: Transaction) => tx.status === "pending") 
+        : [];
+      setTransactions(pending);
+    } catch (err) {
+      showToast("Failed to load transactions", "error");
+      console.error("Failed to load transactions", err);
+    } finally {
       setLoading(false);
-      return;
     }
+  };
 
-    const data = await response.json();
-    const pending = Array.isArray(data.data) 
-      ? data.data.filter((tx: Transaction) => tx.status === "pending") 
-      : [];
-    setTransactions(pending);
-  } catch (err) {
-    showToast("Failed to load transactions", "error");
-    console.error("Failed to load transactions", err);
-  } finally {
-    setLoading(false);
-  }
-}, [showToast]);
+  fetchPendingTransactions();
+}, [showToast]); // Only showToast as dependency
+
+// Remove the useCallback version since it's now inside useEffect
 
 const handleUpdateStatus = async (txid: string, status: string) => {
   setLoadingConfirm(txid);
@@ -88,10 +94,6 @@ const handleUpdateStatus = async (txid: string, status: string) => {
     setLoadingConfirm(null);
   }
 };
-
-  useEffect(() => {
-    fetchPendingTransactions();
-  }, []);
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 font-grotesk pt-20 ">

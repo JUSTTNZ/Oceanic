@@ -1,5 +1,9 @@
+import 'dotenv/config';
 import { User } from '../models/user.model.js';
-import { supabaseAdmin, supabasePublic } from '../lib/supabase.js';
+import { supabaseAdmin, supabasePublic, supabaseRecoverPassword } from '../lib/supabase.js';
+import { createClient } from '@supabase/supabase-js';
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY // service key for server-side logout
+);
 export const initProfile = async (req, res, next) => {
     try {
         const supaUser = req.supabaseUser;
@@ -130,6 +134,77 @@ export const changeUserCurrentPassword = async (req, res, next) => {
             return res.status(500).json({ message: updateError.message });
         }
         return res.status(200).json({ ok: true, message: 'Password changed successfully' });
+    }
+    catch (err) {
+        next(err);
+    }
+};
+export const logoutUser = async (req, res, next) => {
+    try {
+        // Get access token from Authorization header or cookies
+        const authHeader = req.headers.authorization;
+        const token = authHeader?.startsWith('Bearer ')
+            ? authHeader.slice(7)
+            : req.cookies?.['sb-access-token']; // fallback if stored in cookie
+        if (!token) {
+            return res.status(400).json({ message: 'No token provided' });
+        }
+        // Invalidate Supabase session
+        const { error } = await supabase.auth.admin.signOut(token);
+        if (error) {
+            console.error('❌ Supabase logout error:', error.message);
+            return res.status(500).json({ message: 'Logout failed', error: error.message });
+        }
+        // Clear cookies if used
+        res.clearCookie('sb-access-token', { httpOnly: true, sameSite: 'strict', secure: true });
+        res.clearCookie('sb-refresh-token', { httpOnly: true, sameSite: 'strict', secure: true });
+        return res.status(200).json({ ok: true, message: 'Logged out successfully' });
+    }
+    catch (err) {
+        next(err);
+    }
+};
+async function verifyRecaptcha(token, remoteIp) {
+    const params = new URLSearchParams();
+    params.append('secret', process.env.RECAPTCHA_SECRET_KEY);
+    params.append('response', token);
+    if (remoteIp)
+        params.append('remoteip', remoteIp);
+    const resp = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params.toString(),
+    });
+    return resp.json();
+}
+export const requestPasswordRecovery = async (req, res, next) => {
+    try {
+        const { email, captchaToken } = req.body;
+        if (!email || !captchaToken) {
+            return res.status(400).json({ message: 'Email and captchaToken are required' });
+        }
+        // 1) Verify CAPTCHA server-side
+        const result = await verifyRecaptcha(captchaToken, req.ip);
+        if (!result?.success) {
+            return res.status(400).json({
+                message: 'CAPTCHA verification failed',
+                details: result?.['error-codes'] ?? [],
+            });
+        }
+        const { error } = await supabaseRecoverPassword.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
+            redirectTo: `${process.env.APP_URL}/resetpassword`, // e.g. http://localhost:3000/auth/reset
+        });
+        if (error) {
+            // Don’t leak account existence; keep message generic
+            return res.status(200).json({
+                ok: true,
+                message: 'If this email exists, a reset link has been sent.',
+            });
+        }
+        return res.status(200).json({
+            ok: true,
+            message: 'If this email exists, a reset link has been sent.',
+        });
     }
     catch (err) {
         next(err);

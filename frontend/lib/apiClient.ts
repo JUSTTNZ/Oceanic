@@ -15,7 +15,7 @@ async function getAccessToken(): Promise<string | null> {
 export const apiClients = {
   async request(input: string, init: RequestInitLike = {}) {
     // allow unauthenticated calls by passing { skipAuth: true }
-    let headers = new Headers(init.headers || {});
+    const headers = new Headers(init.headers || {});
     if (!init.skipAuth) {
       const token = await getAccessToken();
       if (token) {

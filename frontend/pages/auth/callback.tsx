@@ -1,4 +1,3 @@
-// pages/auth/callback.tsx
 'use client';
 
 import { useEffect, useRef } from 'react';
@@ -7,6 +6,22 @@ import { supabase } from '@/lib/supabase';
 import { useDispatch } from 'react-redux';
 import { setUser } from '@/action';
 import { useToast } from '@/hooks/toast';
+
+// Put these near the top of the file
+interface Profile {
+  supabase_user_id: string;
+  email: string;
+  username: string;
+  role: 'user' | 'admin' | 'superadmin';
+  fullname: string;
+  phoneNumber: string;
+  createdAt: string;
+}
+
+interface InitResponse {
+  ok: boolean;
+  profile: Profile;
+}
 
 export default function AuthCallback() {
   const { showToast, ToastComponent } = useToast();
@@ -21,22 +36,28 @@ export default function AuthCallback() {
     (async () => {
       try {
         // 1) Give Supabase a moment to process the hash on first load
-        // (email links often land with access_token in the hash)
         await new Promise((r) => setTimeout(r, 50));
 
         // 2) Try to read the session
-        let { data: { session }, error } = await supabase.auth.getSession();
+        let { data: { session } } = await supabase.auth.getSession();
 
         // 3) If session isn’t ready yet, wait for the first auth state change
         if (!session) {
-          const once = await new Promise<ReturnType<typeof supabase.auth.onAuthStateChange>>((resolve) => {
-            const sub = supabase.auth.onAuthStateChange((_event, s) => {
-              if (s) resolve(sub); // got a session
-            });
+          const sub = supabase.auth.onAuthStateChange((_event, s) => {
+            if (s) {
+              session = s;
+              sub.data.subscription.unsubscribe();
+            }
           });
-          // cleanup the subscription immediately
-          (once as any).data.subscription.unsubscribe();
-          ({ data: { session } } = await supabase.auth.getSession());
+          // Wait for auth state to change
+          await new Promise<void>((resolve) => {
+            const checkInterval = setInterval(() => {
+              if (session) {
+                clearInterval(checkInterval);
+                resolve();
+              }
+            }, 50);
+          });
         }
 
         if (!session) {
@@ -67,7 +88,8 @@ export default function AuthCallback() {
           return router.replace('/login');
         }
 
-        const { profile } = await resp.json();
+        const { profile } = (await resp.json()) as InitResponse;
+
 
         // 5) Store in Redux
         dispatch(
@@ -91,9 +113,10 @@ export default function AuthCallback() {
           showToast('Login successful!', 'success');
           setTimeout(() => router.replace('/markets'), 1000);
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
+        const errorMsg = err instanceof Error ? err.message : 'Authentication failed';
         console.error('Auth callback error:', err);
-        showToast(err?.message || 'Authentication failed', 'error');
+        showToast(errorMsg, 'error');
         router.replace('/login');
       }
     })();

@@ -6,6 +6,16 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
+type RegisterErrorState = {
+  username: string;
+  fullname: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  phoneNumber: string;
+  general: string;
+};
+
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -21,15 +31,15 @@ export default function RegisterPage() {
   });
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState({
-    username: "",
-    fullname: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    phoneNumber: "",
-    general: "",
-  });
+  const [error, setError] = useState<RegisterErrorState>({
+  username: "",
+  fullname: "",
+  email: "",
+  password: "",
+  confirmPassword: "",
+  phoneNumber: "",
+  general: "",
+});
 
   const router = useRouter();
 
@@ -88,7 +98,16 @@ export default function RegisterPage() {
 
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
-  setError({} as any);
+  setError({
+  username: "",
+  fullname: "",
+  email: "",
+  password: "",
+  confirmPassword: "",
+  phoneNumber: "",
+  general: "",
+});
+
 
   if (!validateForm()) return;
 
@@ -143,9 +162,10 @@ const handleSubmit = async (e: React.FormEvent) => {
 
     // Optional: redirect to login page after a short delay
     setTimeout(() => router.push("/login"), 1800);
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
     console.error("Signup error:", err);
-    showToast(err?.message || "Registration failed", "error");
+    showToast(msg || "Registration failed", "error");
   } finally {
     setLoading(false);
   }
