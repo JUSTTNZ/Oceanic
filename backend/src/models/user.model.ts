@@ -50,7 +50,7 @@ const UserSchema = new Schema<UserDocument>(
     },
     fullname: {
       type: String,
-      required: true,
+      default: '',
       trim: true,
       index: true,
     },

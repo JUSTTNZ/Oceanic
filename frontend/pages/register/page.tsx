@@ -86,47 +86,73 @@ export default function RegisterPage() {
     return isValid;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault()
-  setError({ /* reset */ } as any)
-  if (!validateForm()) return
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setError({} as any);
+
+  if (!validateForm()) return;
 
   try {
-    setLoading(true)
+    setLoading(true);
+
+    // Always trim & lowercase emails
+    const email = formData.email.trim().toLowerCase();
 
     const { data, error } = await supabase.auth.signUp({
-      email: formData.email,
+      email,
       password: formData.password,
-      options: { data: {
-        username: formData.username,
-        fullname: formData.fullname,
-        phoneNumber: formData.phoneNumber
-      }}
-    })
-    if (error) throw error
-
-    // Create Mongo profile & assign role
-    const accessToken = data.session?.access_token
-    if (accessToken) {
-      await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/profile/init`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
-        body: JSON.stringify({
+      options: {
+        // this metadata is stored on the user in Supabase
+        data: {
           username: formData.username,
           fullname: formData.fullname,
-          phoneNumber: formData.phoneNumber
-        })
-      })
+          phoneNumber: formData.phoneNumber,
+        },
+        // this must be in your Supabase > Auth > URL Configuration > Redirect URLs
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+
+    // Handle Supabase errors clearly
+    if (error) {
+      // common friendly messages
+      const msg = error.message?.toLowerCase() || "";
+      if (msg.includes("email rate limit")) {
+        showToast("Too many attempts. Please try again later.", "error");
+      } else if (msg.includes("password")) {
+        showToast("Password is too weak. Please use a stronger password.", "error");
+      } else if (msg.includes("email address is invalid")) {
+        showToast("Please enter a valid email address.", "error");
+      } else {
+        showToast(error.message || "Registration failed", "error");
+      }
+      return;
     }
 
-    showToast('Registration successful! Check your email to verify (if enabled).', 'success')
-    setTimeout(() => router.push('/login'), 1500)
+    // When "Confirm email" is enabled, Supabase usually returns user but NO session.
+    // That’s expected — user must click the link first.
+    if (data?.user && !data.session) {
+      showToast(
+        "Registration successful! Check your inbox and click the verification link to continue.",
+        "success"
+      );
+    } else {
+      // (rare) If email confirmation is off, you might already have a session here.
+      showToast("Registration successful!", "success");
+    }
+
+    // Optional: redirect to login page after a short delay
+    setTimeout(() => router.push("/login"), 1800);
   } catch (err: any) {
-    showToast(err.message || 'Registration failed', 'error')
+    console.error("Signup error:", err);
+    showToast(err?.message || "Registration failed", "error");
   } finally {
-    setLoading(false)
+    setLoading(false);
   }
-}
+};
+
+
+
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-900 p-4">

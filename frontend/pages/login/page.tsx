@@ -48,55 +48,115 @@ export default function LoginPage() {
   };
 
 const handleLogin = async (e: React.FormEvent) => {
-  e.preventDefault()
-  setError({ email: "", password: "", general: "" })
-  if (!validateForm()) return
+  e.preventDefault();
+  setError({ email: "", password: "", general: "" });
+  if (!validateForm()) return;
 
   try {
-    setLoading(true)
+    setLoading(true);
+
+    const email = formData.email.trim().toLowerCase();
+
     const { data, error } = await supabase.auth.signInWithPassword({
-      email: formData.email,
-      password: formData.password
-    })
-    if (error) throw error
+      email,
+      password: formData.password,
+    });
 
-    // Ensure profile exists in Mongo and fetch it
-    const accessToken = data.session?.access_token
-    const r = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/init`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${accessToken}`
-      },
-      body: JSON.stringify({}) // you can pass fullname/username if you want to sync
-    })
-    const { profile } = await r.json()
+    console.log("🔍 Supabase signInWithPassword response:", {
+  email,
+  data,
+  error,
+});
 
-    // Dispatch to Redux with Supabase + profile
-    dispatch(setUser({
-      uid: profile.supabase_user_id,
-      email: profile.email,
-      username: profile.username,
-      role: profile.role,
-      fullname: profile.fullname,
-      createdAt: profile.createdAt,
-      phoneNumber: profile.phoneNumber,
-      lastLogin: new Date().toISOString(),
-    }))
 
-    if (profile.role === 'superadmin') {
-      showToast('Welcome Admin!', 'success')
-      setTimeout(() => router.push('/adminpage'), 1200)
+    // Handle common auth errors nicely
+    if (error) {
+      console.error("❌ Supabase Login Error Details:", {
+    code: (error as any).code || "NO_CODE",
+    message: error.message,
+    name: error.name,
+    stack: error.stack,
+  });
+      if (error.message?.toLowerCase().includes("email not confirmed")) {
+        showToast("Please confirm your email before logging in.", "warning");
+        return;
+      }
+      if (error.message?.toLowerCase().includes("invalid login credentials")) {
+        showToast("Invalid email or password.", "error");
+        return;
+      }
+      showToast(error.message || "Login failed", "error");
+      return;
+    }
+
+    const user = data.user;
+    const accessToken = data.session?.access_token;
+
+    // Extra safety: if you keep email confirmation enabled in Supabase,
+    // signInWithPassword can still succeed but user may be unconfirmed in some configs.
+    if (!user?.email_confirmed_at) {
+      showToast("Please confirm your email before logging in.", "warning");
+      return;
+    }
+
+    if (!accessToken) {
+      showToast("No session token returned. Please try again.", "error");
+      return;
+    }
+
+    // Ensure a Mongo profile exists / fetch it
+    const resp = await fetch(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/init`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({}), // you can pass username/fullname/phone if you want to sync
+        credentials: "include",
+      }
+    );
+
+    if (!resp.ok) {
+      const t = await resp.text().catch(() => "");
+      console.error("INIT /api/users/init failed:", t);
+      showToast("Could not load your profile. Please try again.", "error");
+      return;
+    }
+
+    const { profile } = await resp.json();
+
+    // Save to Redux
+    dispatch(
+      setUser({
+        uid: profile.supabase_user_id,
+        email: profile.email,
+        username: profile.username,
+        role: profile.role,
+        fullname: profile.fullname,
+        createdAt: profile.createdAt,
+        phoneNumber: profile.phoneNumber,
+        lastLogin: new Date().toISOString(),
+      })
+    );
+
+    // Redirect by role
+    if (profile.role === "superadmin") {
+      showToast("Welcome Admin!", "success");
+      setTimeout(() => router.push("/adminpage"), 1200);
     } else {
-      showToast('Login successful', 'success')
-      setTimeout(() => router.push('/markets'), 1200)
+      showToast("Login successful", "success");
+      setTimeout(() => router.push("/markets"), 1200);
     }
   } catch (err: any) {
-    showToast(err.message || 'Login failed', 'error')
+    console.error("Login error:", err);
+    showToast(err?.message || "Login failed", "error");
   } finally {
-    setLoading(false)
+    setLoading(false);
   }
-}
+};
+
 
 
 
