@@ -1,9 +1,9 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, Variants, easeInOut } from "framer-motion";
 import Image from "next/image";
-import img from '../../public/Images/blogp.png';
-import { useState, useEffect } from 'react';
+import img from "../../public/Images/blogp.png";
+import { useState, useEffect } from "react";
 
 const testimonials = [
   {
@@ -61,10 +61,10 @@ export default function TestimonialCarousel() {
     const updateItemsPerPage = () => {
       setItemsPerPage(window.innerWidth < 768 ? 1 : 3);
     };
-    
+
     updateItemsPerPage();
-    window.addEventListener('resize', updateItemsPerPage);
-    return () => window.removeEventListener('resize', updateItemsPerPage);
+    window.addEventListener("resize", updateItemsPerPage);
+    return () => window.removeEventListener("resize", updateItemsPerPage);
   }, []);
 
   // Auto-play functionality
@@ -73,27 +73,29 @@ export default function TestimonialCarousel() {
 
     const interval = setInterval(() => {
       setDirection(1);
-      setCurrentIndex(prev => (prev + 1) % (testimonials.length - itemsPerPage + 1));
-    }, 3000);
+      setCurrentIndex(
+        (prev) => (prev + 1) % (testimonials.length - itemsPerPage + 1)
+      );
+    }, 4000);
 
     return () => clearInterval(interval);
   }, [isPaused, itemsPerPage]);
 
-  const slideVariants = {
-    enter: (direction: number) => ({
-      x: direction > 0 ? '100%' : '-100%',
-      opacity: 0
+  const slideVariants: Variants = {
+    enter: (dir: number) => ({
+      x: dir > 0 ? "100%" : "-100%",
+      opacity: 0,
     }),
     center: {
       x: 0,
       opacity: 1,
-      transition: { duration: 0.5 }
+      transition: { duration: 0.6, ease: easeInOut },
     },
-    exit: (direction: number) => ({
-      x: direction > 0 ? '-100%' : '100%',
+    exit: (dir: number) => ({
+      x: dir > 0 ? "-100%" : "100%",
       opacity: 0,
-      transition: { duration: 0.5 }
-    })
+      transition: { duration: 0.6, ease: easeInOut },
+    }),
   };
 
   // Get visible testimonials
@@ -104,21 +106,23 @@ export default function TestimonialCarousel() {
   }
 
   return (
-    <div className="py-16 pb-24 text-center font-grotesk overflow-hidden bg-[#1c1c3b]  text-white">
+    <div className="py-16 pb-24 text-center font-grotesk overflow-hidden bg-gradient-to-b from-[#141428] via-[#1c1c3b] to-[#141428] text-white relative">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         viewport={{ once: true }}
-        className="mb-12"
+        className="mb-12 relative z-10"
       >
-        <h2 className="md:text-3xl text-2xl font-bold mb-3">What Our Users Say</h2>
-        <p className="text-gray-100 text-md max-w-2xl mx-auto">
+        <h2 className="md:text-3xl text-2xl font-bold mb-3 bg-gradient-to-r from-blue-300 to-purple-400 bg-clip-text text-transparent">
+          What Our Users Say
+        </h2>
+        <p className="text-gray-300 text-md max-w-2xl mx-auto">
           Hear from our community of crypto enthusiasts and investors
         </p>
       </motion.div>
 
-      <div 
+      <div
         className="relative max-w-7xl mx-auto px-4"
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
@@ -135,16 +139,15 @@ export default function TestimonialCarousel() {
               className="absolute inset-0 flex justify-center gap-6"
             >
               {visibleTestimonials.map((testimonial) => (
-                <div 
+                <div
                   key={testimonial.id}
-                  className="p-6 bg-gradient-to-b from-blue-800 to-blue-900 text-white  rounded-xl shadow-md w-full max-w-sm mx-auto flex-shrink-0"
+                  className="p-6 bg-gradient-to-b from-blue-800/70 to-blue-900/90 rounded-xl shadow-lg w-full max-w-sm mx-auto flex-shrink-0 border border-blue-700/30 hover:shadow-blue-500/20 transition-all duration-300"
                 >
-
-                  <p className="text-gray-100 text-md px-6 mb-6 relative z-10">
-                    {testimonial.text}
+                  <p className="text-gray-100 text-md px-4 mb-6 italic relative z-10">
+                    “{testimonial.text}”
                   </p>
                   <div className="mt-6 flex flex-col items-center">
-                    <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-white shadow-md">
+                    <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-blue-400 shadow-md shadow-blue-500/30">
                       <Image
                         src={testimonial.image}
                         alt={testimonial.name}
@@ -152,10 +155,13 @@ export default function TestimonialCarousel() {
                         className="object-cover"
                       />
                     </div>
-                    <h4 className="font-semibold text-md mt-3">{testimonial.name}</h4>
-                    <p className="text-gray-300 text-sm mt-1">{testimonial.role}</p>
+                    <h4 className="font-semibold text-md mt-3 text-blue-300">
+                      {testimonial.name}
+                    </h4>
+                    <p className="text-gray-400 text-sm mt-1">
+                      {testimonial.role}
+                    </p>
                   </div>
-   
                 </div>
               ))}
             </motion.div>
@@ -163,17 +169,23 @@ export default function TestimonialCarousel() {
         </div>
 
         <div className="flex justify-center mt-8 space-x-2">
-          {Array.from({ length: testimonials.length - itemsPerPage + 1 }).map((_, index) => (
-            <button
-              key={index}
-              onClick={() => {
-                setDirection(index > currentIndex ? 1 : -1);
-                setCurrentIndex(index);
-              }}
-              className={`w-3 h-3 rounded-full transition-colors ${currentIndex === index ? 'bg-blue-500' : 'bg-gray-300'}`}
-              aria-label={`Go to testimonial group ${index + 1}`}
-            />
-          ))}
+          {Array.from({ length: testimonials.length - itemsPerPage + 1 }).map(
+            (_, index) => (
+              <button
+                key={index}
+                onClick={() => {
+                  setDirection(index > currentIndex ? 1 : -1);
+                  setCurrentIndex(index);
+                }}
+                className={`w-3 h-3 rounded-full transition-colors ${
+                  currentIndex === index
+                    ? "bg-blue-500"
+                    : "bg-gray-500 hover:bg-gray-400"
+                }`}
+                aria-label={`Go to testimonial group ${index + 1}`}
+              />
+            )
+          )}
         </div>
       </div>
     </div>

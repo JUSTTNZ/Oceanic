@@ -1,3 +1,5 @@
+
+import { apiClients } from "@/lib/apiClient";
 import { useState } from "react";
 import { toast } from "react-hot-toast";
 
@@ -30,15 +32,16 @@ export default function PasswordChangeModal({ user, onClose }: {
       setIsLoading(false);
       return;
     }
-    const token = localStorage.getItem("accessToken");
     try {
-      const response = await fetch('https://oceanic-servernz.vercel.app/api/v1/users/changePassword', {
+      const response = await apiClients.request(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/changepassword`, {
         
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
-         Authorization: `Bearer ${token}`,
+    
         },
+  
+          credentials: "include",
         body: JSON.stringify({
           email: user.email,
           currentPassword,

@@ -1,3 +1,5 @@
+
+import { apiClients } from "@/lib/apiClient";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { toast } from "react-hot-toast";
@@ -25,13 +27,13 @@ export default function DeleteModal({ user, onClose }: {
     setIsDeleting(true);
     
     try {
-      const token = localStorage.getItem("accessToken");
-      const response = await fetch('https://oceanic-servernz.vercel.app/api/v1/users/deleteUser', {
+     
+      const response = await apiClients.request(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/delete`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
         },
+          credentials: "include"
       });
 
       const data = await response.json();
@@ -42,7 +44,7 @@ export default function DeleteModal({ user, onClose }: {
 
       toast.success('Account deleted successfully');
       // Clear user data from storage/local state
-      localStorage.removeItem("accessToken");
+     
 
      router.push("/login");
     } catch (error) {

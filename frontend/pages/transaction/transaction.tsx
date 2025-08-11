@@ -3,6 +3,7 @@ import { useToast } from "../../hooks/toast";
 import {  FaSort, FaSortUp, FaSortDown, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import Footer from "../login/footer";
 import Header from "../login/header";
+import { apiClients } from "@/lib/apiClient";
 
 interface Transaction {
   id: string;
@@ -60,12 +61,11 @@ export default function CryptoTransactions() {
    const [loading, setLoading] = useState(true);
     useEffect(() => {
       const fetchTransactions = async () => {
-        const token = localStorage.getItem("accessToken");
+
         try {
-          const res = await fetch("https://oceanic-servernz.vercel.app/api/v1/transaction/user", {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+          const res = await apiClients.request(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction/user`, {
+          method: 'GET',
+          credentials: "include"
           });
   
           const data = await res.json();

@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { CoinWallet } from './models/coinWallet.model.js';
+import { CoinWallet } from './src/models/coinWallet.model.js';
 import dotenv from 'dotenv';
 
 dotenv.config();

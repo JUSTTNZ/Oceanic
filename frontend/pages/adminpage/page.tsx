@@ -1,4 +1,15 @@
 "use client";
+
+
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { BellIcon } from "@heroicons/react/24/outline";
+import { AnimatePresence, motion } from "framer-motion";
+import AllTransaction from '../admin/alltransaction'
+import PendingTransaction from '../admin/pendingtransaction'
+import { apiClients } from "@/lib/apiClient";
+//import { useRequireAdmin } from "@/hooks/useRequireAdmin";
+
 interface Transaction {
   txid: string; // Transaction ID (format: alphanumeric with optional hyphens)
   amount: number;
@@ -14,13 +25,6 @@ interface Transaction {
   };
 }
 
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { BellIcon } from "@heroicons/react/24/outline";
-import { AnimatePresence, motion } from "framer-motion";
-import AllTransaction from '../admin/alltransaction'
-import PendingTransaction from '../admin/pendingtransaction'
-
 
 export default function AdminDashboard() {
   const [pendingCount, setPendingCount] = useState(0);
@@ -31,43 +35,46 @@ export default function AdminDashboard() {
 
 
   useEffect(() => {
-    const token = localStorage.getItem("accessToken");
-    if (!token) return;
-
+    
     const fetchPendingTransactions = async () => {
-      try {
-        const res = await fetch("https://oceanic-servernz.vercel.app/api/v1/transaction/admin", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        const data = await res.json();
-        console.log("API response:", data);
-
-        if (!res.ok || !Array.isArray(data.data)) {
-          setError(data.message || "Failed to load transactions");
-          setLoading(false);
-          return;
-        }
-        const pending = data.data.filter((txid: Transaction) => txid.status === "pending");
-        setPendingCount(pending.length);
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : "Failed to load transactions";
-        setError(errorMessage);
-        console.error("Fetch error:", err);
-      } finally {
-        setLoading(false);
+  try {
+    // Using apiClient instead of direct fetch
+    const response = await apiClients.request(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction/admin`,
+      {
+        method: 'GET',
+        credentials: 'include'
       }
-    };
+    );
+
+    const data = await response.json();
+    console.log("API response:", data);
+    
+
+    if (!response.ok || !Array.isArray(data.data)) {
+      setError(data.message || "Failed to load transactions");
+      setLoading(false);
+      return;
+    }
+
+    const pending = data.data.filter((tx: Transaction) => tx.status === "pending");
+    setPendingCount(pending.length);
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : "Failed to load transactions";
+    setError(errorMessage);
+    console.error("Fetch error:", err);
+  } finally {
+    setLoading(false);
+  }
+};
 
     fetchPendingTransactions();
   }, []);
 
+  //const ready = useRequireAdmin();
+
      if(loading){
 return(
-
-
 
           <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
            <div className="flex justify-center items-center h-screen">
@@ -76,26 +83,14 @@ return(
           </div>
           )
         }
-      if(error){
-return(
-
-
-
-          <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-            <div className="bg-red-600 text-white rounded-lg p-6 max-w-sm w-full">
-              <h2 className="text-lg font-semibold mb-2">Error</h2>
-              <p>{error}</p>
-           
-            </div>
-          </div>
-          )
-        }
+ 
+        console.log(error)
   return (
     
-    <div className="min-h-screen bg-gray-900 text-white py-20 px-6 font-grotesk">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-gray-900 text-white py-20  font-grotesk w-full">
+      <div className="max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center mb-12">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
+          <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
             Admin Dashboard
           </h1>
           <div className="relative">
@@ -135,9 +130,7 @@ return(
           {activeTab === "pending" ? (
             <motion.div
               key="pending"
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -30 }}
+           
               transition={{ duration: 0.3 }}
             >
               <Link href="#" className="block bg-gray-800/30 hover:border-blue-500 border border-gray-700/20 rounded-xl p-6 transition-all backdrop-blur-sm shadow hover:shadow-blue-500/10">
@@ -149,9 +142,7 @@ return(
           ) : (
             <motion.div
               key="all"
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -30 }}
+         
               transition={{ duration: 0.3 }}
             >
               <Link href="#" className="block bg-gray-800/30 hover:border-blue-500 border border-gray-700/20 rounded-xl p-6 transition-all backdrop-blur-sm shadow hover:shadow-blue-500/10">

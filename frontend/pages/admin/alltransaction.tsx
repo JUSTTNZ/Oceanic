@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
 import { useToast } from "../../hooks/toast";
+import { apiClients } from "@/lib/apiClient";
 interface Transaction {
   txid: string;
   amount: number;
@@ -37,24 +38,24 @@ export default function AllTransactionsPage() {
 
 
   useEffect(() => {
-    const fetchTransactions = async () => {
-      const token = localStorage.getItem("accessToken");
-      try {
-        const res = await fetch("https://oceanic-servernz.vercel.app/api/v1/transaction/admin", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        const data = await res.json();
-        setTransactions(Array.isArray(data.data) ? data.data : []);
-      } catch (err) {
-        showToast("Failed to fetch transactions", "error");
-        console.error(err);
-      } finally {
-        setLoading(false);
+   const fetchTransactions = async () => {
+  try {
+    const { data } = await apiClients.request(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction/admin`,
+      {
+        method: 'GET',
+        credentials: 'include'
       }
-    };
+    ).then(res => res.json());
+
+    setTransactions(Array.isArray(data) ? data : []);
+  } catch (err) {
+    showToast("Failed to fetch transactions", "error");
+    console.error(err);
+  } finally {
+    setLoading(false);
+  }
+};
     fetchTransactions();
   }, [showToast]);
 

@@ -89,7 +89,7 @@ export default function Banks({
           <button
             onClick={() => setShowBankDropdown(!showBankDropdown)}
             className="flex items-center justify-between w-full border border-gray-500 px-4 py-3 rounded-lg text-sm hover:border-gray-600 focus:border-blue-600 focus:outline-none transition-colors text-white"
-            aria-expanded={showBankDropdown}
+            aria-expanded={showBankDropdown === true}
             aria-haspopup="listbox"
           >
             <span>{selectedBank?.name || "Select your bank"}</span>
@@ -103,45 +103,54 @@ export default function Banks({
           {showBankDropdown && (
             <div
               className="absolute z-10 mt-1 w-full bg-gray-900 text-white border border-gray-800 rounded-lg shadow-lg"
-              role="listbox"
             >
               <div className="p-2 border-b border-blue-600">
+                <label htmlFor="bank-search-input" className="sr-only">
+                  Search banks
+                </label>
                 <input
+                  id="bank-search-input"
                   type="text"
                   placeholder="Search banks..."
+                  aria-label="Search banks"
                   className="w-full px-3 py-2 text-sm border rounded-md focus:border-blue-600 focus:outline-none"
                   value={bankSearchTerm}
                   onChange={(e) => setBankSearchTerm(e.target.value)}
                   autoFocus
                 />
               </div>
-              <div className="max-h-60 overflow-y-auto scrollbar-hide">
-                {filteredBanks.length > 0 ? (
-                  filteredBanks.map((bank) => (
-                    <button
-                      key={bank.code}
-                      className="w-full text-left px-4 py-2 text-sm hover:bg-gray-800"
-                      onClick={() => {
-                        setBankDetails((prev) => ({
-                          ...prev,
-                          bankName: bank.name,
-                          bankCode: bank.code,
-                        }));
-                        setSelectedBank(bank);
-                        setShowBankDropdown(false);
-                        setBankSearchTerm("");
-                      }}
-                      role="option"
-                      aria-selected={bank.name === selectedBank?.name}
-                    >
-                      {bank.name}
-                    </button>
-                  ))
-                ) : (
-                  <div className="px-4 py-2 text-sm text-gray-100">
-                    No banks found
-                  </div>
-                )}
+              <div
+                className="max-h-60 overflow-y-auto scrollbar-hide"
+                role="listbox"
+                aria-label="Bank selection list"
+              >
+{filteredBanks.length > 0 ? (
+  filteredBanks.map((bank, index) => (
+    <button
+      key={`${bank.code}-${index}`} // Ensures key uniqueness
+      className="w-full text-left px-4 py-2 text-sm hover:bg-gray-800"
+      onClick={() => {
+        setBankDetails((prev) => ({
+          ...prev,
+          bankName: bank.name,
+          bankCode: bank.code,
+        }));
+        setSelectedBank(bank);
+        setShowBankDropdown(false);
+        setBankSearchTerm("");
+      }}
+      role="option"
+      aria-selected={bank.name === selectedBank?.name}
+    >
+      {bank.name}
+    </button>
+  ))
+) : (
+  <div className="px-4 py-2 text-sm text-gray-100">
+    No banks found
+  </div>
+)}
+
               </div>
             </div>
           )}

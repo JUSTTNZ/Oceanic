@@ -3,6 +3,8 @@ import { FiX, FiCheck } from "react-icons/fi";
 import { toast } from "react-hot-toast";
 import { updateUser } from "@/action";
 import { useDispatch } from "react-redux";
+import { apiClients } from "@/lib/apiClient";
+
 
 export default function EditProfileModal({ user, onClose }: {
   user: {
@@ -33,14 +35,13 @@ export default function EditProfileModal({ user, onClose }: {
     setIsSubmitting(true);
 
     try {
-      const token = localStorage.getItem("accessToken");
-      const response = await fetch('https://oceanic-servernz.vercel.app/api/v1/users/updateUser', {
+      const response = await apiClients.request(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/update`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(formData),
+          credentials: "include"
       });
 
       const data = await response.json();
@@ -49,8 +50,8 @@ export default function EditProfileModal({ user, onClose }: {
         throw new Error(data.message || 'Failed to update profile');
       }
      dispatch(updateUser({
-      fullname: data.data.fullname,
-      phoneNumber: data.data.phoneNumber,
+      fullname: data.profile.fullname,
+      phoneNumber: data.profile.phoneNumber,
      }));
       toast.success('Profile updated successfully!');
       console.log(data)

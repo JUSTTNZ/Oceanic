@@ -73,13 +73,16 @@ export default function Header() {
             className="z-10 absolute top-14 right-4 mt-2 bg-gradient-to-b from-blue-600 to-blue-700 text-white divide-y divide-blue-400 rounded-md shadow-sm w-44"
           >
             <ul className="py-2 text-sm text-white" aria-labelledby="dropdownDefaultButton">
+                 <li>
+                <Link href="/adminpage" className="block px-4 py-3 hover:bg-blue-500/50 transition-colors">Dashboard</Link>
+              </li>
               <li>
-                <Link href="/profile" className="block px-4 py-3 hover:bg-blue-500/50 transition-colors">My Account</Link>
+                <Link href="/adminprofile" className="block px-4 py-3 hover:bg-blue-500/50 transition-colors">My Account</Link>
               </li>
               {/* <li>
                 <Link href="/transaction" className="block px-4 py-3 hover:bg-blue-500/50 transition-colors">Activity History</Link>
               </li> */}
-              <li onClick={() => setShowModal(true)}>
+              <li onClick={() => setShowModal(true)} >
                 <Link href="#" className="block px-4 py-3 hover:bg-blue-500/50 transition-colors">Sign out</Link>
               </li>
             </ul>

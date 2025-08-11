@@ -26,9 +26,7 @@ export default function ConversionDisplay({
   exchangeRate,
 }: ConversionDisplayProps) {
   
-  if (!selectedCountry) {
-    return <p>Loading..</p>;
-  }
+
 
   const safeCountry = selectedCountry || { currency: "USD", currencySymbol: "$" };
   
@@ -69,7 +67,7 @@ const formatCryptoAmount = (amount: number, symbol: string): string => {
   return (
     <div className="bg-gray-800 text-white p-4 rounded-lg space-y-2">
       <div className="flex justify-between items-center">
-        <span className="text-gray-100">Amount in {selectedCountry.currencySymbol}:</span>
+        <span className="text-gray-100">Amount in {selectedCountry?.currencySymbol}:</span>
         <div className="text-right">
           <span className="font-semibold block">
             {formatCurrency(calculatedLocalCurrencyAmount)}
