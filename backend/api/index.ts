@@ -10,7 +10,7 @@ const __dirname = dirname(__filename)
 
 dotenv.config({ path: join(__dirname, '.env') })
 
-const PORT = process.env.PORT || 7001
+const PORT = process.env.PORT || 7000
 
 connectDB()
   .then(() => {
