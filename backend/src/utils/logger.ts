@@ -8,10 +8,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Create logs directory if it doesn't exist
-const logsDir = join(__dirname, '../../logs');
-if (!fs.existsSync(logsDir)) {
-  fs.mkdirSync(logsDir, { recursive: true });
-}
+const logsDir = '';
+// const logsDir = join(__dirname, '../../logs');
+// if (!fs.existsSync(logsDir)) {
+//   fs.mkdirSync(logsDir, { recursive: true });
+//   console.log('Logs directory created:', logsDir
+// }
 
 
 const LOG_LEVELS = {
