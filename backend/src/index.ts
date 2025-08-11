@@ -2,7 +2,7 @@
 import dotenv from 'dotenv'
 import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
-import connectDB from '../src/config/db.js'
+import connectDB from './config/db.js'
 import app from './app.js'
 
 const __filename = fileURLToPath(import.meta.url)
