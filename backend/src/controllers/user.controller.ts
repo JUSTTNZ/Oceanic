@@ -273,3 +273,41 @@ export const requestPasswordRecovery = async (req: Request, res: Response, next:
     next(err);
   }
 };
+
+export const resetPassword = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { access_token, newPassword } = req.body as {
+      access_token?: string;
+      newPassword?: string;
+    };
+
+    if (!access_token || !newPassword) {
+      return res.status(400).json({ message: 'access_token and newPassword are required' });
+    }
+
+    // Initialize a temporary client using the provided access_token
+    const tempClient = createClient(
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_ANON_KEY!,
+      {
+        global: {
+          headers: { Authorization: `Bearer ${access_token}` },
+        },
+      }
+    );
+
+    // Update the user password
+    const { data, error } = await tempClient.auth.updateUser({ password: newPassword });
+
+    if (error) throw error;
+
+    return res.status(200).json({
+      ok: true,
+      message: 'Password updated successfully.',
+      user: data.user,
+    });
+  } catch (err) {
+    console.error('❌ resetPassword error:', err);
+    next(err);
+  }
+};

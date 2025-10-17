@@ -210,37 +210,49 @@ useEffect(() => {
       setCoins(dataCoin.data);
       setSelectedCoin(dataCoin.data[0]);
 
-      // Fetch countries data
-      const responseCountry = await apiClients.request(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/data/countries`,{
-          method: 'GET',
-          credentials: "include"
-        }
-      );
-      if (!responseCountry.ok) throw new Error("Failed to fetch countries");
-      const dataCountry = await responseCountry.json();
-      const countriesData = dataCountry.data;
+// Fetch countries data
+const responseCountry = await apiClients.request(
+  `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/data/countries`,
+  {
+    method: 'GET',
+    credentials: "include"
+  }
+);
 
-      // Format countries data
-      const formattedCountries = countriesData
-        .filter((c: ApiCountry) => c.currencies && Object.keys(c.currencies).length > 0)
-        .map((c: ApiCountry) => {
-          const currencyCode = Object.keys(c.currencies)[0];
-          const currencyInfo = c.currencies[currencyCode];
-          
-          return {
-            code: c.cca2,
-            name: c.name.common,
-            flag: c.flags?.png || c.flags?.svg || '',
-            currency: currencyCode,
-            currencySymbol: currencyInfo?.symbol || currencyCode,
-            currencyName: currencyInfo?.name || currencyCode
-          };
-        });
+if (!responseCountry.ok) throw new Error("Failed to fetch countries");
 
-      setCountries(formattedCountries);
-      const defaultCountry = formattedCountries.find((c: Country) => c.code === "NG") || formattedCountries[0];
-      setSelectedCountry(defaultCountry);
+const dataCountry = await responseCountry.json();
+const countriesData = dataCountry.data;
+
+// Format countries data
+const formattedCountries = countriesData
+  // Keep only Nigeria
+  .filter((c: ApiCountry) => c.name.common === "Nigeria")
+  // Ensure it has currency info
+  .filter((c: ApiCountry) => c.currencies && Object.keys(c.currencies).length > 0)
+  .map((c: ApiCountry) => {
+    const currencyCode = Object.keys(c.currencies)[0];
+    const currencyInfo = c.currencies[currencyCode];
+
+    return {
+      code: c.cca2,
+      name: c.name.common,
+      flag: c.flags?.png || c.flags?.svg || '',
+      currency: currencyCode,
+      currencySymbol: currencyInfo?.symbol || currencyCode,
+      currencyName: currencyInfo?.name || currencyCode
+    };
+  });
+
+setCountries(formattedCountries);
+
+// Set Nigeria as default (if found)
+const defaultCountry = formattedCountries.find(
+  (c: Country) => c.code === "NG"
+) || formattedCountries[0];
+
+setSelectedCountry(defaultCountry);
+
 
       // Fetch exchange rates
       const responseRate = await apiClients.request(
@@ -346,7 +358,7 @@ useEffect(() => {
           <button
             onClick={handleCreateTransaction}
             className="w-full bg-[#0047AB] text-white font-semibold py-3 rounded-full mt-4 hover:bg-blue-700 transition-colors disabled:opacity-50"
-            disabled={!amount || parseFloat(amount) <= serviceFee || !selectedCoin || !walletAddress || loadingPayment}
+            disabled={!amount || parseFloat(amount) <= 0 || !selectedCoin || !walletAddress || loadingPayment}
 
           >
             {

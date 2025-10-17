@@ -85,6 +85,7 @@ app.use(cookieParser())
 // ===== ROUTES =====
 import userRouter from '../src/routes/user.route.js'
 import healthCheckRouter from '../src/routes/healthcheck.route.js'
+import emailRouter from '../src/routes/email.route.js'
 import transactionRouter from '../src/routes/transaction.route.js'
 import bitgetRouter from '../src/routes/webhook.route.js'
 import apiRouter from '../src/routes/coinbankrate.js'
@@ -94,6 +95,7 @@ app.get('/', (_, res) => res.send('Welcome to the backend!'))
 app.use('/api/v1/data', apiRouter)
 app.use('/api/v1/healthCheck', healthCheckRouter)
 app.use('/api/v1/users', userRouter)
+app.use("/api/v1/email", emailRouter);
 app.use('/api/v1/transaction', transactionRouter)
 app.use('/api/v2/bitget', bitgetRouter)
 

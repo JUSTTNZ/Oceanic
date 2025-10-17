@@ -1,0 +1,117 @@
+{
+  "timestamp": "2025-10-17T15:20:08.333Z",
+  "level": "ERROR",
+  "message": "[500] Failed to fetch cryptocurrency data",
+  "meta": {
+    "path": "/api/v1/data/crypto-markets",
+    "method": "GET",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+    "stack": "ApiError: Failed to fetch cryptocurrency data\n    at <anonymous> (C:\\Users\\LENOVO\\Desktop\\MY WORK\\Oceanic\\backend\\src\\controllers\\coinbankratecontroller.ts:153:11)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)",
+    "timestamp": "2025-10-17T15:20:08.332Z"
+  }
+}
+{
+  "timestamp": "2025-10-17T15:20:10.895Z",
+  "level": "ERROR",
+  "message": "[500] Failed to fetch cryptocurrency data",
+  "meta": {
+    "path": "/api/v1/data/crypto-markets",
+    "method": "GET",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+    "stack": "ApiError: Failed to fetch cryptocurrency data\n    at <anonymous> (C:\\Users\\LENOVO\\Desktop\\MY WORK\\Oceanic\\backend\\src\\controllers\\coinbankratecontroller.ts:153:11)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)",
+    "timestamp": "2025-10-17T15:20:10.895Z"
+  }
+}
+{
+  "timestamp": "2025-10-17T15:20:28.480Z",
+  "level": "ERROR",
+  "message": "[500] Failed to fetch cryptocurrency data",
+  "meta": {
+    "path": "/api/v1/data/crypto-markets",
+    "method": "GET",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+    "stack": "ApiError: Failed to fetch cryptocurrency data\n    at <anonymous> (C:\\Users\\LENOVO\\Desktop\\MY WORK\\Oceanic\\backend\\src\\controllers\\coinbankratecontroller.ts:153:11)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)",
+    "timestamp": "2025-10-17T15:20:28.480Z"
+  }
+}
+{
+  "timestamp": "2025-10-17T15:20:28.768Z",
+  "level": "ERROR",
+  "message": "[500] Failed to fetch cryptocurrency data",
+  "meta": {
+    "path": "/api/v1/data/crypto-markets",
+    "method": "GET",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+    "stack": "ApiError: Failed to fetch cryptocurrency data\n    at <anonymous> (C:\\Users\\LENOVO\\Desktop\\MY WORK\\Oceanic\\backend\\src\\controllers\\coinbankratecontroller.ts:153:11)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)",
+    "timestamp": "2025-10-17T15:20:28.768Z"
+  }
+}
+{
+  "timestamp": "2025-10-17T15:30:25.209Z",
+  "level": "ERROR",
+  "message": "[500] Failed to fetch cryptocurrency data",
+  "meta": {
+    "path": "/api/v1/data/crypto-markets",
+    "method": "GET",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+    "stack": "ApiError: Failed to fetch cryptocurrency data\n    at <anonymous> (C:\\Users\\LENOVO\\Desktop\\MY WORK\\Oceanic\\backend\\src\\controllers\\coinbankratecontroller.ts:153:11)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)",
+    "timestamp": "2025-10-17T15:30:25.209Z"
+  }
+}
+{
+  "timestamp": "2025-10-17T15:30:27.342Z",
+  "level": "ERROR",
+  "message": "[500] Failed to fetch cryptocurrency data",
+  "meta": {
+    "path": "/api/v1/data/crypto-markets",
+    "method": "GET",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+    "stack": "ApiError: Failed to fetch cryptocurrency data\n    at <anonymous> (C:\\Users\\LENOVO\\Desktop\\MY WORK\\Oceanic\\backend\\src\\controllers\\coinbankratecontroller.ts:153:11)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)",
+    "timestamp": "2025-10-17T15:30:27.342Z"
+  }
+}
+{
+  "timestamp": "2025-10-17T15:31:05.711Z",
+  "level": "ERROR",
+  "message": "[500] Failed to fetch cryptocurrency data",
+  "meta": {
+    "path": "/api/v1/data/crypto-markets",
+    "method": "GET",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+    "stack": "ApiError: Failed to fetch cryptocurrency data\n    at <anonymous> (C:\\Users\\LENOVO\\Desktop\\MY WORK\\Oceanic\\backend\\src\\controllers\\coinbankratecontroller.ts:153:11)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)",
+    "timestamp": "2025-10-17T15:31:05.711Z"
+  }
+}
+{
+  "timestamp": "2025-10-17T15:31:09.472Z",
+  "level": "ERROR",
+  "message": "[500] Failed to fetch cryptocurrency data",
+  "meta": {
+    "path": "/api/v1/data/crypto-markets",
+    "method": "GET",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+    "stack": "ApiError: Failed to fetch cryptocurrency data\n    at <anonymous> (C:\\Users\\LENOVO\\Desktop\\MY WORK\\Oceanic\\backend\\src\\controllers\\coinbankratecontroller.ts:153:11)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)",
+    "timestamp": "2025-10-17T15:31:09.472Z"
+  }
+}
+{
+  "timestamp": "2025-10-17T15:31:40.460Z",
+  "level": "ERROR",
+  "message": "[500] Failed to fetch countries data",
+  "meta": {
+    "path": "/api/v1/data/countries",
+    "method": "GET",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+    "stack": "ApiError: Failed to fetch countries data\n    at <anonymous> (C:\\Users\\LENOVO\\Desktop\\MY WORK\\Oceanic\\backend\\src\\controllers\\coinbankratecontroller.ts:96:11)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)",
+    "timestamp": "2025-10-17T15:31:40.460Z"
+  }
+}
