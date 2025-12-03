@@ -1,10 +1,10 @@
 import { useState } from 'react';
-
 import { useRouter } from 'next/router';
 import { useDispatch } from 'react-redux';
 import { supabase } from '@/lib/supabase';
 import { toast } from "react-hot-toast";
 import { clearUser } from '@/action';
+
 interface LogoutProps {
   showModal: boolean;
   setShowModal: (show: boolean) => void;

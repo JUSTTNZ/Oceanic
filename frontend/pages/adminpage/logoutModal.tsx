@@ -1,8 +1,6 @@
 import { useState } from 'react';
-
 import { useRouter } from 'next/router'; 
 import { useDispatch } from 'react-redux';
-
 import { toast } from "react-hot-toast";
 import { clearUser } from '@/action';
 import { apiClients } from '@/lib/apiClient';
@@ -12,12 +10,20 @@ interface LogoutProps {
   setShowModal: (show: boolean) => void;
 }
 
+interface ErrorResponse {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+}
+
 export default function LogoutModal({ setShowModal }: LogoutProps) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const router = useRouter();
   const dispatch = useDispatch();
 
- const handleSignOut = async () => {
+  const handleSignOut = async () => {
     setIsLoggingOut(true);
     try {
       // 1. Call logout endpoint using apiClient
@@ -39,13 +45,14 @@ export default function LogoutModal({ setShowModal }: LogoutProps) {
     } catch (error) {
       console.error('Logout error:', error);
       // Check if the error is a FetchError or similar and has a response object
-      const errorMessage = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Logout failed. Please try again.';
+      const errorMessage = (error as ErrorResponse)?.response?.data?.message || 'Logout failed. Please try again.';
       toast.error(errorMessage);
     } finally {
       setIsLoggingOut(false);
       setShowModal(false);
     }
   };
+
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
       <div className="bg-gray-900 rounded-lg p-6 w-full max-w-sm shadow-lg">
