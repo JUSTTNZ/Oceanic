@@ -30,7 +30,10 @@ export default function RegisterPage() {
     phoneNumber: "",
   });
 
+  const [isMagicLinkMode, setIsMagicLinkMode] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [emailForMagicLink, setEmailForMagicLink] = useState(""); // New state for magic link email
+  const [magicLinkSent, setMagicLinkSent] = useState(false); // New state to show magic link message
   const [error, setError] = useState<RegisterErrorState>({
   username: "",
   fullname: "",
@@ -65,57 +68,97 @@ export default function RegisterPage() {
     let isValid = true;
     const newError = { ...error };
 
-    if (!formData.username || formData.username.length < 4) {
-      newError.username = "Username must be at least 4 characters";
-      isValid = false;
+    if (!isMagicLinkMode) { // Only validate these for password-based registration
+      if (!formData.username || formData.username.length < 4) {
+        newError.username = "Username must be at least 4 characters";
+        isValid = false;
+      }
+      if (!formData.fullname || formData.fullname.length < 6) {
+        newError.fullname = "Full name must be at least 6 characters";
+        isValid = false;
+      }
+      if (!formData.password || formData.password.length < 6) {
+        newError.password = "Password must be at least 6 characters";
+        isValid = false;
+      }
+      if (formData.password !== formData.confirmPassword) {
+        newError.confirmPassword = "Passwords do not match";
+        isValid = false;
+      }
+      if (!formData.phoneNumber || formData.phoneNumber.length < 11) {
+        newError.phoneNumber = "Phone number must be 11 digits";
+        isValid = false;
+      }
     }
-    if (!formData.fullname || formData.fullname.length < 6) {
-      newError.fullname = "Full name must be at least 6 characters";
-      isValid = false;
-    }
+
+    // Email validation for both modes
+    const emailToValidate = isMagicLinkMode ? emailForMagicLink : formData.email;
     if (
-      !formData.email ||
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
+      !emailToValidate ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailToValidate)
     ) {
       newError.email = "Please enter a valid email address";
       isValid = false;
     }
-    if (!formData.password || formData.password.length < 6) {
-      newError.password = "Password must be at least 6 characters";
-      isValid = false;
-    }
-    if (formData.password !== formData.confirmPassword) {
-      newError.confirmPassword = "Passwords do not match";
-      isValid = false;
-    }
-    if (!formData.phoneNumber || formData.phoneNumber.length < 11) {
-      newError.phoneNumber = "Phone number must be 11 digits";
-      isValid = false;
-    }
+
     setError(newError);
     return isValid;
   };
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setError({
-  username: "",
-  fullname: "",
-  email: "",
-  password: "",
-  confirmPassword: "",
-  phoneNumber: "",
-  general: "",
-});
+  const handleMagicLinkSubmit = async () => {
+    setError({
+      username: "", fullname: "", email: "", password: "", confirmPassword: "", phoneNumber: "", general: "",
+    });
 
+    if (!validateForm()) return;
 
-  if (!validateForm()) return;
+    try {
+      setLoading(true);
+      const email = emailForMagicLink.trim().toLowerCase();
 
-  try {
-    setLoading(true);
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
 
-    // Always trim & lowercase emails
-    const email = formData.email.trim().toLowerCase();
+      if (error) {
+        console.error("❌ Supabase Magic Link Registration Error:", error);
+        showToast(error.message || "Failed to send magic link for registration.", "error");
+        return;
+      }
+
+      setMagicLinkSent(true);
+      showToast("Magic link sent! Check your email to complete registration and sign in.", "success");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error("Magic link registration error:", err);
+      showToast(msg || "Magic link registration failed", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (isMagicLinkMode) {
+      handleMagicLinkSubmit();
+      return;
+    }
+
+    setError({
+      username: "", fullname: "", email: "", password: "", confirmPassword: "", phoneNumber: "", general: "",
+    });
+
+    if (!validateForm()) return;
+
+    try {
+      setLoading(true);
+
+      // Always trim & lowercase emails
+      const email = formData.email.trim().toLowerCase();
 
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -171,6 +214,24 @@ const handleSubmit = async (e: React.FormEvent) => {
   }
 };
 
+const handleGoogleLogin = async () => {
+  setLoading(true)
+  try {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: `${window.location.origin}/auth/callback` }
+    })
+    if (error) throw error
+    // This will redirect; handle the session in /auth/callback page
+  } catch (e: unknown) {
+  const msg = e instanceof Error ? e.message : String(e);
+  showToast(msg || 'Google sign-up failed', 'error');
+} finally {
+  setLoading(false);
+}
+}
+
+
 
 
 
@@ -214,106 +275,150 @@ const handleSubmit = async (e: React.FormEvent) => {
             </div>
           )}
 
-          <form onSubmit={handleSubmit}>
-            <div className="grid grid-cols-1 gap-4 mb-4">
-              <input
-                type="text"
-                name="username"
-                placeholder="Username"
-                className={`w-full h-10 px-4 bg-gray-700/50 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-gray-200 ${
-                  error.username ? "border-red-500" : "border-gray-600/50"
-                }`}
-                value={formData.username}
-                onChange={handleChange}
-              />
-              <input
-                type="text"
-                name="fullname"
-                placeholder="Full name"
-                className={`w-full h-10 px-4 bg-gray-700/50 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-gray-200 ${
-                  error.fullname ? "border-red-500" : "border-gray-600/50"
-                }`}
-                value={formData.fullname}
-                onChange={handleChange}
-              />
-              <input
-                type="email"
-                name="email"
-                placeholder="your@email.com"
-                className={`w-full h-10 px-4 bg-gray-700/50 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-gray-200 ${
-                  error.email ? "border-red-500" : "border-gray-600/50"
-                }`}
-                value={formData.email}
-                onChange={handleChange}
-              />
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  placeholder="••••••••"
-                  className={`w-full h-10 px-4 bg-gray-700/50 border rounded-lg pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-gray-200 ${
-                    error.password ? "border-red-500" : "border-gray-600/50"
-                  }`}
-                  value={formData.password}
-                  onChange={handleChange}
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  onClick={togglePasswordVisibility}
-                >
-                  {showPassword ? (
-                    <FaEyeSlash className="text-gray-400 hover:text-gray-300" />
-                  ) : (
-                    <FaEye className="text-gray-400 hover:text-gray-300" />
+          {!magicLinkSent ? (
+            <form onSubmit={handleSubmit}>
+              {!isMagicLinkMode ? (
+                // Password-based registration form
+                <div className="grid grid-cols-1 gap-4 mb-4">
+                  <input
+                    type="text"
+                    name="username"
+                    placeholder="Username"
+                    className={`w-full h-10 px-4 bg-gray-700/50 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-gray-200 ${
+                      error.username ? "border-red-500" : "border-gray-600/50"
+                    }`}
+                    value={formData.username}
+                    onChange={handleChange}
+                  />
+                  <input
+                    type="text"
+                    name="fullname"
+                    placeholder="Full name"
+                    className={`w-full h-10 px-4 bg-gray-700/50 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-gray-200 ${
+                      error.fullname ? "border-red-500" : "border-gray-600/50"
+                    }`}
+                    value={formData.fullname}
+                    onChange={handleChange}
+                  />
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="your@email.com"
+                    className={`w-full h-10 px-4 bg-gray-700/50 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-gray-200 ${
+                      error.email ? "border-red-500" : "border-gray-600/50"
+                    }`}
+                    value={formData.email}
+                    onChange={handleChange}
+                  />
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      name="password"
+                      placeholder="••••••••"
+                      className={`w-full h-10 px-4 bg-gray-700/50 border rounded-lg pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-gray-200 ${
+                        error.password ? "border-red-500" : "border-gray-600/50"
+                      }`}
+                      value={formData.password}
+                      onChange={handleChange}
+                    />
+                    <button
+                      type="button"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                      onClick={togglePasswordVisibility}
+                    >
+                      {showPassword ? (
+                        <FaEyeSlash className="text-gray-400 hover:text-gray-300" />
+                      ) : (
+                        <FaEye className="text-gray-400 hover:text-gray-300" />
+                      )}
+                    </button>
+                  </div>
+                  <div className="relative">
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      name="confirmPassword"
+                      placeholder="••••••••"
+                      className={`w-full h-10 px-4 bg-gray-700/50 border rounded-lg pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-gray-200 ${
+                        error.confirmPassword
+                          ? "border-red-500"
+                          : "border-gray-600/50"
+                      }`}
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                    />
+                    <button
+                      type="button"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                      onClick={toggleConfirmPasswordVisibility}
+                    >
+                      {showConfirmPassword ? (
+                        <FaEyeSlash className="text-gray-400 hover:text-gray-300" />
+                      ) : (
+                        <FaEye className="text-gray-400 hover:text-gray-300" />
+                      )}
+                    </button>
+                  </div>
+                  <input
+                    type="tel"
+                    name="phoneNumber"
+                    placeholder="+2347045689224"
+                    className={`w-full h-10 px-4 bg-gray-700/50 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-gray-200 ${
+                      error.phoneNumber ? "border-red-500" : "border-gray-600/50"
+                    }`}
+                    value={formData.phoneNumber}
+                    onChange={handleChange}
+                  />
+                </div>
+              ) : (
+                // Magic link registration form (only email)
+                <div className="space-y-4 mb-4">
+                  <input
+                    type="email"
+                    name="emailForMagicLink"
+                    placeholder="your@email.com"
+                    className={`w-full h-10 px-4 bg-gray-700/50 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-gray-200 ${
+                      error.email ? "border-red-500" : "border-gray-600/50"
+                    }`}
+                    value={emailForMagicLink}
+                    onChange={(e) => setEmailForMagicLink(e.target.value)}
+                  />
+                  {error.email && (
+                    <p className="text-xs text-red-400 mt-1">{error.email}</p>
                   )}
-                </button>
-              </div>
-              <div className="relative">
-                <input
-                  type={showConfirmPassword ? "text" : "password"}
-                  name="confirmPassword"
-                  placeholder="••••••••"
-                  className={`w-full h-10 px-4 bg-gray-700/50 border rounded-lg pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-gray-200 ${
-                    error.confirmPassword
-                      ? "border-red-500"
-                      : "border-gray-600/50"
-                  }`}
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  onClick={toggleConfirmPasswordVisibility}
-                >
-                  {showConfirmPassword ? (
-                    <FaEyeSlash className="text-gray-400 hover:text-gray-300" />
-                  ) : (
-                    <FaEye className="text-gray-400 hover:text-gray-300" />
-                  )}
-                </button>
-              </div>
-              <input
-                type="tel"
-                name="phoneNumber"
-                placeholder="+2347045689224"
-                className={`w-full h-10 px-4 bg-gray-700/50 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-gray-200 ${
-                  error.phoneNumber ? "border-red-500" : "border-gray-600/50"
-                }`}
-                value={formData.phoneNumber}
-                onChange={handleChange}
-              />
-            </div>
+                </div>
+              )}
 
-            <button
-              type="submit"
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white p-2 rounded-lg font-medium text-sm hover:from-blue-500 hover:to-blue-600 transition-all duration-300 shadow-lg shadow-blue-500/20 disabled:opacity-50 flex justify-center items-center h-10"
-              disabled={loading}
-            >
-              {loading ? "Creating account..." : "Register Now"}
-            </button>
-          </form>
+              <button
+                type="submit"
+                className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white p-2 rounded-lg font-medium text-sm hover:from-blue-500 hover:to-blue-600 transition-all duration-300 shadow-lg shadow-blue-500/20 disabled:opacity-50 flex justify-center items-center h-10"
+                disabled={loading}
+              >
+                {loading ? (isMagicLinkMode ? "Sending link..." : "Creating account...") : (isMagicLinkMode ? "Send Magic Link" : "Register Now")}
+              </button>
+            </form>
+          ) : (
+            <div className="text-center">
+              <svg
+                className="w-16 h-16 text-green-500 mx-auto mb-4 animate-bounce"
+                fill="none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <h2 className="text-xl font-semibold text-white mb-2">Check Your Email</h2>
+              <p className="text-gray-400 mb-4">A magic link has been sent to <span className="font-medium text-blue-400">{emailForMagicLink}</span>. Click the link to complete your registration and sign in.</p>
+              <button
+                onClick={() => setMagicLinkSent(false)}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 shadow-lg shadow-blue-500/20"
+              >
+                Resend Link / Try Again
+              </button>
+            </div>
+          )}
 
           <div className="flex items-center my-4">
             <div className="flex-grow border-t border-gray-700/50"></div>
@@ -321,7 +426,25 @@ const handleSubmit = async (e: React.FormEvent) => {
             <div className="flex-grow border-t border-gray-700/50"></div>
           </div>
 
-          <button className="w-full bg-gray-700/50 hover:bg-gray-700/70 text-gray-300 p-2 rounded-lg font-medium text-sm transition-all duration-300 border border-gray-600/50 flex justify-center items-center h-10 mb-4">
+          <button
+            onClick={() => setIsMagicLinkMode(!isMagicLinkMode)}
+            disabled={loading}
+            className="w-full bg-gray-700/50 hover:bg-gray-700/70 text-gray-300 p-2 rounded-lg font-medium text-sm transition-all duration-300 border border-gray-600/50 flex justify-center items-center h-10 mb-4"
+          >
+            {isMagicLinkMode ? "Register with Password" : "Continue with Email (Passwordless)"}
+          </button>
+
+          <div className="flex items-center my-4">
+            <div className="flex-grow border-t border-gray-700/50"></div>
+            <span className="mx-4 text-gray-400 text-sm">OR</span>
+            <div className="flex-grow border-t border-gray-700/50"></div>
+          </div>
+
+          <button
+            onClick={handleGoogleLogin}
+            disabled={loading}
+            className="w-full bg-gray-700/50 hover:bg-gray-700/70 text-gray-300 p-2 rounded-lg font-medium text-sm transition-all duration-300 border border-gray-600/50 flex justify-center items-center h-10 mb-4"
+          >
             <svg
               className="w-5 h-5 mr-2"
               viewBox="0 0 24 24"

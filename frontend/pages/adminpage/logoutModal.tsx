@@ -18,36 +18,34 @@ export default function LogoutModal({ setShowModal }: LogoutProps) {
   const dispatch = useDispatch();
 
  const handleSignOut = async () => {
-  setIsLoggingOut(true);
-  try {
-    // 1. Call logout endpoint using apiClient
-    const response = await apiClients.request(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/logout`,
-      {
-        method: 'POST',
-        credentials: 'include' // Still needed for cookies
-      }
-    );
+    setIsLoggingOut(true);
+    try {
+      // 1. Call logout endpoint using apiClient
+      await apiClients.request(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/logout`,
+        {
+          method: 'POST',
+          credentials: 'include' // Still needed for cookies
+        }
+      );
 
-    if (!response.ok) {
-      throw new Error('Logout failed');
+      // 2. Clear client-side state
+      dispatch(clearUser()); // Redux action
+
+      // 3. Redirect to login
+      router.push('/login');
+      toast.success('Logged out successfully');
+
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Check if the error is a FetchError or similar and has a response object
+      const errorMessage = (error as any)?.response?.data?.message || 'Logout failed. Please try again.';
+      toast.error(errorMessage);
+    } finally {
+      setIsLoggingOut(false);
+      setShowModal(false);
     }
-
-    // 2. Clear client-side state
-    dispatch(clearUser()); // Redux action
-
-    // 3. Redirect to login
-    router.push('/login');
-    toast.success('Logged out successfully');
-
-  } catch (error) {
-    console.error('Logout error:', error);
-    toast.error('Logout failed. Please try again.');
-  } finally {
-    setIsLoggingOut(false);
-    setShowModal(false);
-  }
-};
+  };
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
       <div className="bg-gray-900 rounded-lg p-6 w-full max-w-sm shadow-lg">

@@ -20,6 +20,8 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({ email: "", password: "" });
 
+  const [isMagicLinkMode, setIsMagicLinkMode] = useState(false);
+
   const router = useRouter();
   const dispatch = useDispatch();
 
@@ -43,19 +45,62 @@ export default function LoginPage() {
       newError.email = "Please enter a valid email address";
       isValid = false;
     }
+    // Only validate password if not in magic link mode
+    if (!isMagicLinkMode && !formData.password) {
+      newError.password = "Password is required";
+      isValid = false;
+    }
     setError(newError);
     return isValid;
   };
 
-const handleLogin = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setError({ email: "", password: "", general: "" });
-  if (!validateForm()) return;
+  const handleMagicLinkLogin = async () => {
+    setError({ email: "", password: "", general: "" });
+    if (!validateForm()) return;
 
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
+      const email = formData.email.trim().toLowerCase();
 
-    const email = formData.email.trim().toLowerCase();
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (error) {
+        console.error("❌ Supabase Magic Link Error:", error);
+        showToast(error.message || "Failed to send magic link.", "error");
+        return;
+      }
+
+      showToast("Magic link sent! Check your email to sign in.", "success");
+      // Optionally redirect to a 'check your email' page or stay on login
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error("Magic link error:", err);
+      showToast(msg || "Failed to send magic link.", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (isMagicLinkMode) {
+      handleMagicLinkLogin();
+      return;
+    }
+
+    setError({ email: "", password: "", general: "" });
+    if (!validateForm()) return;
+
+    try {
+      setLoading(true);
+
+      const email = formData.email.trim().toLowerCase();
 
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -253,45 +298,47 @@ const handleGoogleLogin = async () => {
               )}
             </div>
 
-            <div className="mb-5">
-              <label className="block mb-1 text-gray-300 text-xs">
-                Password *
-              </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  required
-                  className={`w-full h-10 px-3 bg-gray-700/50 border rounded-lg pr-9 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-gray-200 ${
-                    error.password ? "border-red-500" : "border-gray-600/50"
-                  }`}
-                  placeholder="••••••••"
-                  value={formData.password}
-                  onChange={handleChange}
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-2 flex items-center"
-                  onClick={togglePasswordVisibility}
-                >
-                  {showPassword ? (
-                    <FaEyeSlash className="text-gray-400 hover:text-gray-300" />
-                  ) : (
-                    <FaEye className="text-gray-400 hover:text-gray-300" />
-                  )}
-                </button>
+            {!isMagicLinkMode && (
+              <div className="mb-5">
+                <label className="block mb-1 text-gray-300 text-xs">
+                  Password *
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    required
+                    className={`w-full h-10 px-3 bg-gray-700/50 border rounded-lg pr-9 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-gray-200 ${
+                      error.password ? "border-red-500" : "border-gray-600/50"
+                    }`}
+                    placeholder="••••••••"
+                    value={formData.password}
+                    onChange={handleChange}
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 pr-2 flex items-center"
+                    onClick={togglePasswordVisibility}
+                  >
+                    {showPassword ? (
+                      <FaEyeSlash className="text-gray-400 hover:text-gray-300" />
+                    ) : (
+                      <FaEye className="text-gray-400 hover:text-gray-300" />
+                    )}
+                  </button>
+                </div>
+                {error.password && (
+                  <p className="text-xs text-red-400 mt-1">{error.password}</p>
+                )}
               </div>
-              {error.password && (
-                <p className="text-xs text-red-400 mt-1">{error.password}</p>
-              )}
-            </div>
+            )}
 
             <button
               type="submit"
               className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white p-2 rounded-lg font-medium text-sm hover:from-blue-500 hover:to-blue-600 transition-all duration-300 shadow-lg shadow-blue-500/20 disabled:opacity-50 flex justify-center items-center h-10"
               disabled={loading}
             >
-              {loading ? "Logging in..." : "Sign in"}
+              {loading ? (isMagicLinkMode ? "Sending link..." : "Logging in...") : (isMagicLinkMode ? "Send Magic Link" : "Sign in")}
             </button>
           </form>
 
@@ -300,6 +347,14 @@ const handleGoogleLogin = async () => {
             <span className="mx-3 text-gray-400 text-xs">OR</span>
             <div className="flex-grow border-t border-gray-700/50"></div>
           </div>
+
+          <button
+            onClick={() => setIsMagicLinkMode(!isMagicLinkMode)}
+            disabled={loading}
+            className="w-full bg-gray-700/50 hover:bg-gray-700/70 text-gray-300 p-2 rounded-lg font-medium text-sm transition-all duration-300 border border-gray-600/50 flex justify-center items-center h-10 mb-5"
+          >
+            {isMagicLinkMode ? "Sign in with Password" : "Continue with Email"}
+          </button>
 
           <button
             onClick={handleGoogleLogin}

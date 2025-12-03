@@ -34,7 +34,7 @@ export default function Profile() {
     month: 'long',
     day: 'numeric'
   }) : '';
-  const lastLoginTime = user.lastLogin;
+  const lastLoginTime = user?.lastLogin;
 
   // Format the last login time
   const formattedLastLogin = lastLoginTime ? timeAgo(lastLoginTime) : 'Never logged in';

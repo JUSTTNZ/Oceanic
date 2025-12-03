@@ -4,6 +4,10 @@ import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import http from 'http'
 import firebaseInit from '../src/utils/firebase.js'
+import connectDB from './config/db.js';
+
+// Connect to the database as soon as the app starts
+connectDB();
 
 // Extend Express types
 declare global {

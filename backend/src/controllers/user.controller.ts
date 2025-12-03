@@ -193,76 +193,36 @@ export const changeUserCurrentPassword = async (
   }
 }
 
-export const logoutUser = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    // Get access token from Authorization header or cookies
-    const authHeader = req.headers.authorization
-    const token = authHeader?.startsWith('Bearer ')
-      ? authHeader.slice(7)
-      : req.cookies?.['sb-access-token'] // fallback if stored in cookie
-
-    if (!token) {
-      return res.status(400).json({ message: 'No token provided' })
-    }
-
-    // Invalidate Supabase session
-    const { error } = await supabase.auth.admin.signOut(token)
-    if (error) {
-      console.error('❌ Supabase logout error:', error.message)
-      return res.status(500).json({ message: 'Logout failed', error: error.message })
-    }
-
-    // Clear cookies if used
-    res.clearCookie('sb-access-token', { httpOnly: true, sameSite: 'strict', secure: true })
-    res.clearCookie('sb-refresh-token', { httpOnly: true, sameSite: 'strict', secure: true })
-
-    return res.status(200).json({ ok: true, message: 'Logged out successfully' })
-  } catch (err) {
-    next(err)
-  }
-}
-
-async function verifyRecaptcha(token: string, remoteIp?: string) {
-  const params = new URLSearchParams();
-  params.append('secret', process.env.RECAPTCHA_SECRET_KEY!);
-  params.append('response', token);
-  if (remoteIp) params.append('remoteip', remoteIp);
-
-  const resp = await fetch('https://www.google.com/recaptcha/api/siteverify', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: params.toString(),
-  });
-
-  return resp.json() as Promise<{ success: boolean; score?: number; 'error-codes'?: string[] }>;
-}
 
 export const requestPasswordRecovery = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { email, captchaToken } = req.body as { email?: string; captchaToken?: string };
+    const { email } = req.body as { email?: string };
 
-    if (!email || !captchaToken) {
-      return res.status(400).json({ message: 'Email and captchaToken are required' });
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
     }
 
-    const result = await verifyRecaptcha(captchaToken, req.ip);
-    if (!result?.success) {
-      return res.status(400).json({
-        message: 'CAPTCHA verification failed',
-        details: result?.['error-codes'] ?? [],
-      });
-    }
-
-    const { error } = await supabaseRecoverPassword.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
-      redirectTo: `${process.env.APP_URL}/resetpassword`,
-    });
-
-    if (error) {
-      // Don’t leak account existence; keep message generic
+    const appUrl = process.env.APP_URL;
+    if (!appUrl || !appUrl.startsWith('http')) {
+      console.error(
+        'FATAL: APP_URL environment variable is not set or is invalid. It must be a full URL, e.g., "http://localhost:3000".'
+      );
+      // Return a generic success message to the client to avoid leaking configuration issues.
       return res.status(200).json({
         ok: true,
         message: 'If this email exists, a reset link has been sent.',
       });
+    }
+
+    const redirectTo = new URL('/auth/reset', appUrl).toString();
+
+    const { error } = await supabaseRecoverPassword.auth.resetPasswordForEmail(
+      email.trim().toLowerCase(),
+      { redirectTo }
+    );
+
+    if (error) {
+      console.error('Password recovery request error:', error.message);
     }
 
     return res.status(200).json({
@@ -270,9 +230,14 @@ export const requestPasswordRecovery = async (req: Request, res: Response, next:
       message: 'If this email exists, a reset link has been sent.',
     });
   } catch (err) {
-    next(err);
+    console.error('Unexpected error in requestPasswordRecovery:', err);
+    return res.status(200).json({
+      ok: true,
+      message: 'If this email exists, a reset link has been sent.',
+    });
   }
 };
+
 
 export const resetPassword = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -282,32 +247,62 @@ export const resetPassword = async (req: Request, res: Response, next: NextFunct
     };
 
     if (!access_token || !newPassword) {
-      return res.status(400).json({ message: 'access_token and newPassword are required' });
+      return res.status(400).json({ message: 'Access token and new password are required' });
     }
 
-    // Initialize a temporary client using the provided access_token
-    const tempClient = createClient(
-      process.env.SUPABASE_URL!,
-      process.env.SUPABASE_ANON_KEY!,
-      {
-        global: {
-          headers: { Authorization: `Bearer ${access_token}` },
-        },
-      }
+    // 1. Get the user from the access token
+    const { data: userResponse, error: userError } = await supabaseAdmin.auth.getUser(access_token);
+
+    if (userError || !userResponse?.user) {
+      return res.status(401).json({ message: 'Invalid or expired token' });
+    }
+    
+    const { user } = userResponse;
+
+    // 2. Update the user's password using the Admin API
+    const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
+      user.id,
+      { password: newPassword }
     );
 
-    // Update the user password
-    const { data, error } = await tempClient.auth.updateUser({ password: newPassword });
-
-    if (error) throw error;
+    if (updateError) {
+      throw updateError;
+    }
 
     return res.status(200).json({
       ok: true,
       message: 'Password updated successfully.',
-      user: data.user,
     });
   } catch (err) {
-    console.error('❌ resetPassword error:', err);
+    const error = err as Error
+    console.error('❌ resetPassword error:', error);
+    // Add a more specific error message if the error is a known Supabase auth error
+    if (error.name === 'AuthApiError') {
+      return res.status(400).json({ message: error.message });
+    }
+    next(err);
+  }
+};
+
+export const logoutUser = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    // The Supabase Admin API can invalidate a user's session/token.
+    // We use the service_role key for this, which is why this is a secure, server-only operation.
+    const { error } = await supabaseAdmin.auth.admin.signOut(token);
+
+    if (error) {
+      // Log the error for debugging, but send a generic message to the client.
+      console.error('Supabase sign out error:', error);
+      return res.status(500).json({ message: 'Could not log out, please try again.' });
+    }
+
+    return res.status(200).json({ ok: true, message: 'Logged out successfully' });
+  } catch (err) {
     next(err);
   }
 };
