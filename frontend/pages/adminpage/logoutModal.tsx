@@ -39,7 +39,7 @@ export default function LogoutModal({ setShowModal }: LogoutProps) {
     } catch (error) {
       console.error('Logout error:', error);
       // Check if the error is a FetchError or similar and has a response object
-      const errorMessage = (error as any)?.response?.data?.message || 'Logout failed. Please try again.';
+      const errorMessage = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Logout failed. Please try again.';
       toast.error(errorMessage);
     } finally {
       setIsLoggingOut(false);
