@@ -1,4 +1,3 @@
-// pages/markets/index.tsx (or wherever this file lives)
 import { useState, useEffect, useMemo } from "react";
 import { FiArrowUp, FiArrowDown, FiStar, FiSearch, FiFilter } from "react-icons/fi";
 import Footer from "../login/footer";
@@ -49,8 +48,7 @@ export default function Markets() {
       try {
         setLoading(true);
         setError(null);
-        const res = await fetch("/api/markets?per_page=200&page=1")
-
+        const res = await fetch("/api/markets?per_page=200&page=1");
         if (!res.ok) throw new Error(`API failed: ${res.status}`);
         const data = await res.json();
         if (!abort) {
@@ -58,25 +56,20 @@ export default function Markets() {
           if (data?.[0]) setSelectedId(data[0].id);
         }
       } catch (e: unknown) {
-          if (!abort) {
-            if (e instanceof Error) {
-              setError(e.message);
-            } else {
-              setError("Failed to fetch market data");
-            }
-          }
+        if (!abort) {
+          setError(e instanceof Error ? e.message : "Failed to fetch market data");
         }
-    finally {
-            if (!abort) setLoading(false);
-          }
-        };
-        fetchCoins();
-        const i = setInterval(fetchCoins, 60_000);
-        return () => {
-          abort = true;
-          clearInterval(i);
-        };
-      }, []);
+      } finally {
+        if (!abort) setLoading(false);
+      }
+    };
+    fetchCoins();
+    const i = setInterval(fetchCoins, 60_000);
+    return () => {
+      abort = true;
+      clearInterval(i);
+    };
+  }, []);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -116,10 +109,10 @@ export default function Markets() {
   const cell = "px-3 py-2 whitespace-nowrap text-sm";
 
   return (
-    <section className="bg-[#0a0f1a] text-gray-100">
+    <section className="bg-[#0a0f1a] text-gray-100 w-full overflow-x-hidden">
       <Header />
-      <div className="min-h-screen px-4 sm:px-6 lg:px-8 pt-24 pb-16 font-grotesk">
-        <div className="max-w-7xl mx-auto space-y-6">
+      <div className="min-h-screen w-full px-3 sm:px-6 lg:px-8 pt-24 pb-16 font-grotesk overflow-x-hidden">
+        <div className="max-w-7xl mx-auto space-y-6 w-full">
 
           {error && (
             <div className="rounded-lg border border-red-500/30 bg-red-500/10 text-red-300 px-4 py-3">
@@ -135,18 +128,18 @@ export default function Markets() {
               </span>
             </h1>
 
-            <div className="flex items-center gap-3">
-              <div className="relative">
+            <div className="flex items-center gap-3 w-full sm:w-auto">
+              <div className="relative flex-1 sm:flex-none">
                 <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search coins…"
-                  className="w-64 rounded-lg bg-[#0d1526] border border-white/5 pl-9 pr-3 py-2 text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50"
+                  className="w-full sm:w-64 rounded-lg bg-[#0d1526] border border-white/5 pl-9 pr-3 py-2 text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50"
                 />
               </div>
 
-              <div className="flex items-center gap-1 rounded-lg bg-[#0d1526] border border-white/5 p-1">
+              <div className="flex flex-wrap items-center gap-1 rounded-lg bg-[#0d1526] border border-white/5 p-1">
                 {(["1h", "24h", "7d"] as const).map((t) => (
                   <button
                     key={t}
@@ -185,8 +178,8 @@ export default function Markets() {
           </div>
 
           {/* Table */}
-          <div className="rounded-2xl border border-white/5 bg-[#0b1220] shadow-[0_0_0_1px_rgba(255,255,255,0.02)_inset]">
-            <div className="overflow-x-auto">
+          <div className="rounded-2xl border border-white/5 bg-[#0b1220] shadow-[0_0_0_1px_rgba(255,255,255,0.02)_inset] w-full overflow-x-auto">
+            <div className="w-full min-w-[600px]">
               <table className="min-w-full">
                 <thead className="sticky top-0 z-10 bg-[#0b1220]/95 backdrop-blur supports-[backdrop-filter]:bg-[#0b1220]/80">
                   <tr className="border-b border-white/5">
@@ -281,7 +274,6 @@ export default function Markets() {
                                   height={28}
                                   className="rounded-full"
                                 />
-                                {/* subtle active glow */}
                                 <span className="pointer-events-none absolute inset-0 rounded-full ring-0 group-hover:ring-4 ring-blue-500/10 transition" />
                               </div>
                               <div className="flex flex-col">
@@ -320,21 +312,19 @@ export default function Markets() {
                 </tbody>
               </table>
             </div>
-
-            {/* Show more / less */}
-            {!loading && filtered.length > 10 && (
-              <div className="p-3 flex justify-center">
-                <button
-                  onClick={() => setShowAll((s) => !s)}
-                  className="rounded-lg bg-blue-600/90 hover:bg-blue-600 active:scale-[0.99] text-white text-sm px-4 py-2 transition"
-                >
-                  {showAll ? "Show 10" : `Show All (${filtered.length})`}
-                </button>
-              </div>
-            )}
           </div>
 
-          {/* Right side card turned into CTA (no table charts here) */}
+          {!loading && filtered.length > 10 && (
+            <div className="p-3 flex justify-center">
+              <button
+                onClick={() => setShowAll((s) => !s)}
+                className="rounded-lg bg-blue-600/90 hover:bg-blue-600 active:scale-[0.99] text-white text-sm px-4 py-2 transition"
+              >
+                {showAll ? "Show 10" : `Show All (${filtered.length})`}
+              </button>
+            </div>
+          )}
+
           <div className="grid lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2" />
             <div className="rounded-2xl border border-white/5 bg-gradient-to-br from-[#0d1526] to-[#0b1220] p-5">
