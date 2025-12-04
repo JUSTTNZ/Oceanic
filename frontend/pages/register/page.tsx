@@ -30,10 +30,7 @@ export default function RegisterPage() {
     phoneNumber: "",
   });
 
-  const [isMagicLinkMode, setIsMagicLinkMode] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [emailForMagicLink, setEmailForMagicLink] = useState(""); // New state for magic link email
-  const [magicLinkSent, setMagicLinkSent] = useState(false); // New state to show magic link message
   const [error, setError] = useState<RegisterErrorState>({
   username: "",
   fullname: "",
@@ -68,7 +65,6 @@ export default function RegisterPage() {
     let isValid = true;
     const newError = { ...error };
 
-    if (!isMagicLinkMode) { // Only validate these for password-based registration
       if (!formData.username || formData.username.length < 4) {
         newError.username = "Username must be at least 4 characters";
         isValid = false;
@@ -89,10 +85,8 @@ export default function RegisterPage() {
         newError.phoneNumber = "Phone number must be 11 digits";
         isValid = false;
       }
-    }
 
-    // Email validation for both modes
-    const emailToValidate = isMagicLinkMode ? emailForMagicLink : formData.email;
+    const emailToValidate = formData.email;
     if (
       !emailToValidate ||
       !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailToValidate)
@@ -105,49 +99,9 @@ export default function RegisterPage() {
     return isValid;
   };
 
-  const handleMagicLinkSubmit = async () => {
-    setError({
-      username: "", fullname: "", email: "", password: "", confirmPassword: "", phoneNumber: "", general: "",
-    });
-
-    if (!validateForm()) return;
-
-    try {
-      setLoading(true);
-      const email = emailForMagicLink.trim().toLowerCase();
-
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-        },
-      });
-
-      if (error) {
-        console.error("❌ Supabase Magic Link Registration Error:", error);
-        showToast(error.message || "Failed to send magic link for registration.", "error");
-        return;
-      }
-
-      setMagicLinkSent(true);
-      showToast("Magic link sent! Check your email to complete registration and sign in.", "success");
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      console.error("Magic link registration error:", err);
-      showToast(msg || "Magic link registration failed", "error");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (isMagicLinkMode) {
-      handleMagicLinkSubmit();
-      return;
-    }
-
     setError({
       username: "", fullname: "", email: "", password: "", confirmPassword: "", phoneNumber: "", general: "",
     });
@@ -157,27 +111,22 @@ export default function RegisterPage() {
     try {
       setLoading(true);
 
-      // Always trim & lowercase emails
       const email = formData.email.trim().toLowerCase();
 
     const { data, error } = await supabase.auth.signUp({
       email,
       password: formData.password,
       options: {
-        // this metadata is stored on the user in Supabase
         data: {
           username: formData.username,
           fullname: formData.fullname,
           phoneNumber: formData.phoneNumber,
         },
-        // this must be in your Supabase > Auth > URL Configuration > Redirect URLs
         emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     });
 
-    // Handle Supabase errors clearly
     if (error) {
-      // common friendly messages
       const msg = error.message?.toLowerCase() || "";
       if (msg.includes("email rate limit")) {
         showToast("Too many attempts. Please try again later.", "error");
@@ -191,19 +140,15 @@ export default function RegisterPage() {
       return;
     }
 
-    // When "Confirm email" is enabled, Supabase usually returns user but NO session.
-    // That’s expected — user must click the link first.
     if (data?.user && !data.session) {
       showToast(
         "Registration successful! Check your inbox and click the verification link to continue.",
         "success"
       );
     } else {
-      // (rare) If email confirmation is off, you might already have a session here.
       showToast("Registration successful!", "success");
     }
 
-    // Optional: redirect to login page after a short delay
     setTimeout(() => router.push("/login"), 1800);
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
@@ -222,7 +167,6 @@ const handleGoogleLogin = async () => {
       options: { redirectTo: `${window.location.origin}/auth/callback` }
     })
     if (error) throw error
-    // This will redirect; handle the session in /auth/callback page
   } catch (e: unknown) {
   const msg = e instanceof Error ? e.message : String(e);
   showToast(msg || 'Google sign-up failed', 'error');
@@ -231,14 +175,9 @@ const handleGoogleLogin = async () => {
 }
 }
 
-
-
-
-
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-900 p-4">
       <div className="relative bg-gray-800/50 backdrop-blur-lg p-5 w-full max-w-sm border border-gray-600/30 rounded-2xl shadow-xl overflow-hidden">
-        {/* Gradient background */}
         <div className="absolute -top-20 -left-20 w-64 h-64 bg-blue-100/50 rounded-full filter blur-3xl"></div>
         <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-indigo-100/30 rounded-full filter blur-3xl"></div>
 
@@ -275,10 +214,7 @@ const handleGoogleLogin = async () => {
             </div>
           )}
 
-          {!magicLinkSent ? (
             <form onSubmit={handleSubmit}>
-              {!isMagicLinkMode ? (
-                // Password-based registration form
                 <div className="grid grid-cols-1 gap-4 mb-4">
                   <input
                     type="text"
@@ -369,70 +305,15 @@ const handleGoogleLogin = async () => {
                     onChange={handleChange}
                   />
                 </div>
-              ) : (
-                // Magic link registration form (only email)
-                <div className="space-y-4 mb-4">
-                  <input
-                    type="email"
-                    name="emailForMagicLink"
-                    placeholder="your@email.com"
-                    className={`w-full h-10 px-4 bg-gray-700/50 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-gray-200 ${
-                      error.email ? "border-red-500" : "border-gray-600/50"
-                    }`}
-                    value={emailForMagicLink}
-                    onChange={(e) => setEmailForMagicLink(e.target.value)}
-                  />
-                  {error.email && (
-                    <p className="text-xs text-red-400 mt-1">{error.email}</p>
-                  )}
-                </div>
-              )}
 
               <button
                 type="submit"
                 className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white p-2 rounded-lg font-medium text-sm hover:from-blue-500 hover:to-blue-600 transition-all duration-300 shadow-lg shadow-blue-500/20 disabled:opacity-50 flex justify-center items-center h-10"
                 disabled={loading}
               >
-                {loading ? (isMagicLinkMode ? "Sending link..." : "Creating account...") : (isMagicLinkMode ? "Send Magic Link" : "Register Now")}
+                {loading ? "Creating account..." : "Register Now"}
               </button>
             </form>
-          ) : (
-            <div className="text-center">
-              <svg
-                className="w-16 h-16 text-green-500 mx-auto mb-4 animate-bounce"
-                fill="none"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-              <h2 className="text-xl font-semibold text-white mb-2">Check Your Email</h2>
-              <p className="text-gray-400 mb-4">A magic link has been sent to <span className="font-medium text-blue-400">{emailForMagicLink}</span>. Click the link to complete your registration and sign in.</p>
-              <button
-                onClick={() => setMagicLinkSent(false)}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 shadow-lg shadow-blue-500/20"
-              >
-                Resend Link / Try Again
-              </button>
-            </div>
-          )}
-
-          <div className="flex items-center my-4">
-            <div className="flex-grow border-t border-gray-700/50"></div>
-            <span className="mx-4 text-gray-400 text-sm">OR</span>
-            <div className="flex-grow border-t border-gray-700/50"></div>
-          </div>
-
-          <button
-            onClick={() => setIsMagicLinkMode(!isMagicLinkMode)}
-            disabled={loading}
-            className="w-full bg-gray-700/50 hover:bg-gray-700/70 text-gray-300 p-2 rounded-lg font-medium text-sm transition-all duration-300 border border-gray-600/50 flex justify-center items-center h-10 mb-4"
-          >
-            {isMagicLinkMode ? "Register with Password" : "Continue with Email (Passwordless)"}
-          </button>
 
           <div className="flex items-center my-4">
             <div className="flex-grow border-t border-gray-700/50"></div>
