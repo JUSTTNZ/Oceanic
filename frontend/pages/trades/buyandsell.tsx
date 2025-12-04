@@ -2,7 +2,7 @@
 import Head from "next/head";
 import { useState } from "react";
 import {
-  CurrencyYenIcon,
+  CurrencyDollarIcon,
   LockClosedIcon,
   ArrowDownTrayIcon,
   ArrowUpTrayIcon,
@@ -56,10 +56,10 @@ export default function BuySellPage() {
       <section className="px-6 md:px-20 py-14 space-y-24 text-gray-900 bg-white">
         {/* Hero */}
         <div className="text-center max-w-4xl mx-auto space-y-6">
-          <CurrencyYenIcon className="h-16 w-16 text-[#0047AB] mx-auto" />
+          <CurrencyDollarIcon className="h-16 w-16 text-[#0047AB] mx-auto" />
           <h1 className="text-5xl font-bold">Buy & Sell Crypto Instantly</h1>
           <p className="text-lg text-gray-700">
-            Whether you’re entering or exiting crypto — we make it lightning fast. Buy using fiat, sell to your bank, and track
+            Whether you’re entering or exiting crypto, we make it lightning fast. Buy using fiat, sell to your bank, and track
             everything in one dashboard.
           </p>
         </div>
@@ -67,7 +67,7 @@ export default function BuySellPage() {
         {/* Feature Cards */}
         <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto">
           {([
-            [ArrowDownTrayIcon, "Buy Crypto", "Use NGN, USD, or other local currencies to instantly buy USDT, BTC, ETH, and more."],
+            [ArrowDownTrayIcon, "Buy Crypto", "Use NGN to instantly buy USDT, BTC, ETH, and more."],
             [ArrowUpTrayIcon, "Sell Crypto", "Withdraw crypto and receive funds directly to your verified bank account."],
             [LockClosedIcon, "KYC Verified", "Seamless identity verification for faster approvals and compliance."],
             [CheckBadgeIcon, "Real-Time Settlement", "Crypto and fiat are both delivered instantly after confirmation."],
