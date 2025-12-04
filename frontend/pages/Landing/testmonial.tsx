@@ -2,59 +2,38 @@
 
 import { motion, AnimatePresence, Variants, easeInOut } from "framer-motion";
 import Image from "next/image";
-import img from "../../public/Images/blogp.png";
 import { useState, useEffect } from "react";
+import testimonialData from "../../lib/testimonials.json";
 
-const testimonials = [
-  {
-    id: 1,
-    name: "Alice Carter",
-    role: "Crypto Investor",
-    image: img,
-    text: "This platform has completely transformed the way I invest in crypto. The analytics and insights are top-notch!",
-  },
-  {
-    id: 2,
-    name: "Michael Brown",
-    role: "Blockchain Developer",
-    image: img,
-    text: "The security and transparency of this crypto project are outstanding. It's a game-changer for the industry!",
-  },
-  {
-    id: 3,
-    name: "Sophia Williams",
-    role: "DeFi Enthusiast",
-    image: img,
-    text: "The seamless transactions and user-friendly interface make this my go-to crypto platform!",
-  },
-  {
-    id: 4,
-    name: "David Johnson",
-    role: "NFT Collector",
-    image: img,
-    text: "The NFT marketplace integration is seamless. I've discovered amazing digital art through this platform!",
-  },
-  {
-    id: 5,
-    name: "Emma Thompson",
-    role: "Crypto Trader",
-    image: img,
-    text: "The real-time market data and trading tools have significantly improved my trading performance.",
-  },
-  {
-    id: 6,
-    name: "James Wilson",
-    role: "Crypto Analyst",
-    image: img,
-    text: "The depth of market analysis available here is unparalleled in the crypto space.",
-  },
-];
+// Function to get 5 random testimonials based on current date
+function getDailyTestimonials() {
+  const today = new Date();
+  const dateString = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
+  
+  // Use date as seed for consistent daily selection
+  let seed = dateString.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  
+  // Shuffle array with seeded random
+  const shuffled = [...testimonialData.testimonials].sort(() => {
+    const x = Math.sin(seed++) * 10000;
+    return (x - Math.floor(x)) - 0.5;
+  });
+  
+  // Return first 5
+  return shuffled.slice(0, 5);
+}
 
 export default function TestimonialCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [itemsPerPage, setItemsPerPage] = useState(3);
   const [direction, setDirection] = useState(1);
+  const [testimonials, setTestimonials] = useState<typeof testimonialData.testimonials>([]);
+
+  // Get daily testimonials on mount
+  useEffect(() => {
+    setTestimonials(getDailyTestimonials());
+  }, []);
 
   // Handle responsive items per page
   useEffect(() => {
@@ -69,17 +48,17 @@ export default function TestimonialCarousel() {
 
   // Auto-play functionality
   useEffect(() => {
-    if (isPaused) return;
+    if (isPaused || testimonials.length === 0) return;
 
+    const maxIndex = Math.max(0, testimonials.length - itemsPerPage);
+    
     const interval = setInterval(() => {
       setDirection(1);
-      setCurrentIndex(
-        (prev) => (prev + 1) % (testimonials.length - itemsPerPage + 1)
-      );
+      setCurrentIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
     }, 4000);
 
     return () => clearInterval(interval);
-  }, [isPaused, itemsPerPage]);
+  }, [isPaused, itemsPerPage, testimonials.length]);
 
   const slideVariants: Variants = {
     enter: (dir: number) => ({
@@ -100,9 +79,13 @@ export default function TestimonialCarousel() {
 
   // Get visible testimonials
   const visibleTestimonials = [];
-  for (let i = 0; i < itemsPerPage; i++) {
+  for (let i = 0; i < itemsPerPage && i < testimonials.length; i++) {
     const index = (currentIndex + i) % testimonials.length;
     visibleTestimonials.push(testimonials[index]);
+  }
+
+  if (testimonials.length === 0) {
+    return null; // or a loading state
   }
 
   return (
@@ -118,7 +101,7 @@ export default function TestimonialCarousel() {
           What Our Users Say
         </h2>
         <p className="text-gray-300 text-md max-w-2xl mx-auto">
-          Hear from our community of crypto enthusiasts and investors
+          Hear from our community about Oceanic&apos;s lightning-fast transactions
         </p>
       </motion.div>
 
@@ -127,7 +110,7 @@ export default function TestimonialCarousel() {
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
       >
-        <div className="relative h-70 overflow-hidden">
+        <div className="relative h-96 overflow-hidden">
           <AnimatePresence custom={direction} initial={false}>
             <motion.div
               key={currentIndex}
@@ -143,8 +126,8 @@ export default function TestimonialCarousel() {
                   key={testimonial.id}
                   className="p-6 bg-gradient-to-b from-blue-800/70 to-blue-900/90 rounded-xl shadow-lg w-full max-w-sm mx-auto flex-shrink-0 border border-blue-700/30 hover:shadow-blue-500/20 transition-all duration-300"
                 >
-                  <p className="text-gray-100 text-md px-4 mb-6 italic relative z-10">
-                    “{testimonial.text}”
+                  <p className="text-gray-100 text-md px-4 mb-6 italic relative z-10 min-h-[120px]">
+                    &quot;{testimonial.text}&quot;
                   </p>
                   <div className="mt-6 flex flex-col items-center">
                     <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-blue-400 shadow-md shadow-blue-500/30">
@@ -158,9 +141,6 @@ export default function TestimonialCarousel() {
                     <h4 className="font-semibold text-md mt-3 text-blue-300">
                       {testimonial.name}
                     </h4>
-                    <p className="text-gray-400 text-sm mt-1">
-                      {testimonial.role}
-                    </p>
                   </div>
                 </div>
               ))}
@@ -169,23 +149,23 @@ export default function TestimonialCarousel() {
         </div>
 
         <div className="flex justify-center mt-8 space-x-2">
-          {Array.from({ length: testimonials.length - itemsPerPage + 1 }).map(
-            (_, index) => (
-              <button
-                key={index}
-                onClick={() => {
-                  setDirection(index > currentIndex ? 1 : -1);
-                  setCurrentIndex(index);
-                }}
-                className={`w-3 h-3 rounded-full transition-colors ${
-                  currentIndex === index
-                    ? "bg-blue-500"
-                    : "bg-gray-500 hover:bg-gray-400"
-                }`}
-                aria-label={`Go to testimonial group ${index + 1}`}
-              />
-            )
-          )}
+          {Array.from({ 
+            length: Math.max(1, testimonials.length - itemsPerPage + 1) 
+          }).map((_, index) => (
+            <button
+              key={index}
+              onClick={() => {
+                setDirection(index > currentIndex ? 1 : -1);
+                setCurrentIndex(index);
+              }}
+              className={`w-3 h-3 rounded-full transition-colors ${
+                currentIndex === index
+                  ? "bg-blue-500"
+                  : "bg-gray-500 hover:bg-gray-400"
+              }`}
+              aria-label={`Go to testimonial group ${index + 1}`}
+            />
+          ))}
         </div>
       </div>
     </div>
