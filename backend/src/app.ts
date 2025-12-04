@@ -25,6 +25,8 @@ firebaseInit()
 
 // ===== CORS =====
 const allowedOrigins = [
+  'https://oceaniccharts.com',
+  'https://www.oceaniccharts.com',
   'http://localhost:3000',
   'https://oceanic-charts.vercel.app'
 ]
