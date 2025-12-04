@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { FaFacebookF, FaTwitter, FaInstagram, FaTelegramPlane } from "react-icons/fa";
 
 export default function Footer() {
@@ -19,9 +20,9 @@ export default function Footer() {
           <span className="hidden lg:inline">·</span>
           <a href="#" className="hover:text-blue-600">Terms of Use</a>
           <span className="hidden lg:inline">·</span>
-          <a href="/support" className="hover:text-blue-600">FAQ</a>
+          <Link href="/support"><a className="hover:text-blue-600">FAQ</a></Link>
           <span className="hidden lg:inline">·</span>
-          <a href="/support" className="hover:text-blue-600">Support</a>
+          <Link href="/support"><a className="hover:text-blue-600">Support</a></Link>
         </div>
 
         <div className="flex space-x-4">
