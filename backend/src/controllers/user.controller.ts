@@ -48,7 +48,7 @@ export const initProfile = async (req: Request, res: Response, next: NextFunctio
 
       profile = await User.create({
         supabase_user_id: id,
-        email: (email || "").toLowerCase(),
+        email: email ? email.toLowerCase() : null,
         username: safeUsername.toLowerCase(),
         fullname: safeFullname,
         phoneNumber: safePhone,

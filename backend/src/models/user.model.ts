@@ -39,14 +39,9 @@ const UserSchema = new Schema<UserDocument>(
     },
     email: {
       type: String,
-      required: [true, 'Email is required'],
       unique: true,
       lowercase: true,
       trim: true,
-      validate: {
-        validator: (email: string) => validator.isEmail(email),
-        message: 'Please provide a valid email address',
-      },
     },
     fullname: {
       type: String,
