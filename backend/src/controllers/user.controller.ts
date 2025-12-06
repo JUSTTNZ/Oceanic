@@ -15,22 +15,30 @@ export const initProfile = async (req: Request, res: Response, next: NextFunctio
       id: string;
       email: string | null;
       user_metadata?: Record<string, any>;
+      app_metadata?: {
+        provider?: string;
+        providers?: string[];
+      };
     };
-    const { id, email, user_metadata } = supaUser;
+    const { id, email, user_metadata, app_metadata } = supaUser;
 
-    // From frontend body
     const { username, fullname, phoneNumber } = req.body as {
       username?: string;
       fullname?: string;
       phoneNumber?: string;
     };
 
+    const isGoogleAuth = app_metadata?.provider === 'google';
+
+    if (!isGoogleAuth && (!phoneNumber || phoneNumber.trim() === '')) {
+      return res.status(400).json({ success: false, message: 'Phone number is required for registration.' });
+    }
+
     let profile = await User.findOne({ supabase_user_id: id });
     if (!profile) {
       const count = await User.countDocuments();
       const role = count === 0 ? "superadmin" : "user";
 
-      // Merge sources: body → supabase metadata → fallback
       const safeUsername =
         username?.trim() ||
         user_metadata?.username?.trim() ||
@@ -40,11 +48,11 @@ export const initProfile = async (req: Request, res: Response, next: NextFunctio
         fullname?.trim() ||
         user_metadata?.fullname?.trim() ||
         "";
-
+      
       const safePhone =
         phoneNumber?.trim() ||
         user_metadata?.phoneNumber?.trim() ||
-        "";
+        undefined;
 
       profile = await User.create({
         supabase_user_id: id,
@@ -54,6 +62,7 @@ export const initProfile = async (req: Request, res: Response, next: NextFunctio
         phoneNumber: safePhone,
         role,
         isVerified: true,
+        isGoogleAuth: isGoogleAuth,
       });
     }
 
@@ -62,7 +71,6 @@ export const initProfile = async (req: Request, res: Response, next: NextFunctio
     next(e);
   }
 };
-
 
 export const getCurrentUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
