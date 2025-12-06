@@ -57,6 +57,8 @@ const UserSchema = new Schema<UserDocument>(
     phoneNumber: {
       type: String,
       trim: true,
+      unique: true,
+      sparse: true, // Add this
       // keep your NG pattern if you want:
       match: [/^\+?\d{7,15}$/, 'Invalid phone'],
     },
