@@ -20,9 +20,9 @@ export default function Footer() {
           <span className="hidden lg:inline">·</span>
           <a href="#" className="hover:text-blue-600">Terms of Use</a>
           <span className="hidden lg:inline">·</span>
-          <Link href="/support"><a className="hover:text-blue-600">FAQ</a></Link>
+          <Link href="/support" legacyBehavior><a className="hover:text-blue-600">FAQ</a></Link>
           <span className="hidden lg:inline">·</span>
-          <Link href="/support"><a className="hover:text-blue-600">Support</a></Link>
+          <Link href="/support" legacyBehavior><a className="hover:text-blue-600">Support</a></Link>
         </div>
 
         <div className="flex space-x-4">
