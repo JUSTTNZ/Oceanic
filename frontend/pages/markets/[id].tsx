@@ -228,9 +228,7 @@ useEffect(() => {
                 {d === "1" ? "1D" : d === "7" ? "7D" : d === "30" ? "1M" : d === "90" ? "3M" : "1Y"}
               </button>
             ))}
-            <button className="rounded-md px-3 py-1.5 text-xs bg-blue-600/90 hover:bg-blue-600 transition">
-              Add to Watchlist
-            </button>
+
           </div>
         </div>
 

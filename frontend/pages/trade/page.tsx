@@ -25,8 +25,8 @@ export default function CryptoExchangePage() {
        dark:has-checked:bg-[rgba(0,71,171,0.25)] dark:has-checked:text-[#0047AB] dark:has-checked:ring-[#0047AB]
        ${
          activeTab === "buy"
-           ? "bg-[rgba(0,71,171,0.2)] text-[#0047AB] border-[#0047AB]" // Transparent blue selection
-           : "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-300" // Light gray inactive
+           ? "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-300" // Light gray for active
+           : "bg-[rgba(0,71,171,0.2)] text-[#0047AB] border-[#0047AB]" // Transparent blue for inactive
        }`}
    >
      Buy
@@ -38,8 +38,8 @@ export default function CryptoExchangePage() {
        dark:has-checked:bg-[rgba(0,71,171,0.25)] dark:has-checked:text-[#0047AB] dark:has-checked:ring-[#0047AB]
        ${
          activeTab === "sell"
-           ? "bg-[rgba(0,71,171,0.2)] text-[#0047AB] border-[#0047AB]" // Transparent blue selection
-           : "bg-gray-200 text-gray-700 border-gray-300 hover:bg-gray-300" // Light gray inactive
+           ? "bg-gray-200 text-gray-700 border-gray-300 hover:bg-gray-300" // Light gray for active
+           : "bg-[rgba(0,71,171,0.2)] text-[#0047AB] border-[#0047AB]" // Transparent blue for inactive
        }`}
    >
      Sell

@@ -115,7 +115,7 @@ export default function ResetPage() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.5 }}
-                  className="space-y-3"
+                  className="flex flex-col gap-4"
                 >
                   <Link href="/login" passHref>
                     <button
@@ -124,6 +124,7 @@ export default function ResetPage() {
                       Back to Login
                     </button>
                   </Link>
+
                   <button
                     onClick={() => {
                       setSubmitted(false)
@@ -135,6 +136,7 @@ export default function ResetPage() {
                     Try Another Email
                   </button>
                 </motion.div>
+
               </motion.div>
             ) : (
               <motion.div
@@ -182,7 +184,7 @@ export default function ResetPage() {
                         onKeyPress={handleKeyPress}
                         disabled={loading}
                         className="w-full bg-gray-700/50 border border-gray-600 rounded-lg pl-10 pr-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                        placeholder="name@example.com"
+                        placeholder="email@example.com"
                       />
                     </div>
                   </div>
