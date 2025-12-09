@@ -7,7 +7,6 @@ export interface IUser {
   email: string;
   fullname: string;
   role: 'user' | 'superadmin';
-  phoneNumber?: string;
   isVerified: boolean;
   isGoogleAuth?: boolean;
   bankDetails?: {
@@ -53,14 +52,6 @@ const UserSchema = new Schema<UserDocument>(
       type: String,
       enum: ['user', 'admin', 'superadmin'],
       default: 'user',
-    },
-    phoneNumber: {
-      type: String,
-      trim: true,
-      unique: true,
-      sparse: true, // Add this
-      // keep your NG pattern if you want:
-      match: [/^\+?\d{7,15}$/, 'Invalid phone'],
     },
     bankDetails: {
       bankName: String,

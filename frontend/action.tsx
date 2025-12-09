@@ -8,7 +8,6 @@ interface User {
   role: string;
   fullname: string;
   createdAt: string;
-  phoneNumber: string;
   lastLogin: string;
 }
 

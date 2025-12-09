@@ -14,7 +14,6 @@ interface Profile {
   username: string;
   role: 'user' | 'admin' | 'superadmin';
   fullname: string;
-  phoneNumber: string;
   createdAt: string;
 }
 
@@ -40,51 +39,51 @@ export default function AuthCallback() {
       if (ran.current) return;
       ran.current = true;
   
-      const handleSession = async (session: import('@supabase/supabase-js').Session | null) => {
-        console.log('Handling session:', session);
-  
-        if (session) {
-          try {
-            const accessToken = session.access_token;
-            const resp = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/init`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${accessToken}`,
-              },
-              credentials: 'include',
-              body: JSON.stringify({
-                username: session.user?.user_metadata?.username,
-                fullname: session.user?.user_metadata?.fullname,
-                phoneNumber: session.user?.user_metadata?.phoneNumber,
-              }),
-            });
-  
-            if (!resp.ok) {
-              const errorText = await resp.text().catch(() => 'Profile initialization failed.');
-              console.error('INIT /api/v1/users/init failed:', errorText);
-              throw new Error('Could not load your profile. Please try logging in again.');
-            }
-  
-            const { profile } = (await resp.json()) as InitResponse;
-  
-            dispatch(
-              setUser({
-                uid: profile.supabase_user_id,
-                email: profile.email,
-                username: profile.username,
-                role: profile.role,
-                fullname: profile.fullname,
-                createdAt: profile.createdAt,
-                phoneNumber: profile.phoneNumber,
-                lastLogin: new Date().toISOString(),
-              })
-            );
-  
+const handleSession = async (session: import('@supabase/supabase-js').Session | null) => {
+  console.log('Handling session:', session);
+
+  if (session) {
+    try {
+      const accessToken = session.access_token;
+
+      const resp = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/init`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+        credentials: 'include',
+      });
+
+      if (!resp.ok) {
+        const errorData = await resp.json().catch(() => ({ message: 'Profile initialization failed.' }));
+        console.error('INIT /api/v1/users/init failed:', errorData);
+
+        let errorMessage = 'Could not load your profile. Please try logging in again.';
+        if (errorData && errorData.message) {
+            errorMessage = errorData.message;
+        }
+        throw new Error(errorMessage);
+      }
+
+      const { profile } = (await resp.json()) as InitResponse;
+
+      dispatch(
+        setUser({
+          uid: profile.supabase_user_id,
+          email: profile.email,
+          username: profile.username,
+          role: profile.role,
+          fullname: profile.fullname,
+          createdAt: profile.createdAt,
+          lastLogin: new Date().toISOString(),
+        })
+      );
+
             setVerificationState('success');
             setMessage('Success! Your email has been verified.');
             setTimeout(() => setShowButton(true), 500);
-  
+
             if (profile.role === 'superadmin') {
               showToast('Welcome Admin!', 'success');
               router.replace('/adminpage');

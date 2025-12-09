@@ -12,6 +12,7 @@ import {
   ExclamationCircleIcon,
 } from "@heroicons/react/24/outline";
 import Navbar from "../Landing/navbar";
+import Footer from "../Landing/footer";
 const faqs = [
   {
     question: "What is P2P trading?",
@@ -109,6 +110,7 @@ export default function P2PPage() {
           </div>
         </div>
       </section>
+      <Footer />
     </>
   );
 }

@@ -100,7 +100,7 @@ export default function TestimonialCarousel() {
         <h2 className="md:text-3xl text-2xl font-bold mb-3 bg-gradient-to-r from-blue-300 to-purple-400 bg-clip-text text-transparent">
           What Our Users Say
         </h2>
-        <p className="text-gray-300 text-md max-w-2xl mx-auto">
+        <p className="text-gray-300 text-md max-w-2xl mx-auto px-6 md:px-4">
           Hear from our community about Oceanic&apos;s lightning-fast transactions
         </p>
       </motion.div>

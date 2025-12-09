@@ -12,7 +12,6 @@ type RegisterErrorState = {
   email: string;
   password: string;
   confirmPassword: string;
-  phoneNumber: string;
   general: string;
 };
 
@@ -27,7 +26,6 @@ export default function RegisterPage() {
     email: "",
     password: "",
     confirmPassword: "",
-    phoneNumber: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -37,7 +35,6 @@ export default function RegisterPage() {
   email: "",
   password: "",
   confirmPassword: "",
-  phoneNumber: "",
   general: "",
 });
 
@@ -81,10 +78,6 @@ export default function RegisterPage() {
         newError.confirmPassword = "Passwords do not match";
         isValid = false;
       }
-      if (!formData.phoneNumber || formData.phoneNumber.length < 11) {
-        newError.phoneNumber = "Phone number must be 11 digits";
-        isValid = false;
-      }
 
     const emailToValidate = formData.email;
     if (
@@ -120,7 +113,6 @@ export default function RegisterPage() {
         data: {
           username: formData.username,
           fullname: formData.fullname,
-          phoneNumber: formData.phoneNumber,
         },
         emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
@@ -294,16 +286,6 @@ const handleGoogleLogin = async () => {
                       )}
                     </button>
                   </div>
-                  <input
-                    type="tel"
-                    name="phoneNumber"
-                    placeholder="+2347045689224"
-                    className={`w-full h-10 px-4 bg-gray-700/50 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-gray-200 ${
-                      error.phoneNumber ? "border-red-500" : "border-gray-600/50"
-                    }`}
-                    value={formData.phoneNumber}
-                    onChange={handleChange}
-                  />
                 </div>
 
               <button

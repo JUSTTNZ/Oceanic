@@ -14,61 +14,100 @@ export const initProfile = async (req: Request, res: Response, next: NextFunctio
     const supaUser = (req as any).supabaseUser as {
       id: string;
       email: string | null;
+      phone?: string;
       user_metadata?: Record<string, any>;
-      app_metadata?: {
-        provider?: string;
-        providers?: string[];
-      };
+      app_metadata?: { provider?: string };
     };
+    
     const { id, email, user_metadata, app_metadata } = supaUser;
 
-    const { username, fullname, phoneNumber } = req.body as {
+    const { username, fullname } = req.body as {
       username?: string;
       fullname?: string;
-      phoneNumber?: string;
     };
 
     const isGoogleAuth = app_metadata?.provider === 'google';
+    const safeEmail = email ? email.toLowerCase() : null;
+    
+    // 1. Find the user by Supabase ID first
+    let profile = await User.findOne({ supabase_user_id: id });
 
-    if (!isGoogleAuth && (!phoneNumber || phoneNumber.trim() === '')) {
-      return res.status(400).json({ success: false, message: 'Phone number is required for registration.' });
+    if (profile) {
+      return res.json({ ok: true, profile });
+    }
+    
+    // 2. If no profile by Supabase ID, try to find by email to link accounts
+    if (safeEmail) {
+      profile = await User.findOne({ email: safeEmail });
     }
 
-    let profile = await User.findOne({ supabase_user_id: id });
-    if (!profile) {
-      const count = await User.countDocuments();
-      const role = count === 0 ? "superadmin" : "user";
+    if (profile) {
+      // 3. User exists with this email, but different Supabase ID - link them
+      profile.supabase_user_id = id;
+      if (isGoogleAuth) {
+        profile.isGoogleAuth = true;
+      }
+      await profile.save();
+      return res.json({ ok: true, profile });
+    }
 
-      const safeUsername =
-        username?.trim() ||
-        user_metadata?.username?.trim() ||
-        (email ? email.split("@")[0] : `user_${id.slice(0, 6)}`);
+    // 4. Create new profile - no existing user found
+    const count = await User.countDocuments();
+    const role = count === 0 ? "superadmin" : "user";
 
-      const safeFullname =
-        fullname?.trim() ||
-        user_metadata?.fullname?.trim() ||
-        "";
+    const safeUsername =
+      username?.trim() ||
+      user_metadata?.username?.trim() ||
+      user_metadata?.full_name?.trim().toLowerCase().replace(/\s+/g, '_') ||
+      (email ? email.split("@")[0] : `user_${id.slice(0, 6)}`);
+
+    const safeFullname =
+      fullname?.trim() ||
+      user_metadata?.full_name?.trim() ||
+      user_metadata?.name?.trim() ||
+      "";
+
+    const newProfile = await User.create({
+      supabase_user_id: id,
+      email: safeEmail,
+      username: safeUsername.toLowerCase(),
+      fullname: safeFullname,
+      role,
+      isVerified: true,
+      isGoogleAuth: isGoogleAuth,
+    });
+
+    return res.json({ ok: true, profile: newProfile });
+
+  } catch (error: any) {
+    console.error('Init profile error:', {
+      code: error.code,
+      keyPattern: error.keyPattern,
+      keyValue: error.keyValue,
+      message: error.message
+    });
+
+    // Handle MongoDB duplicate key errors
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyPattern || {})[0] || 'identifier';
       
-      const safePhone =
-        phoneNumber?.trim() ||
-        user_metadata?.phoneNumber?.trim() ||
-        undefined;
-
-      profile = await User.create({
-        supabase_user_id: id,
-        email: email ? email.toLowerCase() : null,
-        username: safeUsername.toLowerCase(),
-        fullname: safeFullname,
-        phoneNumber: safePhone,
-        role,
-        isVerified: true,
-        isGoogleAuth: isGoogleAuth,
+      // Map technical field names to user-friendly names
+      const fieldMap: Record<string, string> = {
+        supabase_user_id: 'account',
+        email: 'email address',
+        username: 'username'
+      };
+      
+      const friendlyField = fieldMap[field] || field;
+      
+      return res.status(409).json({ 
+        success: false, 
+        message: `This ${friendlyField} is already registered. Please sign in with your existing account or use a different ${friendlyField}.` 
       });
     }
 
-    res.json({ ok: true, profile });
-  } catch (e) {
-    next(e);
+    // Pass other errors to error handler middleware
+    next(error);
   }
 };
 
@@ -76,7 +115,7 @@ export const getCurrentUser = async (req: Request, res: Response, next: NextFunc
   try {
     const { id } = (req as any).supabaseUser as { id: string };
     const profile = await User.findOne({ supabase_user_id: id })
-      .select('email username fullname role phoneNumber createdAt');
+      .select('email username fullname role createdAt');
 
     if (!profile) {
       return res.status(404).json({ status: 'error', message: 'User profile not found' });
@@ -90,7 +129,6 @@ export const getCurrentUser = async (req: Request, res: Response, next: NextFunc
         username: profile.username,
         fullname: profile.fullname,
         role: profile.role,
-        phoneNumber: profile.phoneNumber,
         createdAt: profile.createdAt,
       },
     });
@@ -106,7 +144,7 @@ export const updateUserDetails = async (req: Request, res: Response, next: NextF
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const { fullname, phoneNumber } = req.body;
+    const { fullname } = req.body;
 
     if (!fullname) {
       return res.status(400).json({ message: "Fullname is required" });
@@ -114,9 +152,9 @@ export const updateUserDetails = async (req: Request, res: Response, next: NextF
 
     const updatedUser = await User.findOneAndUpdate(
       { supabase_user_id: supaUser.id },
-      { $set: { fullname, phoneNumber } },
+      { $set: { fullname } },
       { new: true }
-    ).select("email username fullname role phoneNumber createdAt");
+    ).select("email username fullname role createdAt");
 
     if (!updatedUser) {
       return res.status(404).json({ message: "User not found" });

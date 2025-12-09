@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { FaFacebookF, FaTwitter, FaInstagram, FaTelegramPlane } from "react-icons/fa";
+import { FaTwitter, FaInstagram, FaTelegramPlane } from "react-icons/fa";
 
 export default function Footer() {
   return (
@@ -26,7 +26,6 @@ export default function Footer() {
         </div>
 
         <div className="flex space-x-4">
-          <a href="#" className="hover:text-blue-600"><FaFacebookF size={18} /></a>
           <a href="#" className="hover:text-blue-600"><FaTwitter size={18} /></a>
           <a href="#" className="hover:text-blue-600"><FaInstagram size={18} /></a>
           <a href="#" className="hover:text-blue-600"><FaTelegramPlane size={18} /></a>

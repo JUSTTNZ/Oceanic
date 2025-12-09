@@ -12,6 +12,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Navbar from "../Landing/navbar";
 import TestimonialCarousel from "../Landing/testmonial";
+import Footer from "../Landing/footer";
 
 export default function BuySellPage() {
   return (
@@ -108,6 +109,7 @@ export default function BuySellPage() {
 
       {/* Testimonial Carousel Section */}
       <TestimonialCarousel />
+      <Footer />
     </>
   );
 }

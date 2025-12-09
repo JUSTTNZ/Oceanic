@@ -16,7 +16,6 @@ interface RootState {
       username: string;
       roles: string;
       fullname:string;
-      phoneNumber:string;
       createdAt:string;
       country:string;
       lastLogin:string
@@ -109,16 +108,6 @@ export default function Profile() {
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-500">Username</p>
                     <p className="mt-1 text-sm text-gray-900">{user?.username}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start">
-                  <div className="flex-shrink-0 h-10 w-10 rounded-full bg-green-50 flex items-center justify-center">
-                    <FiPhone className="h-5 w-5 text-green-600" />
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-500">Phone Number</p>
-                    <p className="mt-1 text-sm text-gray-900">{user?.phoneNumber}</p>
                   </div>
                 </div>
 
