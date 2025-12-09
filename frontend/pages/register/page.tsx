@@ -96,7 +96,7 @@ export default function RegisterPage() {
     e.preventDefault();
 
     setError({
-      username: "", fullname: "", email: "", password: "", confirmPassword: "", phoneNumber: "", general: "",
+      username: "", fullname: "", email: "", password: "", confirmPassword: "", general: "",
     });
 
     if (!validateForm()) return;
