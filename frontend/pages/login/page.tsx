@@ -183,7 +183,6 @@ if (error) {
         role: profile.role,
         fullname: profile.fullname,
         createdAt: profile.createdAt,
-        phoneNumber: profile.phoneNumber,
         lastLogin: new Date().toISOString(),
       })
     );
