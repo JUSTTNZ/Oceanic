@@ -10,6 +10,7 @@ import {
   CommandLineIcon,
 } from "@heroicons/react/24/outline";
 import Navbar from "../Landing/navbar";
+import Footer from "../Landing/footer";
 
 const docs = [
   {
@@ -94,6 +95,7 @@ export default function DocsPage() {
           </p>
         </div>
       </section>
+      <Footer />
     </>
   );
 }

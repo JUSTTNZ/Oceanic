@@ -44,12 +44,12 @@ export default function ConversionDisplay({
     return formatter.format(value);
   };
 
-  // Calculate amounts with +50 gain
-  const adjustedExchangeRate = exchangeRate + 50;
+
+  const adjustedExchangeRate = exchangeRate + 70;
   const usdAmount = parseFloat(amount || "0");
   const calculatedLocalCurrencyAmount = usdAmount * adjustedExchangeRate;
 
-  // FIXED: Calculate crypto amount correctly
+  // Calculate crypto amount 
   const coinAmount = selectedCoin 
     ? usdAmount / selectedCoin.current_price 
     : 0;

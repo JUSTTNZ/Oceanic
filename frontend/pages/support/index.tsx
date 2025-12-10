@@ -129,7 +129,7 @@ export default function Support() {
               >
                 +1 (800) 555-1234
               </a>
-            </div>
+               </div>
           </div>
 
           {/* FAQ Section */}
@@ -139,7 +139,7 @@ export default function Support() {
                 <FiHelpCircle className="text-blue-600 mr-2" />
                 Frequently Asked Questions
               </h2>
-            </div>
+                </div>
             <div className="divide-y divide-gray-200">
               {faqs.map((faq, index) => (
                 <div key={index} className="p-6">
@@ -161,7 +161,7 @@ export default function Support() {
                   )}
                 </div>
               ))}
-            </div>
+               </div>
           </div>
 
           {/* Contact Form */}
@@ -252,12 +252,12 @@ export default function Support() {
                 </form>
               )}
             </div>
-          </div>
+             </div>
 
     
         </div>
       </div>
       <Footer />
     </section>
-  );
+     );
 }

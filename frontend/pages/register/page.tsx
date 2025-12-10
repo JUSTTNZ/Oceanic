@@ -12,7 +12,6 @@ type RegisterErrorState = {
   email: string;
   password: string;
   confirmPassword: string;
-  phoneNumber: string;
   general: string;
 };
 
@@ -27,7 +26,6 @@ export default function RegisterPage() {
     email: "",
     password: "",
     confirmPassword: "",
-    phoneNumber: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -37,7 +35,6 @@ export default function RegisterPage() {
   email: "",
   password: "",
   confirmPassword: "",
-  phoneNumber: "",
   general: "",
 });
 
@@ -65,76 +62,63 @@ export default function RegisterPage() {
     let isValid = true;
     const newError = { ...error };
 
-    if (!formData.username || formData.username.length < 4) {
-      newError.username = "Username must be at least 4 characters";
-      isValid = false;
-    }
-    if (!formData.fullname || formData.fullname.length < 6) {
-      newError.fullname = "Full name must be at least 6 characters";
-      isValid = false;
-    }
+      if (!formData.username || formData.username.length < 4) {
+        newError.username = "Username must be at least 4 characters";
+        isValid = false;
+      }
+      if (!formData.fullname || formData.fullname.length < 6) {
+        newError.fullname = "Full name must be at least 6 characters";
+        isValid = false;
+      }
+      if (!formData.password || formData.password.length < 6) {
+        newError.password = "Password must be at least 6 characters";
+        isValid = false;
+      }
+      if (formData.password !== formData.confirmPassword) {
+        newError.confirmPassword = "Passwords do not match";
+        isValid = false;
+      }
+
+    const emailToValidate = formData.email;
     if (
-      !formData.email ||
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
+      !emailToValidate ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailToValidate)
     ) {
       newError.email = "Please enter a valid email address";
       isValid = false;
     }
-    if (!formData.password || formData.password.length < 6) {
-      newError.password = "Password must be at least 6 characters";
-      isValid = false;
-    }
-    if (formData.password !== formData.confirmPassword) {
-      newError.confirmPassword = "Passwords do not match";
-      isValid = false;
-    }
-    if (!formData.phoneNumber || formData.phoneNumber.length < 11) {
-      newError.phoneNumber = "Phone number must be 11 digits";
-      isValid = false;
-    }
+
     setError(newError);
     return isValid;
   };
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setError({
-  username: "",
-  fullname: "",
-  email: "",
-  password: "",
-  confirmPassword: "",
-  phoneNumber: "",
-  general: "",
-});
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
+    setError({
+      username: "", fullname: "", email: "", password: "", confirmPassword: "", general: "",
+    });
 
-  if (!validateForm()) return;
+    if (!validateForm()) return;
 
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    // Always trim & lowercase emails
-    const email = formData.email.trim().toLowerCase();
+      const email = formData.email.trim().toLowerCase();
 
     const { data, error } = await supabase.auth.signUp({
       email,
       password: formData.password,
       options: {
-        // this metadata is stored on the user in Supabase
         data: {
           username: formData.username,
           fullname: formData.fullname,
-          phoneNumber: formData.phoneNumber,
         },
-        // this must be in your Supabase > Auth > URL Configuration > Redirect URLs
         emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     });
 
-    // Handle Supabase errors clearly
     if (error) {
-      // common friendly messages
       const msg = error.message?.toLowerCase() || "";
       if (msg.includes("email rate limit")) {
         showToast("Too many attempts. Please try again later.", "error");
@@ -148,19 +132,15 @@ const handleSubmit = async (e: React.FormEvent) => {
       return;
     }
 
-    // When "Confirm email" is enabled, Supabase usually returns user but NO session.
-    // That’s expected — user must click the link first.
     if (data?.user && !data.session) {
       showToast(
         "Registration successful! Check your inbox and click the verification link to continue.",
         "success"
       );
     } else {
-      // (rare) If email confirmation is off, you might already have a session here.
       showToast("Registration successful!", "success");
     }
 
-    // Optional: redirect to login page after a short delay
     setTimeout(() => router.push("/login"), 1800);
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
@@ -171,13 +151,25 @@ const handleSubmit = async (e: React.FormEvent) => {
   }
 };
 
-
-
+const handleGoogleLogin = async () => {
+  setLoading(true)
+  try {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: `${window.location.origin}/auth/callback` }
+    })
+    if (error) throw error
+  } catch (e: unknown) {
+  const msg = e instanceof Error ? e.message : String(e);
+  showToast(msg || 'Google sign-up failed', 'error');
+} finally {
+  setLoading(false);
+}
+}
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-900 p-4">
       <div className="relative bg-gray-800/50 backdrop-blur-lg p-5 w-full max-w-sm border border-gray-600/30 rounded-2xl shadow-xl overflow-hidden">
-        {/* Gradient background */}
         <div className="absolute -top-20 -left-20 w-64 h-64 bg-blue-100/50 rounded-full filter blur-3xl"></div>
         <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-indigo-100/30 rounded-full filter blur-3xl"></div>
 
@@ -214,106 +206,96 @@ const handleSubmit = async (e: React.FormEvent) => {
             </div>
           )}
 
-          <form onSubmit={handleSubmit}>
-            <div className="grid grid-cols-1 gap-4 mb-4">
-              <input
-                type="text"
-                name="username"
-                placeholder="Username"
-                className={`w-full h-10 px-4 bg-gray-700/50 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-gray-200 ${
-                  error.username ? "border-red-500" : "border-gray-600/50"
-                }`}
-                value={formData.username}
-                onChange={handleChange}
-              />
-              <input
-                type="text"
-                name="fullname"
-                placeholder="Full name"
-                className={`w-full h-10 px-4 bg-gray-700/50 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-gray-200 ${
-                  error.fullname ? "border-red-500" : "border-gray-600/50"
-                }`}
-                value={formData.fullname}
-                onChange={handleChange}
-              />
-              <input
-                type="email"
-                name="email"
-                placeholder="your@email.com"
-                className={`w-full h-10 px-4 bg-gray-700/50 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-gray-200 ${
-                  error.email ? "border-red-500" : "border-gray-600/50"
-                }`}
-                value={formData.email}
-                onChange={handleChange}
-              />
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  placeholder="••••••••"
-                  className={`w-full h-10 px-4 bg-gray-700/50 border rounded-lg pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-gray-200 ${
-                    error.password ? "border-red-500" : "border-gray-600/50"
-                  }`}
-                  value={formData.password}
-                  onChange={handleChange}
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  onClick={togglePasswordVisibility}
-                >
-                  {showPassword ? (
-                    <FaEyeSlash className="text-gray-400 hover:text-gray-300" />
-                  ) : (
-                    <FaEye className="text-gray-400 hover:text-gray-300" />
-                  )}
-                </button>
-              </div>
-              <div className="relative">
-                <input
-                  type={showConfirmPassword ? "text" : "password"}
-                  name="confirmPassword"
-                  placeholder="••••••••"
-                  className={`w-full h-10 px-4 bg-gray-700/50 border rounded-lg pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-gray-200 ${
-                    error.confirmPassword
-                      ? "border-red-500"
-                      : "border-gray-600/50"
-                  }`}
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  onClick={toggleConfirmPasswordVisibility}
-                >
-                  {showConfirmPassword ? (
-                    <FaEyeSlash className="text-gray-400 hover:text-gray-300" />
-                  ) : (
-                    <FaEye className="text-gray-400 hover:text-gray-300" />
-                  )}
-                </button>
-              </div>
-              <input
-                type="tel"
-                name="phoneNumber"
-                placeholder="+2347045689224"
-                className={`w-full h-10 px-4 bg-gray-700/50 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-gray-200 ${
-                  error.phoneNumber ? "border-red-500" : "border-gray-600/50"
-                }`}
-                value={formData.phoneNumber}
-                onChange={handleChange}
-              />
-            </div>
+            <form onSubmit={handleSubmit}>
+                <div className="grid grid-cols-1 gap-4 mb-4">
+                  <input
+                    type="text"
+                    name="username"
+                    placeholder="Username"
+                    className={`w-full h-10 px-4 bg-gray-700/50 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-gray-200 ${
+                      error.username ? "border-red-500" : "border-gray-600/50"
+                    }`}
+                    value={formData.username}
+                    onChange={handleChange}
+                  />
+                  <input
+                    type="text"
+                    name="fullname"
+                    placeholder="Full name"
+                    className={`w-full h-10 px-4 bg-gray-700/50 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-gray-200 ${
+                      error.fullname ? "border-red-500" : "border-gray-600/50"
+                    }`}
+                    value={formData.fullname}
+                    onChange={handleChange}
+                  />
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="your@email.com"
+                    className={`w-full h-10 px-4 bg-gray-700/50 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-gray-200 ${
+                      error.email ? "border-red-500" : "border-gray-600/50"
+                    }`}
+                    value={formData.email}
+                    onChange={handleChange}
+                  />
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      name="password"
+                      placeholder="••••••••"
+                      className={`w-full h-10 px-4 bg-gray-700/50 border rounded-lg pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-gray-200 ${
+                        error.password ? "border-red-500" : "border-gray-600/50"
+                      }`}
+                      value={formData.password}
+                      onChange={handleChange}
+                    />
+                    <button
+                      type="button"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                      onClick={togglePasswordVisibility}
+                    >
+                      {showPassword ? (
+                        <FaEyeSlash className="text-gray-400 hover:text-gray-300" />
+                      ) : (
+                        <FaEye className="text-gray-400 hover:text-gray-300" />
+                      )}
+                    </button>
+                  </div>
+                  <div className="relative">
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      name="confirmPassword"
+                      placeholder="••••••••"
+                      className={`w-full h-10 px-4 bg-gray-700/50 border rounded-lg pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-gray-200 ${
+                        error.confirmPassword
+                          ? "border-red-500"
+                          : "border-gray-600/50"
+                      }`}
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                    />
+                    <button
+                      type="button"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                      onClick={toggleConfirmPasswordVisibility}
+                    >
+                      {showConfirmPassword ? (
+                        <FaEyeSlash className="text-gray-400 hover:text-gray-300" />
+                      ) : (
+                        <FaEye className="text-gray-400 hover:text-gray-300" />
+                      )}
+                    </button>
+                  </div>
+                </div>
 
-            <button
-              type="submit"
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white p-2 rounded-lg font-medium text-sm hover:from-blue-500 hover:to-blue-600 transition-all duration-300 shadow-lg shadow-blue-500/20 disabled:opacity-50 flex justify-center items-center h-10"
-              disabled={loading}
-            >
-              {loading ? "Creating account..." : "Register Now"}
-            </button>
-          </form>
+              <button
+                type="submit"
+                className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white p-2 rounded-lg font-medium text-sm hover:from-blue-500 hover:to-blue-600 transition-all duration-300 shadow-lg shadow-blue-500/20 disabled:opacity-50 flex justify-center items-center h-10"
+                disabled={loading}
+              >
+                {loading ? "Creating account..." : "Register Now"}
+              </button>
+            </form>
 
           <div className="flex items-center my-4">
             <div className="flex-grow border-t border-gray-700/50"></div>
@@ -321,7 +303,11 @@ const handleSubmit = async (e: React.FormEvent) => {
             <div className="flex-grow border-t border-gray-700/50"></div>
           </div>
 
-          <button className="w-full bg-gray-700/50 hover:bg-gray-700/70 text-gray-300 p-2 rounded-lg font-medium text-sm transition-all duration-300 border border-gray-600/50 flex justify-center items-center h-10 mb-4">
+          <button
+            onClick={handleGoogleLogin}
+            disabled={loading}
+            className="w-full bg-gray-700/50 hover:bg-gray-700/70 text-gray-300 p-2 rounded-lg font-medium text-sm transition-all duration-300 border border-gray-600/50 flex justify-center items-center h-10 mb-4"
+          >
             <svg
               className="w-5 h-5 mr-2"
               viewBox="0 0 24 24"

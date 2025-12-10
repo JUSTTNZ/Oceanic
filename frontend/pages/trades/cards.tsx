@@ -18,6 +18,7 @@ import {
   QuestionMarkCircleIcon,
 } from "@heroicons/react/24/outline";
 import Navbar from "../Landing/navbar";
+import Footer from "../Landing/footer";
 const faqs = [
   {
     question: "When will the Oceanic Card launch?",
@@ -176,7 +177,9 @@ export default function CardsPage() {
             ))}
           </div>
         </div>
+      <Footer/>
       </section>
+     
     </>
   );
 }

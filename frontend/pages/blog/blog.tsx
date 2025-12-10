@@ -136,8 +136,8 @@ export default function CryptoBlog() {
                   />
                   <div className="p-4">
                     <h3 className="text-lg md:text-xl font-bold mb-2 text-blue-400">
-                      <Link href={post.link} target="_blank">
-                        {post.title}
+                      <Link href={post.link} legacyBehavior>
+                        <a target="_blank">{post.title}</a>
                       </Link>
                     </h3>
                     <p className="mt-2 text-gray-100 text-sm md:text-base">

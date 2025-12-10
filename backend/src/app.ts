@@ -4,6 +4,10 @@ import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import http from 'http'
 import firebaseInit from '../src/utils/firebase.js'
+import connectDB from './config/db.js';
+
+// Connect to the database as soon as the app starts
+connectDB();
 
 // Extend Express types
 declare global {
@@ -21,6 +25,8 @@ firebaseInit()
 
 // ===== CORS =====
 const allowedOrigins = [
+  'https://oceaniccharts.com',
+  'https://www.oceaniccharts.com',
   'http://localhost:3000',
   'https://oceanic-charts.vercel.app'
 ]
@@ -85,6 +91,7 @@ app.use(cookieParser())
 // ===== ROUTES =====
 import userRouter from '../src/routes/user.route.js'
 import healthCheckRouter from '../src/routes/healthcheck.route.js'
+import emailRouter from '../src/routes/email.route.js'
 import transactionRouter from '../src/routes/transaction.route.js'
 import bitgetRouter from '../src/routes/webhook.route.js'
 import apiRouter from '../src/routes/coinbankrate.js'
@@ -94,6 +101,7 @@ app.get('/', (_, res) => res.send('Welcome to the backend!'))
 app.use('/api/v1/data', apiRouter)
 app.use('/api/v1/healthCheck', healthCheckRouter)
 app.use('/api/v1/users', userRouter)
+app.use("/api/v1/email", emailRouter);
 app.use('/api/v1/transaction', transactionRouter)
 app.use('/api/v2/bitget', bitgetRouter)
 

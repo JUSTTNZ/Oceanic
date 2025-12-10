@@ -9,6 +9,7 @@ import { Analytics } from "@vercel/analytics/react";
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/router";
+import { useEffect } from "react";
 
 import { Toaster } from "react-hot-toast"; // ✅ Import toast
 
@@ -18,7 +19,23 @@ const inter = Inter({
 });
 
 export default function App({ Component, pageProps }: AppProps) {
-  const route = useRouter();
+  const router = useRouter();
+
+  useEffect(() => {
+    // This effect runs on the client-side after hydration
+    const hash = window.location.hash;
+    // Check if the URL hash contains magic link auth information
+    if (hash.includes("access_token") && hash.includes("token_type=bearer")) {
+      // Check a session flag to prevent redirect loops
+      const hasRedirected = sessionStorage.getItem("magiclink_redirected");
+      if (!hasRedirected) {
+        // Set the flag and redirect to the desired page
+        sessionStorage.setItem("magiclink_redirected", "true");
+        router.replace("/markets");
+      }
+    }
+  }, [router]);
+
 
   return (
     <div className={inter.className}>
@@ -26,7 +43,7 @@ export default function App({ Component, pageProps }: AppProps) {
         <PersistGate loading={null} persistor={persistor}>
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
-              key={route.route}
+              key={router.route}
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -15 }}
@@ -59,7 +76,7 @@ export default function App({ Component, pageProps }: AppProps) {
                   },
                 }}
               />
-              <Component {...pageProps} key={route.route} />
+              <Component {...pageProps} key={router.route} />
               <Analytics />
             </motion.div>
           </AnimatePresence>

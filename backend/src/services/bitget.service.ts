@@ -80,7 +80,7 @@ export async function fetchDeposits(
     console.error('Bitget API Error:', {
       url,
       status: error.response?.status,
-      errorData: error.response?.data, // Bitget's error message
+      errorData: error.response?.data,
     });
     throw new Error(`Bitget API failed: ${error.response?.data?.msg || error.message}`);
   }

@@ -6,7 +6,7 @@ import {
   MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
 import Navbar from "../Landing/navbar";
-
+import Footer from "../Landing/footer";
 const tags = ["All", "Beginner", "Intermediate", "Security", "Compliance"];
 
 export default function TutorialsPage() {
@@ -72,6 +72,7 @@ export default function TutorialsPage() {
           </p>
         </div>
       </section>
+      <Footer />
     </>
   );
 }

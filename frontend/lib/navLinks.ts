@@ -10,10 +10,10 @@ import {
 
 export const megaMenus = {
   Trade: [
-    { icon: CreditCardIcon, title: "Cards", desc: "Spend money globally with a card that does it all.", href: "/trades/cards" },
-    { icon: RocketLaunchIcon, title: "Instant Swap", desc: "Buy your favourite cryptocurrency in 2 mins or less.", href: "/trades/instant-swap" },
     { icon: LockClosedIcon, title: "Buy/Sell", desc: "Trade cryptocurrencies instantly with deep liquidity and competitive rates.", href: "/trades/buyandsell" },
+    { icon: RocketLaunchIcon, title: "Instant Swap", desc: "Buy your favourite cryptocurrency in 2 mins or less.", href: "/trades/instant-swap" },
     { icon: Squares2X2Icon, title: "P2P", desc: "Securely buy and sell crypto directly with other users.", href: "/trades/p2p" },
+    { icon: CreditCardIcon, title: "Cards", desc: "Spend money globally with a card that does it all.", href: "/trades/cards" },
   ],
   Resources: [
     { icon: UsersIcon, title: "Community", desc: "Connect with other traders and stay updated on the latest trends.", href: "/resources/community" },

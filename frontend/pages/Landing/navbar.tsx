@@ -124,11 +124,13 @@ export default function Navbar() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -5 }}
                       transition={{ duration: 0.3 }}
-                      className="space-y-4 font-thin pl-4 py-2 bg-gray-50 rounded"
+                      className="space-y-3 font-thin pl-4 py-3 bg-gray-50 rounded"
                     >
                       {megaMenus[menu as keyof typeof megaMenus].map((item, idx) => (
                         <Link key={idx} href={item.href}>
-                          <p className="text-sm text-gray-700 hover:text-[#0047AB] cursor-pointer">{item.title}</p>
+                          <p className="text-sm text-gray-700 hover:text-[#0047AB] active:text-[#0047AB] cursor-pointer py-1.5 px-2 rounded transition-all duration-200 hover:bg-blue-50 active:bg-blue-100 hover:translate-x-1">
+                            {item.title}
+                          </p>
                         </Link>
                       ))}
                     </motion.div>

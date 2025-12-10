@@ -6,7 +6,7 @@ export default function About (){
     return(
      <div>
         <Navbar />
-        <AboutPage />
+        <AboutPage/>
         <Footer/>
      </div>
     )

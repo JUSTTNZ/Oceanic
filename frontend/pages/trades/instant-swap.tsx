@@ -13,6 +13,7 @@ import {
   MinusIcon,
 } from "@heroicons/react/24/outline";
 import Navbar from "../Landing/navbar";
+import Footer from "../Landing/footer";
 
 const faqs = [
   {
@@ -117,6 +118,7 @@ export default function InstantSwapPage() {
           </div>
         </div>
       </section>
+      <Footer />
     </>
   );
 }

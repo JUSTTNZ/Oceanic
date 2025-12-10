@@ -8,6 +8,7 @@ import {
 import { UserCircleIcon } from "@heroicons/react/24/solid";
 import { FaWhatsapp, FaTelegramPlane, FaDiscord } from "react-icons/fa";
 import Navbar from "../Landing/navbar";
+import Footer from "../Landing/footer";
 const communityMembers = [
   { name: "CryptoCoach", title: "Pro Trader", country: "\ud83c\uddf3\ud83c\uddec Nigeria" },
   { name: "SashaDev", title: "Web3 Engineer", country: "\ud83c\uddec\ud83c\udde7 UK" },
@@ -97,6 +98,7 @@ export default function CommunityPage() {
           </p>
         </div>
       </section>
+      <Footer />
     </>
   );
 }

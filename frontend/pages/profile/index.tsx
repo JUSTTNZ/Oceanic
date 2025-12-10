@@ -1,7 +1,7 @@
 import { useSelector } from "react-redux";
 import Footer from "../login/footer";
 import Header from "../login/header";
-import { FiEdit, FiUser, FiMail, FiPhone, FiShield, FiGlobe } from "react-icons/fi";
+import { FiEdit, FiUser, FiMail, FiShield, FiGlobe } from "react-icons/fi";
 
 import { useEffect, useState } from "react";
 import EditProfileModal from "./modal";
@@ -16,7 +16,6 @@ interface RootState {
       username: string;
       roles: string;
       fullname:string;
-      phoneNumber:string;
       createdAt:string;
       country:string;
       lastLogin:string
@@ -34,7 +33,7 @@ export default function Profile() {
     month: 'long',
     day: 'numeric'
   }) : '';
-  const lastLoginTime = user.lastLogin;
+  const lastLoginTime = user?.lastLogin;
 
   // Format the last login time
   const formattedLastLogin = lastLoginTime ? timeAgo(lastLoginTime) : 'Never logged in';
@@ -69,8 +68,13 @@ export default function Profile() {
                 <div className="w-20 h-20 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white text-3xl font-bold">
                   {user?.username.charAt(0).toUpperCase()}
                 </div>
-                <button className="absolute bottom-0 right-0 bg-white p-2 rounded-full shadow-md hover:bg-gray-100 transition-colors">
-                  <FiEdit className="text-blue-600" />
+                <button 
+                  type="button"
+                  className="absolute bottom-0 right-0 bg-white p-2 rounded-full shadow-md hover:bg-gray-100 transition-colors"
+                  aria-label="Edit profile picture"
+                  title="Edit profile picture"
+                >
+                  <FiEdit className="text-blue-600" aria-hidden="true" />
                 </button>
               </div>
               <div className="ml-4">
@@ -109,16 +113,6 @@ export default function Profile() {
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-500">Username</p>
                     <p className="mt-1 text-sm text-gray-900">{user?.username}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start">
-                  <div className="flex-shrink-0 h-10 w-10 rounded-full bg-green-50 flex items-center justify-center">
-                    <FiPhone className="h-5 w-5 text-green-600" />
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-500">Phone Number</p>
-                    <p className="mt-1 text-sm text-gray-900">{user?.phoneNumber}</p>
                   </div>
                 </div>
 

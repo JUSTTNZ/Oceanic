@@ -37,8 +37,12 @@ export default function Hero() {
       <div className="max-w-7xl mx-auto px-6 lg:py-24 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
         <div>
           <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold text-[#0047AB] mb-6 leading-tight">Buy and sell <br /> crypto with ease</h1>
-          <p className="text-base sm:text-lg text-gray-900 mb-2">Trade smarter, faster, and without borders. At Oceanic Charts, we’re building a secure gateway to digital finance for everyone — everywhere.</p>
-          <p className="text-base sm:text-lg text-gray-900 mb-8">Your crypto journey starts here. Oceanic Charts empowers you to trade securely, access global markets, and grow your portfolio with confidence.</p>
+          <p className="text-base sm:text-lg text-gray-900 mb-2">
+            Tired of slow trades and hidden fees? OceanicCharts gives you instant crypto transactions with transparent pricing and zero surprises.
+          </p>
+          <p className="text-base sm:text-lg text-gray-900 mb-8">
+            Buy, sell, and swap over 100 cryptocurrencies in seconds. Your gateway to seamless digital trading starts here.
+          </p>
           {/* Input and Button */}
           <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0">
             <input type="email" placeholder="Your e-mail" className="border border-gray-300 px-4 py-3 rounded-md focus:outline-none w-full sm:w-64" />

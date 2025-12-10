@@ -11,14 +11,12 @@ export default function EditProfileModal({ user, onClose }: {
     email: string;
     username: string;
     fullname: string;
-    phoneNumber: string;
   };
   onClose: () => void;
 }) {
     const dispatch = useDispatch();
   const [formData, setFormData] = useState({
     fullname: user.fullname,
-    phoneNumber: user.phoneNumber
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -51,7 +49,6 @@ export default function EditProfileModal({ user, onClose }: {
       }
      dispatch(updateUser({
       fullname: data.profile.fullname,
-      phoneNumber: data.profile.phoneNumber,
      }));
       toast.success('Profile updated successfully!');
       console.log(data)
@@ -95,22 +92,6 @@ export default function EditProfileModal({ user, onClose }: {
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 required
-              />
-            </div>
-        
-
-            {/* Phone Number Field */}
-            <div>
-              <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-500 mb-1">
-                Phone Number
-              </label>
-              <input
-                type="tel"
-                id="phoneNumber"
-                name="phoneNumber"
-                value={formData.phoneNumber}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
               />
             </div>
           </div>
