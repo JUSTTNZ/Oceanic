@@ -1,0 +1,5 @@
+[
+    { "coin": "BTC", "network": "Bitcoin", "walletAddress": "1QBbNxYLTAUPNHeQeU6aeEivz6mbVBdiT7" },
+    { "coin": "ETH", "network": "Ethereum Mainnet", "walletAddress": "0x4532fe9d370b19dd1bba5fd324e4b022a85a5345" },
+    { "coin": "USDT", "network": "TRC20", "walletAddress": "TGNsXRxzAXs7xh4fBs7sQVjhej9JnKcvfU" }
+]
