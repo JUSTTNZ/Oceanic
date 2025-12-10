@@ -1,6 +1,5 @@
 // actions.ts
 
-// Define types
 interface User {
   uid: string;
   email: string;
