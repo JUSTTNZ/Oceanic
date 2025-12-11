@@ -21,6 +21,36 @@ interface Props {
 const TransactionStatusModal = ({ type, title, message, details, onClose }: Props) => {
   const controls = useAnimation();
   const [isVisible, setIsVisible] = useState(true);
+  const [remainingMs, setRemainingMs] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (type !== 'pending' || !details) return;
+
+    // compute expiry: prefer createdAt from details, otherwise persisted expiry in localStorage, otherwise now + 10min
+    const key = details.txid ? `tx_expiry_${details.txid}` : null;
+    let expiry = null as number | null;
+    if (details.createdAt) {
+      expiry = new Date(String(details.createdAt)).getTime() + 10 * 60 * 1000;
+      if (key) localStorage.setItem(key, String(expiry));
+    } else if (key) {
+      const stored = localStorage.getItem(key);
+      if (stored) expiry = parseInt(stored, 10);
+    }
+
+    if (!expiry) {
+      expiry = Date.now() + 10 * 60 * 1000;
+      if (key) localStorage.setItem(key, String(expiry));
+    }
+
+    const tick = () => {
+      const ms = expiry! - Date.now();
+      setRemainingMs(ms > 0 ? ms : 0);
+    };
+
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [type, details]);
 
   useEffect(() => {
     const sequence = async () => {
@@ -154,6 +184,13 @@ const TransactionStatusModal = ({ type, title, message, details, onClose }: Prop
 
             {details && (
               <div className="mt-5 text-sm space-y-3 max-h-60 overflow-y-auto pr-2">
+                {type === 'pending' && remainingMs !== null && (
+                  <div className="mb-3 text-center">
+                    <p className="text-xs text-gray-300">Time remaining</p>
+                    <p className="text-lg font-semibold text-white">{new Date(remainingMs).toISOString().substr(14,5)}</p>
+                  </div>
+                )}
+
                 {Object.entries(details).map(([key, value]) => (
                   <motion.div
                     key={key}

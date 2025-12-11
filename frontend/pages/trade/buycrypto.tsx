@@ -3,7 +3,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useToast } from "../../hooks/toast";
 import CountryDropdown from "../components/buy/country";
 import CoinDropdown from "../components/buy/coin";
@@ -65,6 +65,7 @@ export default function BuyCrypto() {
   const [userEmail, setUserEmail] = useState<string>("");
   const [loadingPayment, setLoadingPayment] = useState(false);
   const { ToastComponent, showToast } = useToast();
+  const pollingRef = useRef<number | null>(null);
 
   const serviceFee = 50;
 
@@ -147,6 +148,39 @@ export default function BuyCrypto() {
       }
 
       setReference(data.data.txid);
+      // persist expiry for 10 minutes (use createdAt from backend if available)
+      try {
+        const expiry = new Date(data.data.createdAt).getTime() + 10 * 60 * 1000;
+        localStorage.setItem(`tx_expiry_${data.data.txid}`, String(expiry));
+      } catch (e) {
+        localStorage.setItem(`tx_expiry_${data.data.txid}`, String(Date.now() + 10 * 60 * 1000));
+      }
+
+      // start polling for status updates
+      if (pollingRef.current) window.clearInterval(pollingRef.current);
+      pollingRef.current = window.setInterval(async () => {
+        try {
+          const resp = await apiClients.request(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction/user`, {
+            method: 'GET',
+            credentials: 'include'
+          });
+          if (!resp.ok) return;
+          const j = await resp.json();
+          const txs = Array.isArray(j.data) ? j.data : [];
+          const found = txs.find((t: any) => t.txid === data.data.txid);
+          if (found && found.status === 'confirmed') {
+            if (pollingRef.current) {
+              window.clearInterval(pollingRef.current);
+              pollingRef.current = null;
+            }
+            localStorage.removeItem(`tx_expiry_${data.data.txid}`);
+            showToast('Your transaction has been confirmed by admin.', 'success');
+          }
+        } catch (err) {
+          console.error('Polling error', err);
+        }
+      }, 8000);
+
       payWithPaystack(data.data.txid);
     } catch (err) {
       console.error(err);

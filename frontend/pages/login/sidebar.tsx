@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { LiaTimesSolid } from "react-icons/lia";
 import { useSelector } from "react-redux";
-import { useState } from "react";
-import { FaChevronDown } from "react-icons/fa";
+import { useState, useEffect } from "react";
+import { FaChevronDown, FaBell } from "react-icons/fa";
 import LogoutM from "./logout";
+import { apiClients } from "@/lib/apiClient";
 
 interface RootState {
   user: {
@@ -25,6 +26,32 @@ export default function Sidebar({ isOpen, closeSidebar }: SidebarProps) {
   const user = useSelector((state: RootState) => state.user);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      try {
+        const res = await apiClients.request(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/notifications/unread/count`,
+          {
+            method: 'GET',
+            credentials: 'include'
+          }
+        );
+
+        if (res.ok) {
+          const data = await res.json();
+          setUnreadCount(data.data?.unreadCount || 0);
+        }
+      } catch (err) {
+        console.error('Failed to fetch unread count:', err);
+      }
+    };
+
+    fetchUnreadCount();
+    const interval = setInterval(fetchUnreadCount, 15000);
+    return () => clearInterval(interval);
+  }, []);
   return (
     <>
       <div
@@ -68,6 +95,21 @@ export default function Sidebar({ isOpen, closeSidebar }: SidebarProps) {
             </Link>
           )}
 
+          {user && (
+            <Link
+              href="/notifications"
+              onClick={closeSidebar}
+              className="relative flex items-center justify-between hover:bg-blue-400 px-3 py-2 rounded transition-colors duration-300"
+            >
+              <span>Notifications</span>
+              {unreadCount > 0 && (
+                <span className="bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </Link>
+          )}
+
           {user ? (
             <>
               <button
@@ -103,7 +145,7 @@ export default function Sidebar({ isOpen, closeSidebar }: SidebarProps) {
                   </Link>
                   <Link
                     href="#"
-                                    onClick={(e) => {
+                    onClick={(e) => {
         e.preventDefault();
         setShowModal(true);
         closeSidebar();

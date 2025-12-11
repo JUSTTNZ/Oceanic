@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 //import { useToast } from "../../hooks/toast";
 import { ArrowPathIcon, } from "@heroicons/react/24/outline";
 import CoinSelection from "../components/sell/coinselection";
@@ -86,7 +86,10 @@ const [selectedCountry] = useState<Country>({
   amount?: number;
   status?: string;
   txid?: string;
+  createdAt?: string;
 } | null>(null);
+
+  const pollingRef = useRef<number | null>(null);
 
   const [banksList, setBanksList] = useState<{name: string, code: string}[]>([]);
   const [bankErrors, setBankErrors] = useState<{ accountNumber?: string; accountName?: string }>({});
@@ -258,12 +261,53 @@ console.log("a", amount)
     setShowModal(true);
     resetForm();
     }
-    else {
-      // Bitget did not confirm it yet
-      setStatus("pending");
-      showToast(
-        "Transaction submitted but not yet confirmed. Please wait."
-      );
+        // persist confirmed transaction info (include createdAt from backend when available)
+        const payload = {
+          coin: selectedCoin?.symbol.toUpperCase(),
+          amount,
+          status: "pending",
+          txid,
+          createdAt: createData.data?.createdAt || new Date().toISOString(),
+        };
+        setConfirmedTransaction(payload);
+        // persist expiry timestamp for timer (backend createdAt + 10min)
+        try {
+          const expiry = new Date(payload.createdAt).getTime() + 10 * 60 * 1000;
+          localStorage.setItem(`tx_expiry_${payload.txid}`, String(expiry));
+        } catch (e) {
+          localStorage.setItem(`tx_expiry_${payload.txid}`, String(Date.now() + 10 * 60 * 1000));
+        }
+
+        // start polling for status updates
+        if (pollingRef.current) window.clearInterval(pollingRef.current);
+        pollingRef.current = window.setInterval(async () => {
+          try {
+            const resp = await apiClients.request(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction/user`, {
+              method: 'GET',
+              credentials: 'include'
+            });
+            if (!resp.ok) return;
+            const j = await resp.json();
+            const txs = Array.isArray(j.data) ? j.data : [];
+            const found = txs.find((t: any) => t.txid === txid);
+            if (found && found.status === 'confirmed') {
+              // stop polling
+              if (pollingRef.current) {
+                window.clearInterval(pollingRef.current);
+                pollingRef.current = null;
+              }
+              // update UI
+              setStatus('confirmed');
+              setModalType('success');
+              setShowModal(true);
+              setConfirmedTransaction(found);
+              // clear expiry
+              localStorage.removeItem(`tx_expiry_${txid}`);
+            }
+          } catch (err) {
+            console.error('Polling error', err);
+          }
+        }, 8000);
       setConfirmedTransaction({
         coin: selectedCoin?.symbol.toUpperCase(),
         amount,

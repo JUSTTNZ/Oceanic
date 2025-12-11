@@ -1,10 +1,10 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 
 import Sidebar from "./sidebar";
 import { RiMenu3Line } from "react-icons/ri";
-import {  FaChevronDown } from "react-icons/fa";
+import {  FaChevronDown, FaBell } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/router";
 import { toast } from "react-hot-toast";
@@ -21,9 +21,38 @@ interface RootState {
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const dispatch = useDispatch()
   const router = useRouter()
-    const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  // Fetch unread notification count
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      try {
+        const res = await apiClients.request(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/notifications/unread/count`,
+          {
+            method: 'GET',
+            credentials: 'include'
+          }
+        );
+
+        if (res.ok) {
+          const data = await res.json();
+          setUnreadCount(data.data?.unreadCount || 0);
+        }
+      } catch (err) {
+        console.error('Failed to fetch unread count:', err);
+      }
+    };
+
+    fetchUnreadCount();
+
+    // Poll for new notifications every 15 seconds
+    const interval = setInterval(fetchUnreadCount, 15000);
+    return () => clearInterval(interval);
+  }, []);
   const handleSignOut = async () => {
     setIsLoggingOut(true);
     try {
@@ -106,6 +135,20 @@ export default function Header() {
         </ul>
         {user ? (
         <>
+        {/* Notification Bell */}
+        <Link
+          href="/notifications"
+          className="relative flex items-center hover:bg-blue-300 px-3 py-2 rounded transition-colors duration-300"
+          title="Notifications"
+        >
+          <FaBell size={18} />
+          {unreadCount > 0 && (
+            <span className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
+          )}
+        </Link>
+
         <button 
           id="dropdownDefaultButton" 
           data-dropdown-toggle="dropdown" 
