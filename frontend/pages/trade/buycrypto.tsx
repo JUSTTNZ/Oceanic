@@ -50,6 +50,12 @@ interface ApiCountry {
   currencies: Currency;
 }
 
+interface Transaction {
+  txid: string;
+  status: 'pending' | 'confirmed' | 'paid';
+  // Add other properties as needed
+}
+
 export default function BuyCrypto() {
   const [coins, setCoins] = useState<Coin[]>([]);
   const [selectedCoin, setSelectedCoin] = useState<Coin | null>(null);
@@ -167,7 +173,7 @@ export default function BuyCrypto() {
           if (!resp.ok) return;
           const j = await resp.json();
           const txs = Array.isArray(j.data) ? j.data : [];
-          const found = txs.find((t: any) => t.txid === data.data.txid);
+          const found = txs.find((t: Transaction) => t.txid === data.data.txid);
           if (found && found.status === 'confirmed') {
             if (pollingRef.current) {
               window.clearInterval(pollingRef.current);
