@@ -14,9 +14,10 @@ type UserRef = {
 
 interface Transaction {
   txid: string;
-  userId: UserRef;              
+  userId: UserRef;
   coin: string;
   amount: number;
+  coinAmount: number;
   walletAddressUsed: string;
   status: string;
   type: string;

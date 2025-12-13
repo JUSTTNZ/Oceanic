@@ -138,6 +138,7 @@ export default function BuyCrypto() {
         body: JSON.stringify({
           coin: selectedCoin?.symbol,
           amount: parseFloat(amount),
+          coinAmount: coinAmount,
           txid: generateUniqueTxid(),
           type: "buy",
           country: selectedCountry?.name,

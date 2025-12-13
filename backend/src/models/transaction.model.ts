@@ -8,6 +8,7 @@ export interface ITransaction extends Document {
   userEmail: string;
   coin: string;
   amount: number;
+  coinAmount: number;
   txid: string;
   status: 'pending' | 'confirmed' | 'paid';
   type: 'buy' | 'sell';

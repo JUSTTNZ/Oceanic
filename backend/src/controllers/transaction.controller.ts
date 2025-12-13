@@ -21,6 +21,7 @@ const createTransaction = asyncHandler(async (req: Request, res: Response)  => {
     const {
       coin,
       amount,
+      coinAmount,
       txid,
       type,
       walletAddressUsed,
@@ -30,7 +31,7 @@ const createTransaction = asyncHandler(async (req: Request, res: Response)  => {
       accountNumber
     } = req.body;
 
-    if (!coin || !amount || !txid || !type || !country) {
+    if (!coin || !amount || !coinAmount || !txid || !type || !country) {
       throw new ApiError({ statusCode: 400, message: "Missing required fields" });
     }
 
@@ -189,7 +190,7 @@ const updateTransactionStatus = asyncHandler(async (req, res) => {
     await Notification.create({
       userId: transaction.userId,
       type: 'transaction_confirmed',
-      message: `Your ${transaction.type} transaction of ${transaction.amount} ${transaction.coin.toUpperCase()} has been confirmed. Payment has been processed.`,
+      message: `Your ${transaction.type} transaction of $${transaction.amount} (${transaction.coinAmount} ${transaction.coin.toUpperCase()}) has been confirmed. Payment has been processed.`,
       transactionId: transaction._id,
       txid: transaction.txid,
       amount: transaction.amount,

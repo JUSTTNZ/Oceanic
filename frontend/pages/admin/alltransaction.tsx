@@ -104,7 +104,8 @@ export default function AllTransactionsPage() {
                   <th className="px-4 py-2 text-left text-sm font-semibold cursor-pointer" onClick={() => toggleSort("createdAt")}>Date {renderSortIcon("createdAt")}</th>
                   <th className="px-4 py-2 text-left text-sm font-semibold cursor-pointer" onClick={() => toggleSort("type")}>Type {renderSortIcon("type")}</th>
                   <th className="px-4 py-2 text-left text-sm font-semibold cursor-pointer" onClick={() => toggleSort("status")}>Status {renderSortIcon("status")}</th>
-                  <th className="px-4 py-2 text-right text-sm font-semibold cursor-pointer" onClick={() => toggleSort("amount")}>Amount {renderSortIcon("amount")}</th>
+                  <th className="px-4 py-2 text-right text-sm font-semibold cursor-pointer" onClick={() => toggleSort("amount")}>Dollar Amount {renderSortIcon("amount")}</th>
+                  <th className="px-4 py-2 text-right text-sm font-semibold">Coin Amount</th>
                   <th className="px-4 py-2 text-left text-sm font-semibold">Wallet</th>
                   <th className="px-4 py-2 text-left text-sm font-semibold">User</th>
                   <th className="px-4 py-2 text-left text-sm font-semibold">Bank</th>
@@ -121,7 +122,8 @@ export default function AllTransactionsPage() {
                         {tx.status.toUpperCase()}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-sm text-right text-white font-semibold">{tx.amount} {tx.coin.toUpperCase()}</td>
+                    <td className="px-4 py-3 text-sm text-right text-white font-semibold">${tx.amount}</td>
+                    <td className="px-4 py-3 text-sm text-right text-white font-semibold">{tx.coinAmount} {tx.coin.toUpperCase()}</td>
                     <td className="px-4 py-3 text-sm text-gray-400 font-mono truncate max-w-xs">{tx.walletAddressUsed}</td>
                     <td className="px-4 py-3 text-sm text-gray-300">{tx.userId?.email || "N/A"}</td>
                     <td className="px-4 py-3 text-sm text-gray-400">
