@@ -4,10 +4,10 @@ import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import http from 'http'
 import firebaseInit from '../src/utils/firebase.js'
-import { connectDB } from './config/database.js';
+//import connectDB from './config/db.js';
 
 // Connect to the database as soon as the app starts
-connectDB();
+//connectDB();
 
 // Extend Express types
 declare global {
@@ -28,10 +28,9 @@ const allowedOrigins = [
   'https://oceaniccharts.com',
   'https://www.oceaniccharts.com',
   'http://localhost:3000',
-  'https://oceanic-charts.vercel.app',
-  'https://oceanic-servernz.vercel.app'
+  'https://oceanic-charts.vercel.app'
 ]
-const vercelRegex = /^https:\/\/oceanic(-[\w-]+)?\.vercel\.app$/
+const vercelRegex = /^https:\/\/oceanic-charts(-[\w-]+)?\.vercel\.app$/
 
 const corsOptions: cors.CorsOptions = {
   origin: (origin, callback) => {
