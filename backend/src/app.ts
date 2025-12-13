@@ -28,9 +28,10 @@ const allowedOrigins = [
   'https://oceaniccharts.com',
   'https://www.oceaniccharts.com',
   'http://localhost:3000',
-  'https://oceanic-charts.vercel.app'
+  'https://oceanic-charts.vercel.app',
+  'https://oceanic-servernz.vercel.app'
 ]
-const vercelRegex = /^https:\/\/oceanic-charts(-[\w-]+)?\.vercel\.app$/
+const vercelRegex = /^https:\/\/oceanic(-[\w-]+)?\.vercel\.app$/
 
 const corsOptions: cors.CorsOptions = {
   origin: (origin, callback) => {
