@@ -7,6 +7,7 @@ import { apiClients } from "@/lib/apiClient";
 interface Transaction {
   txid: string;
   amount: number;
+  coinAmount: number;
   coin: string;
   type: string;
   status: string;
