@@ -10,6 +10,7 @@ import { useRouter } from "next/router";
 import { toast } from "react-hot-toast";
 import { clearUser } from "@/action";
 import { apiClients } from "@/lib/apiClient";
+import { supabase } from "@/lib/supabase";
 interface RootState {
   user: {
     uid: number;
@@ -30,17 +31,29 @@ export default function Header() {
   useEffect(() => {
     const fetchUnreadCount = async () => {
       try {
-        const res = await apiClients.request(
+        // Get Supabase session for authentication
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.access_token) {
+          console.warn('No Supabase session found');
+          return;
+        }
+
+        const res = await fetch(
           `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/notifications/unread/count`,
           {
             method: 'GET',
-            credentials: 'include'
+            headers: {
+              'Authorization': `Bearer ${session.access_token}`,
+              'Content-Type': 'application/json'
+            }
           }
         );
 
         if (res.ok) {
           const data = await res.json();
           setUnreadCount(data.data?.unreadCount || 0);
+        } else {
+          console.error('Failed to fetch unread count:', res.status, res.statusText);
         }
       } catch (err) {
         console.error('Failed to fetch unread count:', err);
@@ -226,6 +239,7 @@ export default function Header() {
       <button
         className="lg:hidden transition-transform duration-300 hover:scale-110"
         onClick={() => setIsOpen(true)}
+        title="Open menu"
       >
         <RiMenu3Line className="w-6 h-6" />
       </button>
