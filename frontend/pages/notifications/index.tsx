@@ -53,7 +53,7 @@ export default function NotificationsPage() {
     };
 
     fetchNotifications();
-  }, [showToast]);
+  }, []); // Remove showToast from dependencies
 
   const handleMarkAsRead = async (notificationId: string) => {
     setMarkingAsRead(notificationId);
@@ -139,7 +139,7 @@ export default function NotificationsPage() {
             <div className="text-center py-16 bg-gray-800/30 border border-gray-700/20 rounded-xl">
               <FaBell className="text-4xl text-gray-500 mx-auto mb-4" />
               <h3 className="text-xl font-medium text-gray-300 mb-2">No notifications yet</h3>
-              <p className="text-gray-400">You'll see transaction updates here when admin confirms your payments</p>
+              <p className="text-gray-400">You&apos;ll see transaction updates here when admin confirms your payments</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -220,6 +220,7 @@ export default function NotificationsPage() {
         </div>
       </div>
       <Footer />
+      {ToastComponent}
     </section>
   );
 }
