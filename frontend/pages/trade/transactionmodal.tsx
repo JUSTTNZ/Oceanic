@@ -26,6 +26,12 @@ const TransactionStatusModal = ({ type, title, message, details, onClose }: Prop
   useEffect(() => {
     if (type !== 'pending' || !details) return;
 
+    // If status is already confirmed, don't start timer
+    if (details.status === 'confirmed') {
+      setRemainingMs(0);
+      return;
+    }
+
     // compute expiry: prefer createdAt from details, otherwise persisted expiry in localStorage, otherwise now + 10min
     const key = details.txid ? `tx_expiry_${details.txid}` : null;
     let expiry = null as number | null;

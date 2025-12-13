@@ -3,6 +3,9 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 export interface ITransaction extends Document {
   userId: mongoose.Types.ObjectId;
+  userFullname: string;
+  userUsername: string;
+  userEmail: string;
   coin: string;
   amount: number;
   txid: string;

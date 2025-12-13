@@ -3,6 +3,8 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Transaction } from "../models/transaction.model.js";
 import { CoinWallet } from "../models/coinWallet.model.js";
+import { Notification } from "../models/notification.model.js";
+import { sendAdminEmail } from "../utils/mailer.js";
 import { Request, Response } from "express";
 import coins from "../coindata/coin.json" with { type: "json" };
 interface CoinData {
@@ -180,6 +182,49 @@ const updateTransactionStatus = asyncHandler(async (req, res) => {
 
   transaction.status = status;
   await transaction.save();
+
+  // If status is confirmed, create notification and send email
+  if (status === 'confirmed') {
+    // Create notification
+    await Notification.create({
+      userId: transaction.userId,
+      type: 'transaction_confirmed',
+      message: `Your ${transaction.type} transaction of ${transaction.amount} ${transaction.coin.toUpperCase()} has been confirmed. Payment has been processed.`,
+      transactionId: transaction._id,
+      txid: transaction.txid,
+      amount: transaction.amount,
+      coin: transaction.coin,
+    });
+
+    // Send email
+    const emailSubject = `Transaction Confirmed - ${transaction.txid}`;
+    const emailBody = `
+      <h2>Transaction Confirmed</h2>
+      <p>Dear ${transaction.userFullname},</p>
+      <p>Your ${transaction.type} transaction has been successfully confirmed.</p>
+      <p><strong>Transaction Details:</strong></p>
+      <ul>
+        <li>Transaction ID: ${transaction.txid}</li>
+        <li>Amount: ${transaction.amount} ${transaction.coin.toUpperCase()}</li>
+        <li>Type: ${transaction.type}</li>
+        <li>Status: Confirmed</li>
+      </ul>
+      <p>Your payment has been processed and credited to your account.</p>
+      <p>Thank you for using Oceanic Charts!</p>
+      <p>Best regards,<br>The Oceanic Charts Team</p>
+    `;
+
+    try {
+      await sendAdminEmail({
+        to: transaction.userEmail,
+        subject: emailSubject,
+        html: emailBody
+      });
+    } catch (emailError) {
+      console.error('Failed to send confirmation email:', emailError);
+      // Don't throw error, just log it
+    }
+  }
 
   // const io = getIO();
   // io.emit('transaction_updated', {
