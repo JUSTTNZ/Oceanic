@@ -5,12 +5,12 @@ import {
   markAsRead,
   markAllAsRead,
 } from '../controllers/notification.controller.js';
-import { verifyJWT } from '../middlewares/auth.middleware.js';
+import { requireSupabaseUser } from '../middlewares/supabaseAuth.js';
 
 const router = Router();
 
-// Apply JWT verification to all routes
-router.use(verifyJWT);
+// Apply Supabase user verification to all routes
+router.use(requireSupabaseUser);
 
 // Get all notifications
 router.get('/', getNotifications);
