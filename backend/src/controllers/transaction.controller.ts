@@ -3,9 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Transaction } from "../models/transaction.model.js";
 import { CoinWallet } from "../models/coinWallet.model.js";
-import { Notification } from "../models/notification.model.js";
 import { Request, Response } from "express";
-import { sendAdminEmail } from "../utils/mailer.js";
 import coins from "../coindata/coin.json" with { type: "json" };
 interface CoinData {
   coin: string;
@@ -189,34 +187,6 @@ const updateTransactionStatus = asyncHandler(async (req, res) => {
   //   txid,
   //   status
   // });
-
-  // If admin confirmed the transaction, notify the user by email and create a notification
-  if (status === 'confirmed') {
-    try {
-      await sendAdminEmail({
-        to: transaction.userEmail,
-        subject: `Payment sent for transaction ${transaction.txid}`,
-        text: `Hello ${transaction.userFullname},\n\nWe have sent payment for your transaction (${transaction.txid}) of ${transaction.amount} ${transaction.coin}. If you have any questions, reply to this email.\n\nBest regards,\nOceanic Team`,
-      });
-    } catch (err) {
-      console.error('Failed to send confirmation email to user:', err);
-    }
-
-    // Create a notification for the user
-    try {
-      await Notification.create({
-        userId: transaction.userId,
-        type: 'transaction_confirmed',
-        message: `Your transaction of ${transaction.amount} ${transaction.coin} has been confirmed. Payment has been sent to your account.`,
-        txid: transaction.txid,
-        transactionId: transaction._id,
-        amount: transaction.amount,
-        coin: transaction.coin,
-      });
-    } catch (err) {
-      console.error('Failed to create notification:', err);
-    }
-  }
 
   return res.status(200).json(new ApiResponse(200, 'Transaction status updated', transaction));
 });
