@@ -347,10 +347,14 @@ useEffect(() => {
 
  
   useEffect(() => {
-    if (amount && selectedCoin) {
+    if (amount && selectedCoin && selectedCoin.current_price > 0) {
       const usdVal = parseFloat(amount) || 0;
       const coinVal = usdVal / selectedCoin.current_price;
-      setCoinAmount(parseFloat(coinVal.toFixed(8)));
+      if (isNaN(coinVal) || !isFinite(coinVal)) {
+        setCoinAmount(0);
+      } else {
+        setCoinAmount(parseFloat(coinVal.toFixed(8)));
+      }
     } else {
       setCoinAmount(0);
     }

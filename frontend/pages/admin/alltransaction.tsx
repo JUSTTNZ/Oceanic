@@ -124,7 +124,7 @@ export default function AllTransactionsPage() {
                       </span>
                     </td>
                     <td className="px-4 py-3 text-sm text-right text-white font-semibold">${tx.amount}</td>
-                    <td className="px-4 py-3 text-sm text-right text-white font-semibold">{tx.coinAmount} {tx.coin.toUpperCase()}</td>
+                  <td className="px-4 py-3 text-sm text-right text-white font-semibold">{tx.coinAmount || '0'} {tx.coin.toUpperCase()}</td>
                     <td className="px-4 py-3 text-sm text-gray-400 font-mono truncate max-w-xs">{tx.walletAddressUsed}</td>
                     <td className="px-4 py-3 text-sm text-gray-300">{tx.userId?.email || "N/A"}</td>
                     <td className="px-4 py-3 text-sm text-gray-400">

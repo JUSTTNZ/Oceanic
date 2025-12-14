@@ -51,6 +51,7 @@ const createTransaction = asyncHandler(async (req: Request, res: Response)  => {
       userEmail: req.profile?.email,
       coin,
       amount,
+      coinAmount,
       txid,
       type,
       country,
