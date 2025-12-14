@@ -139,8 +139,11 @@ const handleUpdateStatus = async (txid: string, status: string) => {
 
                 <div className="mb-6 ">
                   <p className="text-2xl font-bold text-white">
-                    {tx.amount} {tx.coin.toUpperCase()}
+                    $ {tx.amount}
                   </p>
+<p className="text-sm text-gray-300 mt-1">
+  Coin Amount: {tx.coinAmount} {tx.coin.toUpperCase()}
+</p>
 <p className="text-xs text-gray-400 mt-1  overflow-hidden text-ellipsis ">
   Transaction ID: {tx.txid}
 </p>
