@@ -31,7 +31,7 @@ const createTransaction = asyncHandler(async (req: Request, res: Response)  => {
       accountNumber
     } = req.body;
 
-    if (!coin || !amount || !coinAmount || !txid || !type || !country) {
+    if (!coin || amount == null || coinAmount == null || !txid || !type || !country) {
       throw new ApiError({ statusCode: 400, message: "Missing required fields" });
     }
 
