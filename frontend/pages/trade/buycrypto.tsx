@@ -347,15 +347,14 @@ useEffect(() => {
 
  
   useEffect(() => {
-    if (amount && selectedCoin && exchangeRate > 0 && selectedCountry) {
-      const localVal = parseFloat(amount) || 0;
-      const netAmount = localVal - serviceFee;
-      const coinVal = netAmount > 0 ? netAmount / (selectedCoin.current_price * exchangeRate) : 0;
-      setCoinAmount(parseFloat(coinVal.toFixed(6)));
+    if (amount && selectedCoin) {
+      const usdVal = parseFloat(amount) || 0;
+      const coinVal = usdVal / selectedCoin.current_price;
+      setCoinAmount(parseFloat(coinVal.toFixed(8)));
     } else {
       setCoinAmount(0);
     }
-  }, [amount, selectedCoin, exchangeRate, selectedCountry]);
+  }, [amount, selectedCoin]);
 
   const adjustedExchangeRate = exchangeRate + 50;
   const usdAmount = parseFloat(amount || "0");
