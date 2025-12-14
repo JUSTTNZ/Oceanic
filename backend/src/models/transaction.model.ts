@@ -29,6 +29,7 @@ const TransactionSchema = new mongoose.Schema({
   userEmail: { type: String, required: true },
   coin: { type: String, required: true },
   amount: { type: Number, required: true },
+  coinAmount: { type: Number, required: true },
   txid: { type: String, required: true, unique: true },
   type: { type: String, enum: ['buy', 'sell'], required: true },
   country: { type: String, required: true },
