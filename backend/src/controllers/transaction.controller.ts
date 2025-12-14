@@ -140,7 +140,13 @@ const getAllTransactions = asyncHandler(async (req, res) => {
       .populate('userId', 'email username fullname')
       .sort({ createdAt: sortOrder });
 
-    res.json(new ApiResponse(200, 'All transactions', transactions));
+    // Ensure coinAmount is always present in the response
+    const processedTransactions = transactions.map(tx => ({
+      ...tx.toObject(),
+      coinAmount: tx.coinAmount || 0
+    }));
+
+    res.json(new ApiResponse(200, 'All transactions', processedTransactions));
     console.log('All transactions:', transactions);
   } catch (error) {
     console.error("Error fetching transactions:", error);
@@ -191,7 +197,7 @@ const updateTransactionStatus = asyncHandler(async (req, res) => {
     await Notification.create({
       userId: transaction.userId,
       type: 'transaction_confirmed',
-      message: `Your ${transaction.type} transaction of $${transaction.amount} (${transaction.coinAmount} ${transaction.coin.toUpperCase()}) has been confirmed. Payment has been processed.`,
+      message: `Your ${transaction.type} transaction of $${transaction.amount} (${transaction.coinAmount || 0} ${transaction.coin.toUpperCase()}) has been confirmed. Payment has been processed.`,
       transactionId: transaction._id,
       txid: transaction.txid,
       amount: transaction.amount,
