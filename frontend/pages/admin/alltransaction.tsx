@@ -181,7 +181,7 @@ export default function AllTransactionsPage() {
                   : tx.coinAmount * (tx.exchangeRateAdjusted ?? exchangeRate);
 
               const nairaAmount = dollarAmount * (tx.exchangeRateAdjusted ?? exchangeRate);
-
+ console.log ("d",dollarAmount)
                   return (
                     <tr key={tx.txid} className="hover:bg-gray-800/50">
                       <td className="px-4 py-3 text-blue-300 font-mono truncate max-w-xs">{tx.txid}</td>
@@ -192,7 +192,8 @@ export default function AllTransactionsPage() {
                           {tx.status.toUpperCase()}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-right font-semibold">{tx.type === "buy" ? `$${tx.amount}` : `${tx.coinAmount} ${tx.coin.toUpperCase()}`}</td>
+{tx.type === "buy" ? `$${tx.amount}` : ` $${ dollarAmount.toFixed(2)} `}
+
                       <td className="px-4 py-3 text-right font-semibold">
                         {loadingRates ? "Loading..." : new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN" }).format(nairaAmount)}
                       </td>
