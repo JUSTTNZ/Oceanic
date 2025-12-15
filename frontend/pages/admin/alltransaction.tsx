@@ -44,37 +44,61 @@ export default function AllTransactionsPage() {
    const fetchTransactionsAndRates = async () => {
   try {
     setLoading(true);
+    setLoadingRates(true);
+    
     // Fetch transactions
-    const { data } = await apiClients.request(
+    const response = await apiClients.request(
       `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction/admin`,
       {
         method: 'GET',
         credentials: 'include'
       }
-    ).then(res => res.json());
+    );
 
-    setTransactions(Array.isArray(data) ? data : []);
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => "Failed to fetch transactions");
+      console.error("Transaction fetch error:", errorText);
+      showToast("Failed to load transactions", "error");
+      setTransactions([]);
+      setLoading(false);
+      setLoadingRates(false);
+      return;
+    }
+
+    const responseData = await response.json();
+    setTransactions(Array.isArray(responseData.data) ? responseData.data : []);
 
     // Fetch exchange rates
-    const responseRate = await apiClients.request(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/data/exchange-rates`,
-      {
-          method: 'GET',
-          credentials: "include"
+    try {
+      const responseRate = await apiClients.request(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/data/exchange-rates`,
+        {
+            method: 'GET',
+            credentials: "include"
+        }
+      );
+      if (responseRate.ok) {
+        const rateData = await responseRate.json();
+        const initialRate = rateData.data?.conversion_rates?.NGN || 1; 
+        setExchangeRate(initialRate);
+      } else {
+        console.warn("Failed to fetch exchange rates, using default");
+        setExchangeRate(1);
       }
-    );
-    if (!responseRate.ok) throw new Error("Failed to fetch rates");
-    const rateData = await responseRate.json();
-    // Assuming a default country like Nigeria for NGN rate conversion
-    const initialRate = rateData.data?.conversion_rates?.NGN || 1; 
-    setExchangeRate(initialRate);
-    setLoadingRates(false);
+    } catch (rateError) {
+      console.warn("Exchange rate fetch error:", rateError);
+      setExchangeRate(1); // Use default rate
+    } finally {
+      setLoadingRates(false);
+    }
 
   } catch (err) {
     showToast("Failed to fetch data", "error");
     console.error(err);
+    setTransactions([]);
   } finally {
     setLoading(false);
+    setLoadingRates(false);
   }
 };
     fetchTransactionsAndRates();

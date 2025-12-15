@@ -36,6 +36,7 @@ useEffect(() => {
   const fetchPendingTransactionsAndRates = async () => {
     try {
       setLoading(true);
+      setLoadingRates(true);
       // Fetch transactions
       const response = await apiClients.request(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction/admin`,
@@ -46,8 +47,12 @@ useEffect(() => {
       );
 
       if (!response.ok) {
+        const errorText = await response.text().catch(() => "Failed to fetch transactions");
+        console.error("Transaction fetch error:", errorText);
+        showToast("Failed to load transactions", "error");
         setTransactions([]);
         setLoading(false);
+        setLoadingRates(false);
         return;
       }
 
@@ -58,24 +63,36 @@ useEffect(() => {
       setTransactions(pending);
 
       // Fetch exchange rates
-      const responseRate = await apiClients.request(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/data/exchange-rates`,
-        {
-            method: 'GET',
-            credentials: "include"
+      try {
+        const responseRate = await apiClients.request(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/data/exchange-rates`,
+          {
+              method: 'GET',
+              credentials: "include"
+          }
+        );
+        if (responseRate.ok) {
+          const rateData = await responseRate.json();
+          const initialRate = rateData.data?.conversion_rates?.NGN || 1; 
+          setExchangeRate(initialRate);
+        } else {
+          console.warn("Failed to fetch exchange rates, using default");
+          setExchangeRate(1);
         }
-      );
-      if (!responseRate.ok) throw new Error("Failed to fetch rates");
-      const rateData = await responseRate.json();
-      const initialRate = rateData.data?.conversion_rates?.NGN || 1; 
-      setExchangeRate(initialRate);
-      setLoadingRates(false);
+      } catch (rateError) {
+        console.warn("Exchange rate fetch error:", rateError);
+        setExchangeRate(1); // Use default rate
+      } finally {
+        setLoadingRates(false);
+      }
 
     } catch (err) {
       showToast("Failed to load data", "error");
       console.error("Failed to load data", err);
+      setTransactions([]);
     } finally {
       setLoading(false);
+      setLoadingRates(false);
     }
   };
 
