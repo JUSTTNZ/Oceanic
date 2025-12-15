@@ -58,7 +58,17 @@ export default function AllTransactionsPage() {
     if (!response.ok) {
       const errorText = await response.text().catch(() => "Failed to fetch transactions");
       console.error("Transaction fetch error:", errorText);
-      showToast("Failed to load transactions", "error");
+      
+      // Check for authentication errors
+      if (response.status === 401 || response.status === 403) {
+        showToast("Authentication required. Please login again.", "error");
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 2000);
+      } else {
+        showToast("Failed to load transactions", "error");
+      }
+      
       setTransactions([]);
       setLoading(false);
       setLoadingRates(false);
@@ -93,8 +103,18 @@ export default function AllTransactionsPage() {
     }
 
   } catch (err) {
-    showToast("Failed to fetch data", "error");
     console.error(err);
+    
+    // Handle authentication errors
+    if (err instanceof Error && err.message === "No access token") {
+      showToast("Authentication required. Please login again.", "error");
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 2000);
+    } else {
+      showToast("Failed to fetch data", "error");
+    }
+    
     setTransactions([]);
   } finally {
     setLoading(false);
