@@ -200,9 +200,8 @@ const handleSubmit = async () => {
     setIsSubmitting(true);
     setStatus("sent");
 
-    // Calculate coinAmount (fiat equivalent)
-    const adjustedExchangeRate = exchangeRate - 50;
-    const coinAmount = amount * selectedCoin.current_price * adjustedExchangeRate;
+    const cryptoAmountToSell = amount;
+    const fiatAmountReceived = cryptoAmountToSell * selectedCoin.current_price;
 
     // Step 1: Create transaction
     const createRes = await apiClients.request(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction`, {
@@ -213,8 +212,8 @@ const handleSubmit = async () => {
       credentials: "include",
       body: JSON.stringify({
         coin: selectedCoin.symbol,
-        amount,
-        coinAmount,
+        amount: fiatAmountReceived, // This is the fiat amount received by the user
+        coinAmount: cryptoAmountToSell, // This is the crypto amount sold by the user
         txid,
         type: "sell",
         country: selectedCountry.code,

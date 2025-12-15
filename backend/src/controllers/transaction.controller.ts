@@ -193,15 +193,34 @@ const updateTransactionStatus = asyncHandler(async (req, res) => {
 
   // If status is confirmed, create notification and send email
   if (status === 'confirmed') {
+    let notificationAmount: number;
+    let notificationCoin: string;
+    let notificationMessage: string;
+    let emailAmountDisplay: string;
+
+          if (transaction.type === 'buy') {
+            // For buy: primary amount is fiat (USD), secondary is crypto
+            notificationAmount = transaction.amount; // Store fiat amount for notification
+            notificationCoin = 'USD'; // Explicitly USD for buy transactions
+            notificationMessage = `Your buy transaction of $${transaction.amount} (${transaction.coinAmount || 0} ${transaction.coin.toUpperCase()}) has been confirmed. Payment has been processed.`;
+            emailAmountDisplay = `$${transaction.amount} USD`;
+          } else {
+            // For sell: primary amount is crypto, secondary is fiat (USD equivalent)
+            notificationAmount = transaction.coinAmount; // Store crypto amount for notification
+            notificationCoin = transaction.coin.toUpperCase(); // Store crypto symbol
+            // The message should reflect crypto sold and fiat received
+            notificationMessage = `Your sell transaction of ${transaction.coinAmount || 0} ${transaction.coin.toUpperCase()} ($${transaction.amount}) has been confirmed. Payment has been processed.`;
+            emailAmountDisplay = `${transaction.coinAmount || 0} ${transaction.coin.toUpperCase()}`;
+          }
     // Create notification
     await Notification.create({
       userId: transaction.userId,
       type: 'transaction_confirmed',
-      message: `Your ${transaction.type} transaction of $${transaction.amount} (${transaction.coinAmount || 0} ${transaction.coin.toUpperCase()}) has been confirmed. Payment has been processed.`,
+      message: notificationMessage,
       transactionId: transaction._id,
       txid: transaction.txid,
-      amount: transaction.amount,
-      coin: transaction.coin,
+      amount: notificationAmount,
+      coin: notificationCoin,
     });
 
     // Send email
@@ -213,7 +232,7 @@ const updateTransactionStatus = asyncHandler(async (req, res) => {
       <p><strong>Transaction Details:</strong></p>
       <ul>
         <li>Transaction ID: ${transaction.txid}</li>
-        <li>Amount: ${transaction.amount} ${transaction.coin.toUpperCase()}</li>
+        <li>Amount: ${emailAmountDisplay}</li>
         <li>Type: ${transaction.type}</li>
         <li>Status: Confirmed</li>
       </ul>

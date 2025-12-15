@@ -36,11 +36,15 @@ export default function AllTransactionsPage() {
   const [sortField, setSortField] = useState<keyof Transaction>("createdAt");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const { ToastComponent, showToast } = useToast();
+  const [exchangeRate, setExchangeRate] = useState<number>(0); // New state for exchange rate
+  const [loadingRates, setLoadingRates] = useState(true); // New loading state for rates
 
 
   useEffect(() => {
-   const fetchTransactions = async () => {
+   const fetchTransactionsAndRates = async () => {
   try {
+    setLoading(true);
+    // Fetch transactions
     const { data } = await apiClients.request(
       `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction/admin`,
       {
@@ -50,14 +54,30 @@ export default function AllTransactionsPage() {
     ).then(res => res.json());
 
     setTransactions(Array.isArray(data) ? data : []);
+
+    // Fetch exchange rates
+    const responseRate = await apiClients.request(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/data/exchange-rates`,
+      {
+          method: 'GET',
+          credentials: "include"
+      }
+    );
+    if (!responseRate.ok) throw new Error("Failed to fetch rates");
+    const rateData = await responseRate.json();
+    // Assuming a default country like Nigeria for NGN rate conversion
+    const initialRate = rateData.data?.conversion_rates?.NGN || 1; 
+    setExchangeRate(initialRate);
+    setLoadingRates(false);
+
   } catch (err) {
-    showToast("Failed to fetch transactions", "error");
+    showToast("Failed to fetch data", "error");
     console.error(err);
   } finally {
     setLoading(false);
   }
 };
-    fetchTransactions();
+    fetchTransactionsAndRates();
   }, [showToast]);
 
   const sortedTransactions = Array.isArray(transactions)
@@ -106,6 +126,7 @@ export default function AllTransactionsPage() {
                   <th className="px-4 py-2 text-left text-sm font-semibold cursor-pointer" onClick={() => toggleSort("type")}>Type {renderSortIcon("type")}</th>
                   <th className="px-4 py-2 text-left text-sm font-semibold cursor-pointer" onClick={() => toggleSort("status")}>Status {renderSortIcon("status")}</th>
                   <th className="px-4 py-2 text-right text-sm font-semibold cursor-pointer" onClick={() => toggleSort("amount")}>Dollar Amount {renderSortIcon("amount")}</th>
+                  <th className="px-4 py-2 text-right text-sm font-semibold">Naira Amount</th>
                   <th className="px-4 py-2 text-right text-sm font-semibold">Coin Amount</th>
                   <th className="px-4 py-2 text-left text-sm font-semibold">Wallet</th>
                   <th className="px-4 py-2 text-left text-sm font-semibold">User</th>
@@ -124,6 +145,13 @@ export default function AllTransactionsPage() {
                       </span>
                     </td>
                     <td className="px-4 py-3 text-sm text-right text-white font-semibold">${tx.amount}</td>
+                    <td className="px-4 py-3 text-sm text-right text-white font-semibold">
+                      {loadingRates ? (
+                        'Loading...'
+                      ) : (
+                        new Intl.NumberFormat('en-US', { style: 'currency', currency: 'NGN' }).format(tx.amount * exchangeRate)
+                      )}
+                    </td>
                   <td className="px-4 py-3 text-sm text-right text-white font-semibold">{tx.coinAmount || '0'} {tx.coin.toUpperCase()}</td>
                     <td className="px-4 py-3 text-sm text-gray-400 font-mono truncate max-w-xs">{tx.walletAddressUsed}</td>
                     <td className="px-4 py-3 text-sm text-gray-300">{tx.userId?.email || "N/A"}</td>

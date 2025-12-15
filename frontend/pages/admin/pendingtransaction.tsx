@@ -29,10 +29,14 @@ export default function AdminPendingPage() {
   const [loading, setLoading] = useState(true);
   const [loadingConfirm, setLoadingConfirm] = useState<string | null>(null);
   const { ToastComponent, showToast } = useToast();
+  const [exchangeRate, setExchangeRate] = useState<number>(0); // New state for exchange rate
+  const [loadingRates, setLoadingRates] = useState(true); // New loading state for rates
 
 useEffect(() => {
-  const fetchPendingTransactions = async () => {
+  const fetchPendingTransactionsAndRates = async () => {
     try {
+      setLoading(true);
+      // Fetch transactions
       const response = await apiClients.request(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction/admin`,
         {
@@ -52,15 +56,30 @@ useEffect(() => {
         ? data.data.filter((tx: Transaction) => tx.status === "pending") 
         : [];
       setTransactions(pending);
+
+      // Fetch exchange rates
+      const responseRate = await apiClients.request(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/data/exchange-rates`,
+        {
+            method: 'GET',
+            credentials: "include"
+        }
+      );
+      if (!responseRate.ok) throw new Error("Failed to fetch rates");
+      const rateData = await responseRate.json();
+      const initialRate = rateData.data?.conversion_rates?.NGN || 1; 
+      setExchangeRate(initialRate);
+      setLoadingRates(false);
+
     } catch (err) {
-      showToast("Failed to load transactions", "error");
-      console.error("Failed to load transactions", err);
+      showToast("Failed to load data", "error");
+      console.error("Failed to load data", err);
     } finally {
       setLoading(false);
     }
   };
 
-  fetchPendingTransactions();
+  fetchPendingTransactionsAndRates();
 }, [showToast]); // Only showToast as dependency
 
 // Remove the useCallback version since it's now inside useEffect
@@ -140,6 +159,13 @@ const handleUpdateStatus = async (txid: string, status: string) => {
                 <div className="mb-6 ">
                   <p className="text-2xl font-bold text-white">
                     $ {tx.amount}
+                  </p>
+                  <p className="text-sm text-gray-400 mt-1">
+                    Naira Amount: {loadingRates ? (
+                      'Loading...'
+                    ) : (
+                      new Intl.NumberFormat('en-US', { style: 'currency', currency: 'NGN' }).format(tx.amount * exchangeRate)
+                    )}
                   </p>
 <p className="text-sm text-gray-300 mt-1">
   Coin Amount: {tx.coinAmount != null ? tx.coinAmount : '0'} {tx.coin.toUpperCase()}

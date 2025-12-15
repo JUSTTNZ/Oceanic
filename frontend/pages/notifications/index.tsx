@@ -187,7 +187,9 @@ export default function NotificationsPage() {
                             {notification.amount && notification.coin && (
                               <div>
                                 <p className="text-gray-400">Amount</p>
-                                <p className="text-gray-200 font-semibold">{notification.amount} {notification.coin}</p>
+                                <p className="text-gray-200 font-semibold">
+                                  {notification.coin === 'USD' ? `\$${notification.amount}` : `${notification.amount} ${notification.coin}`}
+                                </p>
                               </div>
                             )}
                           </div>
