@@ -1,8 +1,4 @@
-# Fix Admin Dashboard Transaction Display
-
-## Tasks
-- [x] Update transaction model to include coinAmount field
-- [x] Update transaction controller to accept and save coinAmount
-- [x] Update buy crypto page to send coinAmount
-- [x] Update admin transaction displays to show both dollar and coin amounts
-- [x] Update notification messages and emails to show appropriate amounts
+- [x] Fix notification figures for buy and sell transactions
+  - [x] Update backend notification creation logic to display correct amounts based on transaction type
+  - [x] For buy transactions: show fiat amount (USD)
+  - [x] For sell transactions: show crypto amount with coin symbol

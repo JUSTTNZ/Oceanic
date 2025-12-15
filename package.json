@@ -1,0 +1,26 @@
+{
+  "name": "oceanic",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "gemini": "node gemini-cli.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JUSTTNZ/Oceanic.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/JUSTTNZ/Oceanic/issues"
+  },
+  "homepage": "https://github.com/JUSTTNZ/Oceanic#readme",
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "dotenv": "^17.2.3"
+  }
+}
