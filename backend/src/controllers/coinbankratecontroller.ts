@@ -45,7 +45,7 @@ interface PaystackBankApiResponse {
 const getExchangeRates = asyncHandler(async (req: Request, res: Response) => {
   try {
     const response = await fetch(
-      "https://v6.exchangerate-api.com/v6/6c726f2eef74105ff040df4b/latest/USD"
+      "https://v6.exchangerate-api.com/v6/5b6cdce3d58b3bf1330f360e/latest/USD"
     );
 
     if (!response.ok) {

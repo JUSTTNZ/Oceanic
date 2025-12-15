@@ -44,6 +44,7 @@ export default function NotificationsPage() {
 
         const data = await res.json();
         setNotifications(Array.isArray(data.data) ? data.data : []);
+        console.log("Fetched notifications:", data.data);
       } catch (err) {
         showToast("Error loading notifications", "error");
         console.error(err);
