@@ -175,8 +175,12 @@ export default function AllTransactionsPage() {
 
               <tbody className="divide-y divide-gray-700">
                 {sortedTransactions.map(tx => {
-                  const dollarAmount = tx.type === "buy" ? tx.amount : tx.amount;
-                  const nairaAmount = dollarAmount * (tx.exchangeRateAdjusted ?? exchangeRate);
+    const dollarAmount =
+                tx.type === "buy"
+                  ? tx.amount
+                  : tx.coinAmount * (tx.exchangeRateAdjusted ?? exchangeRate);
+
+              const nairaAmount = dollarAmount * (tx.exchangeRateAdjusted ?? exchangeRate);
 
                   return (
                     <tr key={tx.txid} className="hover:bg-gray-800/50">
