@@ -64,10 +64,10 @@ const [error, setError] = useState<string | null>(null);
   const [modalType, setModalType] = useState<"success" | "error" | "pending">("pending");
   const { showToast, ToastComponent } = useToast();
   const [transaction, setTransaction] = useState<Transaction | null>(null);
-  console.log(transaction)
-  console.log("coin", selectedCoin?.symbol, )
-console.log("t", txid)
-console.log("a", amount)
+//   console.log(transaction)
+//   console.log("coin", selectedCoin?.symbol, )
+// console.log("t", txid)
+// console.log("a", amount)
 const [selectedCountry] = useState<Country>({ 
   code: "NG", 
   name: "Nigeria", 
@@ -205,6 +205,9 @@ const handleSubmit = async () => {
       `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v2/bitget/confirm-deposit?coin=${selectedCoin.symbol}&txid=${txid}&size=${amount}`,
       { method: 'GET', credentials: "include" }
     );
+    console.log("selectedCoin", selectedCoin.symbol)
+    console.log("txid", txid)
+    console.log("amount", amount)
     const confirmData = await confirmRes.json();
     console.log("Bitget confirmation:", confirmData);
 
