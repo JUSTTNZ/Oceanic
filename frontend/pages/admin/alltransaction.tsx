@@ -47,7 +47,7 @@ export default function AllTransactionsPage() {
       setLoadingRates(true);
 
       try {
-        console.log("Fetching all transactions...");
+        // console.log("Fetching all transactions...");
         const res = await apiClients.request(
           `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction/admin`,
           { method: "GET", credentials: "include" }
@@ -61,12 +61,12 @@ export default function AllTransactionsPage() {
 
         const json = await res.json();
         let txs: Transaction[] = Array.isArray(json.data) ? json.data : [];
-        console.log("Raw transactions fetched:", txs);
+        // console.log("Raw transactions fetched:", txs);
 
         // Fetch NGN exchange rate
         let baseRate = 1;
         try {
-          console.log("Fetching NGN exchange rate...");
+          // console.log("Fetching NGN exchange rate...");
           const rateRes = await apiClients.request(
             `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/data/exchange-rates`,
             { method: "GET", credentials: "include" }
@@ -74,7 +74,7 @@ export default function AllTransactionsPage() {
           if (rateRes.ok) {
             const rateJson = await rateRes.json();
             baseRate = rateJson?.data?.conversion_rates?.NGN ?? 1;
-            console.log("Base NGN exchange rate:", baseRate);
+            // console.log("Base NGN exchange rate:", baseRate);
           }
         } catch (err) {
           console.error("Failed to fetch exchange rate, defaulting to 1", err);
@@ -93,7 +93,7 @@ export default function AllTransactionsPage() {
           };
         });
 
-        console.log("Transactions after adjustment:", txs);
+        // console.log("Transactions after adjustment:", txs);
         setTransactions(txs);
         setExchangeRate(baseRate);
 
