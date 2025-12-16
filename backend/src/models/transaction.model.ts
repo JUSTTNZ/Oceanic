@@ -36,6 +36,11 @@ const TransactionSchema = new mongoose.Schema({
   walletAddressUsed: { type: String },
   walletAddressSentTo: { type: String },
   bankName: { type: String },
+  coinPriceUsd: {
+  type: Number,
+  required: false,
+},
+
   accountName: { type: String },
   accountNumber: { type: String },
   status: { type: String, enum: ['pending', 'confirmed', 'paid'], default: 'pending' },

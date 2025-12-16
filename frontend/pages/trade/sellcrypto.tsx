@@ -215,6 +215,7 @@ const handleSubmit = async () => {
         amount: fiatAmountReceived, // This is the fiat amount received by the user
         coinAmount: cryptoAmountToSell, // This is the crypto amount sold by the user
         txid,
+        coinPriceUsd: selectedCoin.current_price,
         type: "sell",
         country: selectedCountry.code,
         bankName: bankDetails.bankName,
@@ -304,7 +305,7 @@ console.log("a", amount)
     }
     return formatter.format(value);
   };
- const adjustedExchangeRate = exchangeRate - 50;
+ const adjustedExchangeRate = exchangeRate - 70;
 
     if (loading) {
      return (
