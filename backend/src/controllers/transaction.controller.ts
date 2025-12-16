@@ -7,7 +7,6 @@ import { Notification } from "../models/notification.model.js";
 import { sendAdminEmail } from "../utils/mailer.js";
 import { Request, Response } from "express";
 import coins from "../coindata/coin.json" with { type: "json" };
-import { fetchDeposits, matchesDeposit, BitgetDeposit } from "../services/bitget.service.js";
 interface CoinData {
   coin: string;
   network: string;
@@ -32,8 +31,7 @@ const createTransaction = asyncHandler(async (req: Request, res: Response)  => {
       accountName,
       accountNumber
     } = req.body;
-
-    // 1️⃣ Validate required fields
+ console.log("Creating transaction with data:", req.body);
     if (!coin || amount == null || coinAmount == null || !txid || !type || !country) {
       throw new ApiError({ statusCode: 400, message: "Missing required fields" });
     }
@@ -42,26 +40,11 @@ const createTransaction = asyncHandler(async (req: Request, res: Response)  => {
       throw new ApiError({ statusCode: 400, message: "Transaction type must be 'buy' or 'sell'" });
     }
 
-    // 2️⃣ Check with Bitget before saving
-    const endTime = Date.now();
-    const startTime = endTime - 7 * 24 * 60 * 60 * 1000; // last 7 days
-const depositsResponse = (await fetchDeposits(coin, startTime, endTime, 100)) as BitgetDeposit[];
-
-const depositMatch = depositsResponse.find(dep =>
-  matchesDeposit(dep, coin, coinAmount, txid).matches
-);
-
-    if (!depositMatch) {
-      throw new ApiError({ statusCode: 400, message: "Deposit not found on Bitget or does not match criteria" });
-    }
-
-    // 3️⃣ Check DB for duplicates (coin + txid)
-    const existing = await Transaction.findOne({ txid, coin });
+    const existing = await Transaction.findOne({ txid });
     if (existing) {
-      throw new ApiError({ statusCode: 400, message: "Transaction already exists in DB" });
+      throw new ApiError({ statusCode: 400, message: "Transaction with this TXID already exists" });
     }
 
-    // 4️⃣ Prepare transaction data
     const data: any = {
       userId: req.profile?._id,
       userFullname: req.profile?.fullname,
@@ -77,40 +60,71 @@ const depositMatch = depositsResponse.find(dep =>
     };
 
     if (type === "buy") {
-      if (!walletAddressUsed) throw new ApiError({ statusCode: 400, message: "Wallet address required for buy" });
+      if (!walletAddressUsed) {
+        throw new ApiError({
+          statusCode: 400,
+          message: "User wallet address is required for buy transactions",
+        });
+      }
       data.walletAddressUsed = walletAddressUsed;
     }
 
     if (type === "sell") {
       if (!bankName || !accountName || !accountNumber) {
-        throw new ApiError({ statusCode: 400, message: "Bank details required for sell" });
+        throw new ApiError({
+          statusCode: 400,
+          message: "Bank name, account name, and account number are required for sell transactions",
+        });
       }
-      if (!/^\d{10}$/.test(accountNumber)) throw new ApiError({ statusCode: 400, message: "Account number must be 10 digits" });
-      if (!/^[a-zA-Z]+ [a-zA-Z]+$/.test(accountName.trim())) throw new ApiError({ statusCode: 400, message: "Account name must be two words" });
+
+      if (!/^\d{10}$/.test(accountNumber)) {
+        throw new ApiError({
+          statusCode: 400,
+          message: "Account number must be exactly 10 digits",
+        });
+      }
+
+      if (!/^[a-zA-Z]+ [a-zA-Z]+$/.test(accountName.trim())) {
+        throw new ApiError({
+          statusCode: 400,
+          message: "Account name must be two words (e.g., John Doe)",
+        });
+      }
+
       data.bankName = bankName;
       data.accountName = accountName;
       data.accountNumber = accountNumber;
     }
 
-    // 5️⃣ Determine wallet to send to
     const walletInfo = await CoinWallet.findOne({ coin });
+
     if (!walletInfo) {
-      const fallback = coinsData.find(c => c.coin.toUpperCase() === coin.toUpperCase());
-      if (!fallback) throw new ApiError({ statusCode: 404, message: "No wallet address found for this coin" });
+      const fallback = coinsData.find((c: CoinData) => c.coin.toUpperCase() === coin.toUpperCase());
+
+      if (!fallback) {
+        throw new ApiError({
+          statusCode: 404,
+          message: "No wallet address found for this coin",
+        });
+      }
+
       data.walletAddressSentTo = fallback.walletAddress;
     } else {
       data.walletAddressSentTo = walletInfo.walletAddress;
     }
 
-    // 6️⃣ Save transaction
     const transaction = await Transaction.create(data);
-console.log("New transaction created:", transaction);
+
     res.status(201).json(new ApiResponse(201, "Transaction created successfully", transaction));
   } catch (error) {
     if (error instanceof ApiError) throw error;
-    throw new ApiError({ statusCode: 500, message: error instanceof Error ? error.message : "Failed to create transaction" });
+    throw new ApiError({
+      statusCode: 500,
+      message: error instanceof Error ? error.message : "Something went wrong while creating transaction",
+    });
   }
 });
+
   
 
 // Get All Transactions with optional sorting and filtering
