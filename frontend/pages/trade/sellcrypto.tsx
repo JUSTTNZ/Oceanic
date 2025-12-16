@@ -198,22 +198,42 @@ const handleSubmit = async () => {
 
   try {
     setIsSubmitting(true);
-    setStatus("sent");
+    setStatus("pending");
 
+    // Step 1: Confirm transaction with Bitget first
+    const confirmRes = await apiClients.request(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v2/bitget/confirm-deposit?coin=${selectedCoin.symbol}&txid=${txid}&size=${amount}`,
+      { method: 'GET', credentials: "include" }
+    );
+    const confirmData = await confirmRes.json();
+    console.log("Bitget confirmation:", confirmData);
+
+    if (!confirmData.success || !confirmData.confirmed) {
+      setStatus("failed");
+      showToast(
+        "Deposit not found or does not match criteria. Check your txid and amount.",
+        "error"
+      );
+      setModalType("error");
+      setShowModal(true);
+      return; // stop here, don't create backend transaction
+    }
+
+    setStatus("confirmed");
+    showToast("Deposit confirmed with Bitget!", "success");
+
+    // Step 2: Create transaction in your backend
     const cryptoAmountToSell = amount;
     const fiatAmountReceived = cryptoAmountToSell * selectedCoin.current_price;
 
-    // Step 1: Create transaction
     const createRes = await apiClients.request(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify({
         coin: selectedCoin.symbol,
-        amount: fiatAmountReceived, // This is the fiat amount received by the user
-        coinAmount: cryptoAmountToSell, // This is the crypto amount sold by the user
+        amount: fiatAmountReceived,
+        coinAmount: cryptoAmountToSell,
         txid,
         coinPriceUsd: selectedCoin.current_price,
         type: "sell",
@@ -223,65 +243,26 @@ const handleSubmit = async () => {
         accountNumber: bankDetails.accountNumber,
       }),
     });
-    
+
     const createData = await createRes.json();
-console.log("cre", createData)
-    if (!createRes.ok) {
-      throw new Error(createData.message || "Transaction creation failed");
-    }
+    console.log("Transaction created:", createData);
+
+    if (!createRes.ok) throw new Error(createData.message || "Transaction creation failed");
 
     setTransaction(createData.data);
-console.log("coin", selectedCoin.symbol, coins)
-console.log("t", txid)
-console.log("a", amount)
-    // Step 2: Confirm transaction using Bitget
-    const confirmRes = await apiClients.request(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v2/bitget/confirm-deposit?coin=${selectedCoin.symbol}&txid=${txid}&size=${amount}`,
-      {
-     method: 'GET',
-    credentials: "include"
-      }
-    );
-    console.log("res", confirmRes)
-
-    const confirmData = await confirmRes.json();
-  console.log("con", confirmData)
-    if (confirmData.success && confirmData.confirmed) {
     setStatus("confirmed");
-    showToast("Transaction confirmed successfully!", "success");
-
     setConfirmedTransaction({
       coin: selectedCoin?.symbol.toUpperCase(),
       amount,
       status: "confirmed",
       txid,
     });
-
     setModalType("success");
     setShowModal(true);
     resetForm();
-    }
-    else {
-      // Bitget did not confirm it yet
-      setStatus("pending");
-      showToast(
-        "Transaction submitted but not yet confirmed. Please wait."
-      );
-      setConfirmedTransaction({
-        coin: selectedCoin?.symbol.toUpperCase(),
-        amount,
-        status: "pending",
-        txid,
-      });
-      setModalType("pending");
-      setShowModal(true);
-    }
+
   } catch (error) {
     console.log("Transaction error:", error);
-    // showToast(
-    //   error instanceof Error ? error.message : "Transaction failed",
-    //   "error"
-    // );
     setStatus("failed");
     setModalType("error");
     setShowModal(true);
@@ -289,6 +270,7 @@ console.log("a", amount)
     setIsSubmitting(false);
   }
 };
+
 
     const safeCountry = selectedCountry || { currency: "USD", currencySymbol: "$" };
   
