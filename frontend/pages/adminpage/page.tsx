@@ -45,14 +45,14 @@ useEffect(() => {
         }
       );
 
-      console.log("RAW response:", response);
+      // console.log("RAW response:", response);
 
       if (!response.ok) {
         throw new Error("Request failed");
       }
 
       const result = await response.json(); // ✅ PARSE JSON
-      console.log("PARSED result:", result);
+      // console.log("PARSED result:", result);
 
       if (!Array.isArray(result.data)) {
         throw new Error(result?.message || "Invalid data format");
