@@ -21,6 +21,7 @@ interface Transaction {
   status: string;
   type: "buy" | "sell";
   createdAt: string;
+  coinPriceUsd?: number;
 }
 
 interface Coin {
@@ -52,10 +53,11 @@ export default function AdminPendingPage() {
         );
         if (!txRes.ok) throw new Error("Failed to fetch transactions");
         const txJson = await txRes.json();
+        console.log("All transactions fetched:", txJson);
         const pending: Transaction[] = Array.isArray(txJson.data)
           ? txJson.data.filter((tx: Transaction) => tx.status === "pending")
           : [];
-
+      console.log("Pending transactions fetched:", pending);
         // Fetch NGN exchange rate
         let baseRate = 1;
         try {
@@ -72,24 +74,12 @@ export default function AdminPendingPage() {
         }
         setExchangeRate(baseRate);
 
-        // Fetch coins
-        const coinsRes = await fetch("/api/markets?per_page=200&page=1");
-        if (!coinsRes.ok) throw new Error("Failed to fetch coin prices");
-        const coinData: Coin[] = await coinsRes.json();
-        setCoins(coinData);
-        console.log("Coin data fetched:", coinData);
 
-        // Build a lookup map: symbol => current_price
-        const coinPriceMap: Record<string, number> = {};
-        coinData.forEach((c: Coin) => {
-          coinPriceMap[c.symbol.toLowerCase()] = c.current_price;
-        });
-        console.log("Coin price map:", coinPriceMap);
-
+ 
         // Calculate USD and NGN amounts
         const adjustedTransactions = pending.map(tx => {
-          const coinKey = tx.coin.toLowerCase();
-          const coinPriceUsd = coinPriceMap[coinKey] || 0;
+  
+          const coinPriceUsd = tx.coinPriceUsd ?? 0;
           const dollarAmount = tx.type === "sell" ? tx.coinAmount * coinPriceUsd : tx.amount;
   const adjustedRate = tx.type === "sell" ? baseRate - 70 : baseRate + 70;
   const nairaAmount = dollarAmount * adjustedRate;
@@ -191,6 +181,7 @@ export default function AdminPendingPage() {
                     Naira Amount: {new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN" }).format(tx.nairaAmount)}
                   </p>
                   <p className="text-xs text-gray-400 mt-1 truncate">Transaction ID: {tx.txid}</p>
+                                    {/* <p className="text-xs text-gray-400 mt-1 truncate">priceusd: {tx.coinPriceUsd}</p> */}
                 </div>
 
                 <button
