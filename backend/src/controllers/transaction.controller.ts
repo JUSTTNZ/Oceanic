@@ -211,7 +211,7 @@ const updateTransactionStatus = asyncHandler(async (req, res) => {
             notificationAmount = transaction.coinAmount; // Store crypto amount for notification
             notificationCoin = transaction.coin.toUpperCase(); // Store crypto symbol
             // The message should reflect crypto sold and fiat received
-            notificationMessage = `Your sell transaction of ${transaction.coinAmount || 0} ${transaction.coin.toUpperCase()} ($${transaction.amount}) has been confirmed. Payment has been processed.`;
+            notificationMessage = `Your sell transaction of ${transaction.coinAmount || 0} ${transaction.coin.toUpperCase()}  has been confirmed. Payment has been processed.`;
             emailAmountDisplay = `${transaction.coinAmount || 0} ${transaction.coin.toUpperCase()}`;
           }
     // Create notification

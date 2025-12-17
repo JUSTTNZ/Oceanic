@@ -5,13 +5,13 @@ import { useEffect, useState } from "react";
 import { Check, X } from "lucide-react";
 
 interface Props {
-  type: "success" | "error" | "pending";
+  type: "success" | "error" | "pending" | "error1" | "txid-exists";
   title: string;
   message: string;
   details?: {
     coin?: string;
     amount?: number;
-    status?: string;
+    // status?: string;
     txid?: string;
     [key: string]: string | number | boolean | undefined;
   };
