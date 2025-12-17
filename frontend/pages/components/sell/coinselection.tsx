@@ -18,7 +18,7 @@ interface CoinSelectionProps {
   setSearchCoin: (search: string) => void;
   setSelectedCoin: (coin: Coin) => void;
   filteredCoins: Coin[];
-  status: 'pending' | 'sent' | 'received' | 'confirmed' | 'failed';
+  status: 'pending' | 'sent' | 'received' | 'confirmed' | 'failed' | "txid-exists";
 }
 
 export default function CoinSelection({

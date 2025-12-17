@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-type TransactionStatus = 'pending' | 'sent' | 'received' | 'confirmed' | 'failed' | 'admin_review';
+type  TransactionStatus = 'pending' | 'sent' | 'received' | 'confirmed' | 'failed' | 'admin_review' | "txid-exists";
 
 interface Country {
   name: string;
