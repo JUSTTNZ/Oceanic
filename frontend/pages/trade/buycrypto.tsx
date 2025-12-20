@@ -75,15 +75,86 @@ export default function BuyCrypto() {
 
   const serviceFee = 50;
 
-  const onSuccess = (ref: string) => {
-   showToast("Payment successful!", "success");
+  const onSuccess = async (ref: string) => {
+    // Payment successful, now create transaction
+    try {
+      setLoadingPayment(true);
+      
+      // Create transaction after successful payment
+      const txid = generateUniqueTxid();
+      const usdAmount = parseFloat(amount || "0");
+      const calculatedLocalCurrencyAmount = usdAmount * (exchangeRate + 50);
+
+      const res = await apiClients.request(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          coin: selectedCoin?.symbol,
+          amount: usdAmount,
+          coinAmount: coinAmount,
+          txid: txid,
+          type: "buy",
+          country: selectedCountry?.name,
+          walletAddressUsed: walletAddress,
+          status: "paid", // Mark as paid since payment succeeded
+          localCurrencyAmount: calculatedLocalCurrencyAmount,
+          localCurrency: selectedCountry?.currency || "NGN",
+          paymentReference: ref, // Store Paystack reference
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data?.data?.txid) {
+        showToast("Payment successful but failed to save transaction. Please contact support.", "warning");
+        setLoadingPayment(false);
+        return;
+      }
+
+      setReference(txid);
+      showToast("Payment successful! Transaction saved.", "success");
+
+      // Start polling for admin confirmation
+      if (pollingRef.current) window.clearInterval(pollingRef.current);
+      pollingRef.current = window.setInterval(async () => {
+        try {
+          const resp = await apiClients.request(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction/user`, {
+            method: 'GET',
+            credentials: 'include'
+          });
+          if (!resp.ok) return;
+          const j = await resp.json();
+          const txs = Array.isArray(j.data) ? j.data : [];
+          const found = txs.find((t: Transaction) => t.txid === txid);
+          if (found && found.status === 'confirmed') {
+            if (pollingRef.current) {
+              window.clearInterval(pollingRef.current);
+              pollingRef.current = null;
+            }
+            showToast('Your transaction has been confirmed by admin.', 'success');
+          }
+        } catch (err) {
+          console.error('Polling error', err);
+        }
+      }, 8000);
+
+    } catch (err) {
+      console.error("Transaction creation error after payment:", err);
+      showToast("Payment successful but failed to save transaction details.", "warning");
+    } finally {
+      setLoadingPayment(false);
+    }
   };
 
   const onClose = () => {
     console.log("Payment closed");
+    showToast("Payment was cancelled.", "info");
   };
 
-  const payWithPaystack = (ref: string) => {
+  const payWithPaystack = (email: string, amountInNaira: number) => {
     interface PaystackPopType {
       setup: (options: {
         key: string | undefined;
@@ -96,13 +167,16 @@ export default function BuyCrypto() {
       }) => { openIframe: () => void };
     }
 
+    // Generate a unique reference for Paystack
+    const paystackRef = "ps_" + Math.random().toString(36).substr(2, 9);
+
     const paystackPop = (window as { PaystackPop?: PaystackPopType }).PaystackPop;
     const handler = paystackPop?.setup({
       key: process.env.NEXT_PUBLIC_PAYSTACK_KEY,
-      email: userEmail ,
-      amount: Math.round(calculatedLocalCurrencyAmount * 100),
+      email: email,
+      amount: Math.round(amountInNaira * 100),
       currency: "NGN",
-      ref,
+      ref: paystackRef,
       callback: function (response: { reference: string }) {
         onSuccess(response.reference);
       },
@@ -115,6 +189,7 @@ export default function BuyCrypto() {
       handler.openIframe();
     } else {
       showToast("Paystack SDK failed to load. Please refresh and try again.", "error");
+      setLoadingPayment(false);
     }
   };
 
@@ -124,77 +199,37 @@ export default function BuyCrypto() {
 
   const handleCreateTransaction = async () => {
     setLoadingPayment(true);
-  
 
-    try {
-      const res = await apiClients.request(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          
-        },
-        
-        credentials: "include",
-        body: JSON.stringify({
-          coin: selectedCoin?.symbol,
-          amount: parseFloat(amount),
-          coinAmount: coinAmount,
-          txid: generateUniqueTxid(),
-          type: "buy",
-          country: selectedCountry?.name,
-          walletAddressUsed: walletAddress,
-        }),
-      });
+    const usdAmount = parseFloat(amount || "0");
+    const calculatedLocalCurrencyAmount = usdAmount * (exchangeRate + 50);
 
-      const data = await res.json();
-  console.log(data)
-      if (!res.ok || !data?.data?.txid) {
-        showToast("Failed to create transaction.", "error");
-        setLoadingPayment(false);
-        return;
-      }
-
-      setReference(data.data.txid);
-      // persist expiry for 10 minutes (use createdAt from backend if available)
-      try {
-        const expiry = new Date(data.data.createdAt).getTime() + 10 * 60 * 1000;
-        localStorage.setItem(`tx_expiry_${data.data.txid}`, String(expiry));
-      } catch (e) {
-        localStorage.setItem(`tx_expiry_${data.data.txid}`, String(Date.now() + 10 * 60 * 1000));
-      }
-
-      // start polling for status updates
-      if (pollingRef.current) window.clearInterval(pollingRef.current);
-      pollingRef.current = window.setInterval(async () => {
-        try {
-          const resp = await apiClients.request(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction/user`, {
-            method: 'GET',
-            credentials: 'include'
-          });
-          if (!resp.ok) return;
-          const j = await resp.json();
-          const txs = Array.isArray(j.data) ? j.data : [];
-          const found = txs.find((t: Transaction) => t.txid === data.data.txid);
-          if (found && found.status === 'confirmed') {
-            if (pollingRef.current) {
-              window.clearInterval(pollingRef.current);
-              pollingRef.current = null;
-            }
-            localStorage.removeItem(`tx_expiry_${data.data.txid}`);
-            showToast('Your transaction has been confirmed by admin.', 'success');
-          }
-        } catch (err) {
-          console.error('Polling error', err);
-        }
-      }, 8000);
-
-      payWithPaystack(data.data.txid);
-    } catch (err) {
-      console.error(err);
-      showToast("Something went wrong.", "error");
-    } finally {
+    // First, validate inputs
+    if (!amount || usdAmount <= 0) {
+      showToast("Please enter a valid amount", "error");
       setLoadingPayment(false);
+      return;
     }
+
+    if (!selectedCoin) {
+      showToast("Please select a coin", "error");
+      setLoadingPayment(false);
+      return;
+    }
+
+    if (!walletAddress) {
+      showToast("Please enter your wallet address", "error");
+      setLoadingPayment(false);
+      return;
+    }
+
+    if (!userEmail) {
+      showToast("User email not found", "error");
+      setLoadingPayment(false);
+      return;
+    }
+
+    // Initiate Paystack payment FIRST
+    payWithPaystack(userEmail, calculatedLocalCurrencyAmount);
   };
 
   useEffect(() => {
@@ -208,13 +243,11 @@ export default function BuyCrypto() {
   }, []);
 
   useEffect(() => {
-    
-
     const fetchUser = async () => {
       try {
         const res = await apiClients.request(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/me`, {
-       method: 'GET',
-        credentials: "include"
+          method: 'GET',
+          credentials: "include"
         });
 
         const data = await res.json();
@@ -232,120 +265,117 @@ export default function BuyCrypto() {
     fetchUser();
   }, []);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
 
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+        // Fetch coins data
+        const responseCoins = await apiClients.request(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/data/crypto-markets`,{
+            method: 'GET',
+            credentials: "include"
+          }
+        );
+        if (!responseCoins.ok) throw new Error("Failed to fetch coins");
+        const dataCoin = await responseCoins.json();
+        setCoins(dataCoin.data);
+        setSelectedCoin(dataCoin.data[0]);
 
-      // Fetch coins data
-      const responseCoins = await apiClients.request(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/data/crypto-markets`,{
-          method: 'GET',
-          credentials: "include"
-        }
-      );
-      if (!responseCoins.ok) throw new Error("Failed to fetch coins");
-      const dataCoin = await responseCoins.json();
-      setCoins(dataCoin.data);
-      setSelectedCoin(dataCoin.data[0]);
+        // Fetch countries data
+        const responseCountry = await apiClients.request(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/data/countries`,
+          {
+            method: 'GET',
+            credentials: "include"
+          }
+        );
 
-// Fetch countries data
-const responseCountry = await apiClients.request(
-  `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/data/countries`,
-  {
-    method: 'GET',
-    credentials: "include"
-  }
-);
+        if (!responseCountry.ok) throw new Error("Failed to fetch countries");
 
-if (!responseCountry.ok) throw new Error("Failed to fetch countries");
+        const dataCountry = await responseCountry.json();
+        const countriesData = dataCountry.data;
 
-const dataCountry = await responseCountry.json();
-const countriesData = dataCountry.data;
+        // Format countries data
+        const formattedCountries = countriesData
+          // Keep only Nigeria
+          .filter((c: ApiCountry) => c.name.common === "Nigeria")
+          // Ensure it has currency info
+          .filter((c: ApiCountry) => c.currencies && Object.keys(c.currencies).length > 0)
+          .map((c: ApiCountry) => {
+            const currencyCode = Object.keys(c.currencies)[0];
+            const currencyInfo = c.currencies[currencyCode];
 
-// Format countries data
-const formattedCountries = countriesData
-  // Keep only Nigeria
-  .filter((c: ApiCountry) => c.name.common === "Nigeria")
-  // Ensure it has currency info
-  .filter((c: ApiCountry) => c.currencies && Object.keys(c.currencies).length > 0)
-  .map((c: ApiCountry) => {
-    const currencyCode = Object.keys(c.currencies)[0];
-    const currencyInfo = c.currencies[currencyCode];
+            return {
+              code: c.cca2,
+              name: c.name.common,
+              flag: c.flags?.png || c.flags?.svg || '',
+              currency: currencyCode,
+              currencySymbol: currencyInfo?.symbol || currencyCode,
+              currencyName: currencyInfo?.name || currencyCode
+            };
+          });
 
-    return {
-      code: c.cca2,
-      name: c.name.common,
-      flag: c.flags?.png || c.flags?.svg || '',
-      currency: currencyCode,
-      currencySymbol: currencyInfo?.symbol || currencyCode,
-      currencyName: currencyInfo?.name || currencyCode
+        setCountries(formattedCountries);
+
+        // Set Nigeria as default (if found)
+        const defaultCountry = formattedCountries.find(
+          (c: Country) => c.code === "NG"
+        ) || formattedCountries[0];
+
+        setSelectedCountry(defaultCountry);
+
+        // Fetch exchange rates
+        const responseRate = await apiClients.request(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/data/exchange-rates`,{
+              method: 'GET',
+            credentials: "include"
+          }
+        );
+        if (!responseRate.ok) throw new Error("Failed to fetch rates");
+        const rateData = await responseRate.json();
+        
+        // Use the default country's currency to set initial exchange rate
+        const initialRate = rateData.data?.conversion_rates?.[defaultCountry.currency] || 1;
+        setExchangeRate(initialRate);
+
+        setLoading(false);
+      } catch (err) {
+        setError("Failed to fetch data: " + (err as Error).message);
+        console.error(err);
+        setLoading(false);
+      }
     };
-  });
 
-setCountries(formattedCountries);
+    fetchData();
+  }, []);
 
-// Set Nigeria as default (if found)
-const defaultCountry = formattedCountries.find(
-  (c: Country) => c.code === "NG"
-) || formattedCountries[0];
+  // Add a separate effect to update exchange rate when selected country changes
+  useEffect(() => {
+    if (!selectedCountry) return;
 
-setSelectedCountry(defaultCountry);
+    const updateExchangeRate = async () => {
+      try {
+        const response = await apiClients.request(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/data/exchange-rates`,{
+              method: 'GET',
+            credentials: "include"
+          }
+        );
+        if (!response.ok) throw new Error("Failed to fetch rates");
+        const data = await response.json();
+        
+        const newRate = data.data?.conversion_rates?.[selectedCountry.currency] || 1;
+        setExchangeRate(newRate);
+      } catch (err) {
+        console.error("Failed to update exchange rate:", err);
+      }
+    };
 
+    updateExchangeRate();
+  }, [selectedCountry]);
 
-      // Fetch exchange rates
-      const responseRate = await apiClients.request(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/data/exchange-rates`,{
-            method: 'GET',
-          credentials: "include"
-        }
-      );
-      if (!responseRate.ok) throw new Error("Failed to fetch rates");
-      const rateData = await responseRate.json();
-      
-      // Use the default country's currency to set initial exchange rate
-      const initialRate = rateData.data?.conversion_rates?.[defaultCountry.currency] || 1;
-      setExchangeRate(initialRate);
-
-      setLoading(false);
-    } catch (err) {
-      setError("Failed to fetch data: " + (err as Error).message);
-      console.error(err);
-      setLoading(false);
-    }
-  };
-
-  fetchData();
-}, []);
-
-// Add a separate effect to update exchange rate when selected country changes
-useEffect(() => {
-  if (!selectedCountry) return;
-
-  const updateExchangeRate = async () => {
-    try {
-      const response = await apiClients.request(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/data/exchange-rates`,{
-            method: 'GET',
-          credentials: "include"
-        }
-      );
-      if (!response.ok) throw new Error("Failed to fetch rates");
-      const data = await response.json();
-      
-      const newRate = data.data?.conversion_rates?.[selectedCountry.currency] || 1;
-      setExchangeRate(newRate);
-    } catch (err) {
-      console.error("Failed to update exchange rate:", err);
-    }
-  };
-
-  updateExchangeRate();
-}, [selectedCountry]);
-
- 
   useEffect(() => {
     if (amount && selectedCoin && selectedCoin.current_price > 0) {
       const usdVal = parseFloat(amount) || 0;
@@ -364,29 +394,21 @@ useEffect(() => {
   const usdAmount = parseFloat(amount || "0");
   const calculatedLocalCurrencyAmount = usdAmount * adjustedExchangeRate;
 
-   if (loading) {
+  if (loading) {
     return (
-     <LoadingDisplay />
+      <LoadingDisplay />
     );
   }
-/*if (error){
-  return(
- <ErrorDisplay />
-  )
-}*/
-
-
 
   return (
     <motion.div
       key="buy"
-  initial={{ opacity: 0, y: 30 }} // Start from below
-  animate={{ opacity: 1, y: 0 }} // Animate to original position
-  exit={{ opacity: 0, y: -30 }} // Exit upwards
-  transition={{ duration: 0.3 }}
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -30 }}
+      transition={{ duration: 0.3 }}
       className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl mx-auto py-14 px-4 font-grotesk"
     >
-
       <FirstSide coins={coins} selectedCountry={selectedCountry ?? countries[0]} exchangeRate={exchangeRate} />
 
       <div className="w-full max-w-sm mx-auto p-6 md:shadow-xl shadow-2xl space-y-4 bg-gray-800/30 border border-gray-700/20 rounded-xl hover:border-blue-500/30 transition-all backdrop-blur-sm hover:shadow-blue-500/10">
@@ -398,26 +420,23 @@ useEffect(() => {
         <AmountInput value={amount} onChange={setAmount} />
         <ConversionDisplay selectedCountry={selectedCountry ?? countries[0]} selectedCoin={selectedCoin} serviceFee={serviceFee} amount={amount} localCurrencyAmount={calculatedLocalCurrencyAmount.toString()} coinAmount={coinAmount} exchangeRate={exchangeRate} />
 
-    
-          <button
-            onClick={handleCreateTransaction}
-            className="w-full bg-[#0047AB] text-white font-semibold py-3 rounded-full mt-4 hover:bg-blue-700 transition-colors disabled:opacity-50"
-            disabled={!amount || parseFloat(amount) <= 0 || !selectedCoin || !walletAddress || loadingPayment}
-
-          >
-            {
-              loadingPayment ?(
-                  <div className="flex items-center justify-center gap-2 text-white font-medium">
-            <span className="w-4 h-4 border-2 border-blue-300 border-t-transparent rounded-full animate-spin"></span>
-            Checking payment....
-          </div>
-              ): (
-              "  Continue to Payment"
-              )
-            }
-          
-          </button>
-      
+        <button
+          onClick={handleCreateTransaction}
+          className="w-full bg-[#0047AB] text-white font-semibold py-3 rounded-full mt-4 hover:bg-blue-700 transition-colors disabled:opacity-50"
+          disabled={!amount || parseFloat(amount) <= 0 || !selectedCoin || !walletAddress || loadingPayment}
+        >
+          {
+            loadingPayment ? (
+              <div className="flex items-center justify-center gap-2 text-white font-medium">
+                <span className="w-4 h-4 border-2 border-blue-300 border-t-transparent rounded-full animate-spin"></span>
+                Processing Payment...
+              </div>
+            ) : (
+              "Proceed to Paystack"
+            )
+          }
+        </button>
+        
         {ToastComponent}
       </div>
     </motion.div>
