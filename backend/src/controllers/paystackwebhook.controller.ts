@@ -46,25 +46,17 @@ export const handlePaystackWebhook = async (req: Request, res: Response) => {
     );
 
     await sendAdminEmail({
-      subject: `Transaction BUY Update: PAID`,
-      html: `
-        <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-          <h2 style="color: #28a745;">💰 BUY Transaction Paid</h2>
-          <p>A <strong>buy</strong> transaction was successfully paid with the following details:</p>
-          <ul>
-            <li><strong>Transaction ID (TXID):</strong> ${transaction.txid}</li>
-            <li><strong>Coin:</strong> ${transaction.coin}</li>
-            <li><strong>Amount:</strong> $${amount}</li>
-            <li><strong>Country:</strong> ${transaction.country}</li>
-            <li><strong>User Wallet Address:</strong> ${transaction.walletAddressUsed}</li>
-            <li><strong>Status:</strong> ${transaction.status}</li>
-          </ul>
-          <p style="margin-top: 20px;">Please log in to the admin dashboard for more details.</p>
-          <hr>
-          <p style="font-size: 12px; color: #666;">Oceanic Charts - Crypto Transaction Management</p>
-        </div>
-      `
-    });
+    type: "buy",
+    userFullname: transaction.userFullname ?? "Unknown User",
+    userEmail: transaction.userEmail ?? "unknown@email.com",
+    coin: transaction.coin,
+    amount: amount,
+    coinAmount: transaction.coinAmount,
+    txid: transaction.txid,
+    country: transaction.country,
+    walletAddressUsed: transaction.walletAddressUsed,
+  });
+
 
 
     res.status(200).json({ success: true });
