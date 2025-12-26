@@ -22,7 +22,7 @@ interface Country {
   code: string;
 }
 
-type TransactionStatus = 'pending' | 'sent' | 'received' | 'confirmed' | 'failed';
+type TransactionStatus = 'pending' | 'sent' | 'received' | 'confirmed' | 'failed' | "txid-exists";
 
 interface WalletAddressDisplayProps {
   selectedCoin: Coin | null;

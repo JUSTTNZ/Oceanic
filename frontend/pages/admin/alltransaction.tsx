@@ -1,26 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
 import { useToast } from "../../hooks/toast";
 import { apiClients } from "@/lib/apiClient";
+
 interface Transaction {
   txid: string;
-  amount: number;
+  amount: number;       // Buy: USD amount | Sell: coinAmount in USD (no extra fetch)
   coinAmount: number;
   coin: string;
-  type: string;
+  type: "buy" | "sell";
   status: string;
   walletAddressUsed: string;
   createdAt: string;
+  userId?: { email?: string; username?: string; fullname?: string };
   bankName?: string;
   accountName?: string;
   accountNumber?: string;
-  userId?: {
-    email: string;
-    username: string;
-    fullname: string;
-  };
+  exchangeRateAdjusted?: number; // Adjusted NGN exchange rate (+70/-70)
 }
 
 const statusColors: Record<string, string> = {
@@ -32,110 +30,105 @@ const statusColors: Record<string, string> = {
 export default function AllTransactionsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error] = useState<string | null>(null);
   const [sortField, setSortField] = useState<keyof Transaction>("createdAt");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
-  const { ToastComponent, showToast } = useToast();
-  const [exchangeRate, setExchangeRate] = useState<number>(0); // New state for exchange rate
-  const [loadingRates, setLoadingRates] = useState(true); // New loading state for rates
+  const [exchangeRate, setExchangeRate] = useState<number>(1);
+  const [loadingRates, setLoadingRates] = useState(true);
 
+  const { ToastComponent, showToast } = useToast();
+  const hasFetched = useRef(false);
 
   useEffect(() => {
-   const fetchTransactionsAndRates = async () => {
-  try {
-    setLoading(true);
-    setLoadingRates(true);
-    
-    // Fetch transactions
-    const response = await apiClients.request(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction/admin`,
-      {
-        method: 'GET',
-        credentials: 'include'
-      }
-    );
+    if (hasFetched.current) return;
+    hasFetched.current = true;
 
-    if (!response.ok) {
-      const errorText = await response.text().catch(() => "Failed to fetch transactions");
-      console.error("Transaction fetch error:", errorText);
-      
-      // Check for authentication errors
-      if (response.status === 401 || response.status === 403) {
-        showToast("Authentication required. Please login again.", "error");
-        setTimeout(() => {
-          window.location.href = '/login';
-        }, 2000);
-      } else {
-        showToast("Failed to load transactions", "error");
-      }
-      
-      setTransactions([]);
-      setLoading(false);
-      setLoadingRates(false);
-      return;
-    }
+    const fetchData = async () => {
+      setLoading(true);
+      setLoadingRates(true);
 
-    const responseData = await response.json();
-    setTransactions(Array.isArray(responseData.data) ? responseData.data : []);
+      try {
+        // console.log("Fetching all transactions...");
+        const res = await apiClients.request(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction/admin`,
+          { method: "GET", credentials: "include" }
+        );
 
-    // Fetch exchange rates
-    try {
-      const responseRate = await apiClients.request(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/data/exchange-rates`,
-        {
-            method: 'GET',
-            credentials: "include"
+        if (!res.ok) {
+          showToast("Failed to load transactions", "error");
+          setTransactions([]);
+          return;
         }
-      );
-      if (responseRate.ok) {
-        const rateData = await responseRate.json();
-        const initialRate = rateData.data?.conversion_rates?.NGN || 1; 
-        setExchangeRate(initialRate);
-      } else {
-        console.warn("Failed to fetch exchange rates, using default");
-        setExchangeRate(1);
-      }
-    } catch (rateError) {
-      console.warn("Exchange rate fetch error:", rateError);
-      setExchangeRate(1); // Use default rate
-    } finally {
-      setLoadingRates(false);
-    }
 
-  } catch (err) {
-    console.error(err);
-    
-    // Handle authentication errors
-    if (err instanceof Error && err.message === "No access token") {
-      showToast("Authentication required. Please login again.", "error");
-      setTimeout(() => {
-        window.location.href = '/login';
-      }, 2000);
-    } else {
-      showToast("Failed to fetch data", "error");
-    }
-    
-    setTransactions([]);
-  } finally {
-    setLoading(false);
-    setLoadingRates(false);
-  }
-};
-    fetchTransactionsAndRates();
+        const json = await res.json();
+        let txs: Transaction[] = Array.isArray(json.data) ? json.data : [];
+        // console.log("Raw transactions fetched:", txs);
+
+        // Fetch NGN exchange rate
+        let baseRate = 1;
+        try {
+          // console.log("Fetching NGN exchange rate...");
+          const rateRes = await apiClients.request(
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/data/exchange-rates`,
+            { method: "GET", credentials: "include" }
+          );
+          if (rateRes.ok) {
+            const rateJson = await rateRes.json();
+            baseRate = rateJson?.data?.conversion_rates?.NGN ?? 1;
+            // console.log("Base NGN exchange rate:", baseRate);
+          }
+        } catch (err) {
+          console.error("Failed to fetch exchange rate, defaulting to 1", err);
+          baseRate = 1;
+        }
+
+        // Apply adjusted exchange rate (+70 for buy, -70 for sell)
+        txs = txs.map(tx => {
+          const adjustedRate = tx.type === "buy" ? baseRate + 70 : baseRate - 70;
+          console.log(
+            `Transaction ${tx.txid}: type=${tx.type}, baseRate=${baseRate}, adjustedRate=${adjustedRate}`
+          );
+          return {
+            ...tx,
+            exchangeRateAdjusted: adjustedRate,
+          };
+        });
+
+        // console.log("Transactions after adjustment:", txs);
+        setTransactions(txs);
+        setExchangeRate(baseRate);
+
+      } catch (err) {
+        console.error("Error fetching transactions:", err);
+        showToast("Failed to fetch data", "error");
+        setTransactions([]);
+      } finally {
+        setLoading(false);
+        setLoadingRates(false);
+      }
+    };
+
+    fetchData();
   }, [showToast]);
 
-  const sortedTransactions = Array.isArray(transactions)
-    ? [...transactions].sort((a, b) => {
-        const order = sortDirection === "asc" ? 1 : -1;
-        const valA = a[sortField]!;
-        const valB = b[sortField]!;
-        return valA > valB ? order : valA < valB ? -order : 0;
-      })
-    : [];
+  const sortedTransactions = [...transactions].sort((a, b) => {
+    const order = sortDirection === "asc" ? 1 : -1;
+    const valA = a[sortField];
+    const valB = b[sortField];
+
+    if (sortField === "createdAt") {
+      return (new Date(valA as string).getTime() - new Date(valB as string).getTime()) * order;
+    }
+
+    if (typeof valA === "number" && typeof valB === "number") {
+      return (valA - valB) * order;
+    }
+
+    return String(valA).localeCompare(String(valB)) * order;
+  });
 
   const toggleSort = (field: keyof Transaction) => {
     if (field === sortField) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+      setSortDirection(prev => (prev === "asc" ? "desc" : "asc"));
     } else {
       setSortField(field);
       setSortDirection("asc");
@@ -156,20 +149,22 @@ export default function AllTransactionsPage() {
 
         {loading ? (
           <p className="text-blue-400">Loading...</p>
-        ) : error ? (
-          <p className="text-red-500">{error}</p>
         ) : transactions.length === 0 ? (
           <p className="text-gray-400">No transactions available.</p>
         ) : (
-          <div className="overflow-x-auto rounded-lg shadow border border-gray-700">
+          <div className="overflow-x-auto rounded-lg border border-gray-700">
             <table className="min-w-full divide-y divide-gray-700">
               <thead className="bg-gray-800">
                 <tr>
-                  <th className="px-4 py-2 text-left text-sm font-semibold cursor-pointer" onClick={() => toggleSort("txid")}>TxID {renderSortIcon("txid")}</th>
-                  <th className="px-4 py-2 text-left text-sm font-semibold cursor-pointer" onClick={() => toggleSort("createdAt")}>Date {renderSortIcon("createdAt")}</th>
-                  <th className="px-4 py-2 text-left text-sm font-semibold cursor-pointer" onClick={() => toggleSort("type")}>Type {renderSortIcon("type")}</th>
-                  <th className="px-4 py-2 text-left text-sm font-semibold cursor-pointer" onClick={() => toggleSort("status")}>Status {renderSortIcon("status")}</th>
-                  <th className="px-4 py-2 text-right text-sm font-semibold cursor-pointer" onClick={() => toggleSort("amount")}>Dollar Amount {renderSortIcon("amount")}</th>
+                  {["txid", "createdAt", "type", "status", "amount"].map((key, i) => (
+                    <th
+                      key={i}
+                      className="px-4 py-2 text-left text-sm font-semibold cursor-pointer"
+                      onClick={() => toggleSort(key as keyof Transaction)}
+                    >
+                      {key.toUpperCase()} {renderSortIcon(key as keyof Transaction)}
+                    </th>
+                  ))}
                   <th className="px-4 py-2 text-right text-sm font-semibold">Naira Amount</th>
                   <th className="px-4 py-2 text-right text-sm font-semibold">Coin Amount</th>
                   <th className="px-4 py-2 text-left text-sm font-semibold">Wallet</th>
@@ -177,48 +172,56 @@ export default function AllTransactionsPage() {
                   <th className="px-4 py-2 text-left text-sm font-semibold">Bank</th>
                 </tr>
               </thead>
+
               <tbody className="divide-y divide-gray-700">
-                {sortedTransactions.map((tx) => (
-                  <tr key={tx.txid} className="hover:bg-gray-800/50">
-                    <td className="px-4 py-3 text-sm text-blue-300 font-mono truncate max-w-xs">{tx.txid}</td>
-                    <td className="px-4 py-3 text-sm text-gray-300">{new Date(tx.createdAt).toLocaleString()}</td>
-                    <td className="px-4 py-3 text-sm text-blue-500 capitalize">{tx.type}</td>
-                    <td className="px-4 py-3">
-                      <span className={`text-xs px-2 py-1 rounded-full font-semibold ${statusColors[tx.status] || "bg-gray-200 text-gray-700"}`}>
-                        {tx.status.toUpperCase()}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-right text-white font-semibold">${tx.amount}</td>
-                    <td className="px-4 py-3 text-sm text-right text-white font-semibold">
-                      {loadingRates ? (
-                        'Loading...'
-                      ) : (
-                        new Intl.NumberFormat('en-US', { style: 'currency', currency: 'NGN' }).format(tx.amount * exchangeRate)
-                      )}
-                    </td>
-                  <td className="px-4 py-3 text-sm text-right text-white font-semibold">{tx.coinAmount || '0'} {tx.coin.toUpperCase()}</td>
-                    <td className="px-4 py-3 text-sm text-gray-400 font-mono truncate max-w-xs">{tx.walletAddressUsed}</td>
-                    <td className="px-4 py-3 text-sm text-gray-300">{tx.userId?.email || "N/A"}</td>
-                    <td className="px-4 py-3 text-sm text-gray-400">
-                      {tx.type === 'sell' ? (
-                        <>
-                          <div>{tx.bankName || "-"}</div>
-                          <div>{tx.accountName || "-"}</div>
-                          <div title="Click to copy" onClick={() => navigator.clipboard.writeText(tx.accountNumber || '')} className="cursor-pointer hover:text-blue-400">
-                            {tx.accountNumber || "-"}
-                          </div>
-                        </>
-                      ) : (
-                        <div className="text-gray-500">N/A</div>
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                {sortedTransactions.map(tx => {
+    const dollarAmount =
+                tx.type === "buy"
+                  ? tx.amount
+                  : tx.coinAmount * (tx.exchangeRateAdjusted ?? exchangeRate);
+
+              const nairaAmount = dollarAmount * (tx.exchangeRateAdjusted ?? exchangeRate);
+ console.log ("d",dollarAmount)
+                  return (
+                    <tr key={tx.txid} className="hover:bg-gray-800/50">
+                      <td className="px-4 py-3 text-blue-300 font-mono truncate max-w-xs">{tx.txid}</td>
+                      <td className="px-4 py-3 text-gray-300">{new Date(tx.createdAt).toLocaleString()}</td>
+                      <td className="px-4 py-3 text-blue-500 capitalize">{tx.type}</td>
+                      <td className="px-4 py-3">
+                        <span className={`text-xs px-2 py-1 rounded-full font-semibold ${statusColors[tx.status] ?? "bg-gray-200 text-gray-700"}`}>
+                          {tx.status.toUpperCase()}
+                        </span>
+                      </td>
+{tx.type === "buy" ? `$${tx.amount}` : ` $${ dollarAmount.toFixed(2)} `}
+
+                      <td className="px-4 py-3 text-right font-semibold">
+                        {loadingRates ? "Loading..." : new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN" }).format(nairaAmount)}
+                      </td>
+                      <td className="px-4 py-3 text-right font-semibold">{tx.coinAmount} {tx.coin.toUpperCase()}</td>
+                      <td className="px-4 py-3 font-mono truncate max-w-xs">{tx.walletAddressUsed}</td>
+                      <td className="px-4 py-3">{tx.userId?.email ?? "N/A"}</td>
+                      <td className="px-4 py-3">
+                        {tx.type === "sell" ? (
+                          <>
+                            <div>{tx.bankName || "-"}</div>
+                            <div>{tx.accountName || "-"}</div>
+                            <div className="cursor-pointer hover:text-blue-400" onClick={() => navigator.clipboard.writeText(tx.accountNumber ?? "")}>
+                              {tx.accountNumber || "-"}
+                            </div>
+                          </>
+                        ) : (
+                          <span className="text-gray-500">N/A</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
         )}
       </div>
+
       {ToastComponent}
     </div>
   );

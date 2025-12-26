@@ -23,6 +23,7 @@ const createTransaction = asyncHandler(async (req: Request, res: Response)  => {
       amount,
       coinAmount,
       txid,
+      coinPriceUsd,
       type,
       walletAddressUsed,
       country,
@@ -30,7 +31,7 @@ const createTransaction = asyncHandler(async (req: Request, res: Response)  => {
       accountName,
       accountNumber
     } = req.body;
-
+ console.log("Creating transaction with data:", req.body);
     if (!coin || amount == null || coinAmount == null || !txid || !type || !country) {
       throw new ApiError({ statusCode: 400, message: "Missing required fields" });
     }
@@ -53,6 +54,7 @@ const createTransaction = asyncHandler(async (req: Request, res: Response)  => {
       amount,
       coinAmount,
       txid,
+      coinPriceUsd,
       type,
       country,
     };
@@ -147,7 +149,7 @@ const getAllTransactions = asyncHandler(async (req, res) => {
     }));
 
     res.json(new ApiResponse(200, 'All transactions', processedTransactions));
-    console.log('All transactions:', transactions);
+    // console.log('All transactions:', transactions);
   } catch (error) {
     console.error("Error fetching transactions:", error);
     throw new ApiError({ statusCode: 500, message: 'Something went wrong in the process' });
@@ -209,7 +211,7 @@ const updateTransactionStatus = asyncHandler(async (req, res) => {
             notificationAmount = transaction.coinAmount; // Store crypto amount for notification
             notificationCoin = transaction.coin.toUpperCase(); // Store crypto symbol
             // The message should reflect crypto sold and fiat received
-            notificationMessage = `Your sell transaction of ${transaction.coinAmount || 0} ${transaction.coin.toUpperCase()} ($${transaction.amount}) has been confirmed. Payment has been processed.`;
+            notificationMessage = `Your sell transaction of ${transaction.coinAmount || 0} ${transaction.coin.toUpperCase()}  has been confirmed. Payment has been processed.`;
             emailAmountDisplay = `${transaction.coinAmount || 0} ${transaction.coin.toUpperCase()}`;
           }
     // Create notification

@@ -110,3 +110,39 @@ export async function getAccountInfo() {
     throw error;
   }
 }
+
+export interface BitgetDeposit {
+  coin: string;
+  size: string;          // comes as string
+  tradeId?: string;      // txid variant 1
+  orderId?: string;      // txid variant 2
+  status: "success" | string;
+}
+
+export function matchesDeposit(
+  deposit: BitgetDeposit,
+  expectedCoin: string,
+  expectedSize: number,
+  expectedTxid: string
+): { matches: boolean; reasons?: string[] } {
+  const reasons: string[] = [];
+
+  // Coin match (ignore chain suffixes)
+  const coinMatched = deposit.coin.toUpperCase().includes(expectedCoin.toUpperCase());
+  if (!coinMatched) reasons.push(`Coin mismatch: ${deposit.coin} vs ${expectedCoin}`);
+
+  // Amount match (with small tolerance)
+  const amountMatched = Math.abs(parseFloat(deposit.size || '0') - expectedSize) < 0.01;
+  if (!amountMatched) reasons.push(`Size mismatch: ${deposit.size} vs ${expectedSize}`);
+
+  // Txid match
+  const txidCandidates = [deposit.tradeId, deposit.orderId].filter(Boolean).map(String);
+  const txidMatched = txidCandidates.some(t => t.toLowerCase() === expectedTxid.toLowerCase());
+  if (!txidMatched) reasons.push(`Txid mismatch: ${txidCandidates.join(', ')} vs ${expectedTxid}`);
+
+  // Status must be 'success'
+  const statusMatched = deposit.status === 'success';
+  if (!statusMatched) reasons.push(`Status not success: ${deposit.status}`);
+
+  return { matches: coinMatched && amountMatched && txidMatched && statusMatched, reasons };
+}

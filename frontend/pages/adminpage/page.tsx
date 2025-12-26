@@ -34,42 +34,47 @@ export default function AdminDashboard() {
 
 
 
-  useEffect(() => {
-    
-    const fetchPendingTransactions = async () => {
-  try {
-    // Using apiClient instead of direct fetch
-    const response = await apiClients.request(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction/admin`,
-      {
-        method: 'GET',
-        credentials: 'include'
+useEffect(() => {
+  const fetchPendingTransactions = async () => {
+    try {
+      const response = await apiClients.request(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction/admin`,
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
+
+      // console.log("RAW response:", response);
+
+      if (!response.ok) {
+        throw new Error("Request failed");
       }
-    );
 
-    const data = await response.json();
-    console.log("API response:", data);
-    
+      const result = await response.json(); // ✅ PARSE JSON
+      // console.log("PARSED result:", result);
 
-    if (!response.ok || !Array.isArray(data.data)) {
-      setError(data.message || "Failed to load transactions");
-      setLoading(false);
-      return;
+      if (!Array.isArray(result.data)) {
+        throw new Error(result?.message || "Invalid data format");
+      }
+
+      const pending = result.data.filter(
+        (tx: Transaction) => tx.status === "pending"
+      );
+
+      setPendingCount(pending.length);
+    } catch (err) {
+      console.error("Fetch error:", err);
+      setError(
+        err instanceof Error ? err.message : "Failed to load transactions"
+      );
+    } finally {
+      setLoading(false); // ✅ always stops loader
     }
+  };
 
-    const pending = data.data.filter((tx: Transaction) => tx.status === "pending");
-    setPendingCount(pending.length);
-  } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : "Failed to load transactions";
-    setError(errorMessage);
-    console.error("Fetch error:", err);
-  } finally {
-    setLoading(false);
-  }
-};
-
-    fetchPendingTransactions();
-  }, []);
+  fetchPendingTransactions();
+}, []);
 
   //const ready = useRequireAdmin();
 

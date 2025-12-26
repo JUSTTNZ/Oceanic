@@ -49,7 +49,7 @@ interface BankDetails {
   bankCode?: string;
 }
 const SUPPORTED_COINS = Object.keys(BYBIT_WALLET_ADDRESSES);
-export type TransactionStatus = 'pending' | 'sent' | 'received' | 'confirmed' | 'failed';
+export type TransactionStatus = 'pending' | 'sent' | 'received' | 'confirmed' | 'failed' | "txid-exists";
 
 const SellCrypto = () => {
   const [status, setStatus] = useState<TransactionStatus>('pending');
@@ -61,13 +61,13 @@ const SellCrypto = () => {
   const [showCoinDropdown, setShowCoinDropdown] = useState(false);
 const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
-  const [modalType, setModalType] = useState<"success" | "error" | "pending">("pending");
+  const [modalType, setModalType] = useState<"success" | "error" | "txid-exists" | "pending">("pending");
   const { showToast, ToastComponent } = useToast();
   const [transaction, setTransaction] = useState<Transaction | null>(null);
-  console.log(transaction)
-  console.log("coin", selectedCoin?.symbol, )
-console.log("t", txid)
-console.log("a", amount)
+//   console.log(transaction)
+//   console.log("coin", selectedCoin?.symbol, )
+// console.log("t", txid)
+// console.log("a", amount)
 const [selectedCountry] = useState<Country>({ 
   code: "NG", 
   name: "Nigeria", 
@@ -84,7 +84,7 @@ const [selectedCountry] = useState<Country>({
   const [confirmedTransaction, setConfirmedTransaction] = useState<{
   coin?: string;
   amount?: number;
-  status?: string;
+  // status?: string;
   txid?: string;
 } | null>(null);
 
@@ -198,24 +198,47 @@ const handleSubmit = async () => {
 
   try {
     setIsSubmitting(true);
-    setStatus("sent");
+    setStatus("pending");
 
-    // Calculate coinAmount (fiat equivalent)
-    const adjustedExchangeRate = exchangeRate - 50;
-    const coinAmount = amount * selectedCoin.current_price * adjustedExchangeRate;
+    // Step 1: Confirm transaction with Bitget first
+    const confirmRes = await apiClients.request(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v2/bitget/confirm-deposit?coin=${selectedCoin.symbol}&txid=${txid}&size=${amount}`,
+      { method: 'GET', credentials: "include" }
+    );
+    console.log("selectedCoin", selectedCoin.symbol)
+    console.log("txid", txid)
+    console.log("amount", amount)
+    const confirmData = await confirmRes.json();
+    console.log("Bitget confirmation:", confirmData);
 
-    // Step 1: Create transaction
+    if (!confirmData.success || !confirmData.confirmed) {
+      setStatus("failed");
+      // showToast(
+      //   "Deposit not found or does not match criteria. Check your txid and amount.",
+      //   "error"
+      // );
+      setModalType("error");
+      setShowModal(true);
+      return; // stop here, don't create backend transaction
+    }
+
+    setStatus("confirmed");
+    // showToast("Deposit confirmed with Bitget!", "success");
+
+    // Step 2: Create transaction in your backend
+    const cryptoAmountToSell = amount;
+    const fiatAmountReceived = cryptoAmountToSell * selectedCoin.current_price;
+
     const createRes = await apiClients.request(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify({
         coin: selectedCoin.symbol,
-        amount,
-        coinAmount,
+        amount: fiatAmountReceived,
+        coinAmount: cryptoAmountToSell,
         txid,
+        coinPriceUsd: selectedCoin.current_price,
         type: "sell",
         country: selectedCountry.code,
         bankName: bankDetails.bankName,
@@ -223,72 +246,34 @@ const handleSubmit = async () => {
         accountNumber: bankDetails.accountNumber,
       }),
     });
-    
+
     const createData = await createRes.json();
-console.log("cre", createData)
-    if (!createRes.ok) {
-      throw new Error(createData.message || "Transaction creation failed");
-    }
+    console.log("Transaction created:", createData);
+
+    if (!createRes.ok) throw new Error(createData.message || "Transaction creation failed");
 
     setTransaction(createData.data);
-console.log("coin", selectedCoin.symbol, coins)
-console.log("t", txid)
-console.log("a", amount)
-    // Step 2: Confirm transaction using Bitget
-    const confirmRes = await apiClients.request(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v2/bitget/confirm-deposit?coin=${selectedCoin.symbol}&txid=${txid}&size=${amount}`,
-      {
-     method: 'GET',
-    credentials: "include"
-      }
-    );
-    console.log("res", confirmRes)
-
-    const confirmData = await confirmRes.json();
-  console.log("con", confirmData)
-    if (confirmData.success && confirmData.confirmed) {
     setStatus("confirmed");
-    showToast("Transaction confirmed successfully!", "success");
-
     setConfirmedTransaction({
       coin: selectedCoin?.symbol.toUpperCase(),
       amount,
-      status: "confirmed",
+      // status: "confirmed",
       txid,
     });
-
     setModalType("success");
     setShowModal(true);
     resetForm();
-    }
-    else {
-      // Bitget did not confirm it yet
-      setStatus("pending");
-      showToast(
-        "Transaction submitted but not yet confirmed. Please wait."
-      );
-      setConfirmedTransaction({
-        coin: selectedCoin?.symbol.toUpperCase(),
-        amount,
-        status: "pending",
-        txid,
-      });
-      setModalType("pending");
-      setShowModal(true);
-    }
+
   } catch (error) {
     console.log("Transaction error:", error);
-    // showToast(
-    //   error instanceof Error ? error.message : "Transaction failed",
-    //   "error"
-    // );
     setStatus("failed");
-    setModalType("error");
+    setModalType("txid-exists");
     setShowModal(true);
   } finally {
     setIsSubmitting(false);
   }
 };
+
 
     const safeCountry = selectedCountry || { currency: "USD", currencySymbol: "$" };
   
@@ -305,7 +290,16 @@ console.log("a", amount)
     }
     return formatter.format(value);
   };
- const adjustedExchangeRate = exchangeRate - 50;
+ const adjustedExchangeRate = exchangeRate - 70;
+const modalMessages = {
+  success: "Transaction successful! We’re just confirming the details, and you’ll receive your funds soon. Thanks for waiting!.",
+
+  pending: `${amount} ${selectedCoin?.symbol.toUpperCase()} is pending. We have received your transaction and are waiting for blockchain confirmation.`,
+
+  error: "We could not confirm your transaction. Please check your transaction ID and amount, then try again.",
+    "txid-exists":
+    "This transaction ID has already been used. If you have already submitted this transaction, please wait for confirmation or contact support.",
+};
 
     if (loading) {
      return (
@@ -423,20 +417,24 @@ console.log("a", amount)
 
 
       {showModal && (
+        
         <TransactionStatusModal
           type={modalType}
           title={
-            modalType === "success"
-              ? "Transaction Successful"
-              : modalType === "pending"
-              ? "Transaction Pending"
-              : "Transaction Failed"
+    modalType === "success"
+    ? "Transaction Successful"
+    : modalType === "pending"
+    ? "Transaction Pending"
+    : modalType === "txid-exists"
+    ? "Transaction Already Submitted"
+    : "Transaction Failed"
           }
-          message={
-            modalType === "success"
-              ? "Your transaction was completed successfully. Your account will be credited after confirmation by our team. This usually takes 5-10 minutes."
-              : `${amount} ${selectedCoin?.symbol.toUpperCase()} is pending. We are yet to confirm your transaction.`
-          }
+          // message={
+          //   modalType === "success"
+          //     ? "Your transaction was completed successfully. Your account will be credited after confirmation by our team. This usually takes 5-10 minutes."
+          //     : `${amount} ${selectedCoin?.symbol.toUpperCase()} is pending. We are yet to confirm your transaction.`
+          // }
+            message={modalMessages[modalType]}
           details={confirmedTransaction || {}}
           onClose={() => setShowModal(false)}
         />
