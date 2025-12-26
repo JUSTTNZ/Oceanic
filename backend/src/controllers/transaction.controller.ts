@@ -4,7 +4,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { Transaction } from "../models/transaction.model.js";
 import { CoinWallet } from "../models/coinWallet.model.js";
 import { Notification } from "../models/notification.model.js";
-import { sendAdminEmail } from "../utils/mailer.js";
+import { sendAdminEmail, sendUserTransactionStatusEmail } from "../utils/mailer.js";
 import { Request, Response } from "express";
 import coins from "../coindata/coin.json" with { type: "json" };
 interface CoinData {
@@ -31,7 +31,9 @@ const createTransaction = asyncHandler(async (req: Request, res: Response)  => {
       accountName,
       accountNumber
     } = req.body;
- console.log("Creating transaction with data:", req.body);
+    
+    console.log("Creating transaction with data:", req.body);
+    
     if (!coin || amount == null || coinAmount == null || !txid || !type || !country) {
       throw new ApiError({ statusCode: 400, message: "Missing required fields" });
     }
@@ -115,6 +117,23 @@ const createTransaction = asyncHandler(async (req: Request, res: Response)  => {
 
     const transaction = await Transaction.create(data);
 
+    // Send email notification to admin (non-blocking)
+    sendAdminEmail({
+      type: data.type,
+      userFullname: data.userFullname,
+      userEmail: data.userEmail,
+      coin: data.coin,
+      amount: data.amount,
+      coinAmount: data.coinAmount,
+      txid: data.txid,
+      country: data.country,
+      walletAddressUsed: data.walletAddressUsed,
+      walletAddressSentTo: data.walletAddressSentTo,
+      bankName: data.bankName,
+      accountName: data.accountName,
+      accountNumber: data.accountNumber,
+    }).catch((err) => console.error("Failed to send admin notification email:", err));
+
     res.status(201).json(new ApiResponse(201, "Transaction created successfully", transaction));
   } catch (error) {
     if (error instanceof ApiError) throw error;
@@ -124,7 +143,6 @@ const createTransaction = asyncHandler(async (req: Request, res: Response)  => {
     });
   }
 });
-
   
 
 // Get All Transactions with optional sorting and filtering
@@ -193,68 +211,59 @@ const updateTransactionStatus = asyncHandler(async (req, res) => {
   transaction.status = status;
   await transaction.save();
 
-  // If status is confirmed, create notification and send email
-  if (status === 'confirmed') {
+  // Send email notification for confirmed or rejected status
+  if (status === 'confirmed' || status === 'rejected') {
     let notificationAmount: number;
     let notificationCoin: string;
     let notificationMessage: string;
-    let emailAmountDisplay: string;
 
-          if (transaction.type === 'buy') {
-            // For buy: primary amount is fiat (USD), secondary is crypto
-            notificationAmount = transaction.amount; // Store fiat amount for notification
-            notificationCoin = 'USD'; // Explicitly USD for buy transactions
-            notificationMessage = `Your buy transaction of $${transaction.amount} (${transaction.coinAmount || 0} ${transaction.coin.toUpperCase()}) has been confirmed. Payment has been processed.`;
-            emailAmountDisplay = `$${transaction.amount} USD`;
-          } else {
-            // For sell: primary amount is crypto, secondary is fiat (USD equivalent)
-            notificationAmount = transaction.coinAmount; // Store crypto amount for notification
-            notificationCoin = transaction.coin.toUpperCase(); // Store crypto symbol
-            // The message should reflect crypto sold and fiat received
-            notificationMessage = `Your sell transaction of ${transaction.coinAmount || 0} ${transaction.coin.toUpperCase()}  has been confirmed. Payment has been processed.`;
-            emailAmountDisplay = `${transaction.coinAmount || 0} ${transaction.coin.toUpperCase()}`;
-          }
-    // Create notification
-    await Notification.create({
-      userId: transaction.userId,
-      type: 'transaction_confirmed',
-      message: notificationMessage,
-      transactionId: transaction._id,
-      txid: transaction.txid,
-      amount: notificationAmount,
-      coin: notificationCoin,
-    });
+    if (transaction.type === 'buy') {
+      // For buy: primary amount is fiat (USD), secondary is crypto
+      notificationAmount = transaction.amount;
+      notificationCoin = 'USD';
+      notificationMessage = `Your buy transaction of $${transaction.amount} (${transaction.coinAmount || 0} ${transaction.coin.toUpperCase()}) has been ${status}.`;
+    } else {
+      // For sell: primary amount is crypto, secondary is fiat (USD equivalent)
+      notificationAmount = transaction.coinAmount;
+      notificationCoin = transaction.coin.toUpperCase();
+      notificationMessage = `Your sell transaction of ${transaction.coinAmount || 0} ${transaction.coin.toUpperCase()} has been ${status}.`;
+    }
 
-    // Send email
-    const emailSubject = `Transaction Confirmed - ${transaction.txid}`;
-    const emailBody = `
-      <h2>Transaction Confirmed</h2>
-      <p>Dear ${transaction.userFullname},</p>
-      <p>Your ${transaction.type} transaction has been successfully confirmed.</p>
-      <p><strong>Transaction Details:</strong></p>
-      <ul>
-        <li>Transaction ID: ${transaction.txid}</li>
-        <li>Amount: ${emailAmountDisplay}</li>
-        <li>Type: ${transaction.type}</li>
-        <li>Status: Confirmed</li>
-      </ul>
-      <p>Your payment has been processed and credited to your account.</p>
-      <p>Thank you for using Oceanic Charts!</p>
-      <p>Best regards,<br>The Oceanic Charts Team</p>
-    `;
+    // Uncomment when ready to use notifications
+    // await Notification.create({
+    //   userId: transaction.userId,
+    //   type: `transaction_${status}`,
+    //   message: notificationMessage,
+    //   transactionId: transaction._id,
+    //   txid: transaction.txid,
+    //   amount: notificationAmount,
+    //   coin: notificationCoin,
+    // });
 
+    // Send email to user
     try {
-      await sendAdminEmail({
-        to: transaction.userEmail,
-        subject: emailSubject,
-        html: emailBody
-      });
+      await sendUserTransactionStatusEmail(
+        transaction.userEmail,
+        status,
+        {
+          userFullname: transaction.userFullname,
+          type: transaction.type,
+          coin: transaction.coin,
+          amount: transaction.amount,
+          coinAmount: transaction.coinAmount,
+          txid: transaction.txid,
+          bankName: transaction.bankName,
+          accountName: transaction.accountName,
+          accountNumber: transaction.accountNumber,
+        }
+      );
     } catch (emailError) {
-      console.error('Failed to send confirmation email:', emailError);
+      console.error('Failed to send user status notification email:', emailError);
       // Don't throw error, just log it
     }
   }
 
+  // Uncomment when socket.io is set up
   // const io = getIO();
   // io.emit('transaction_updated', {
   //   user: transaction.userId,
