@@ -146,9 +146,9 @@ export const confirmDeposit = async (req: Request, res: Response) => {
       });
     }
 
-    // Use dynamic time range: last 7 days (better than fixed timestamps)
+    // Use dynamic time range: last 28 days (better than fixed timestamps)
     const endTime = Date.now();
-    const startTime = endTime - 7 * 24 * 60 * 60 * 1000;
+    const startTime = endTime - 28 * 24 * 60 * 60 * 1000;
 
     console.log(
       `[ConfirmDeposit] Searching for: coin=${coin}, size=${expectedSize}, txid=${txid}\nTime range: ${new Date(
