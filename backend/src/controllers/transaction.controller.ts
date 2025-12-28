@@ -16,6 +16,7 @@ interface CoinData {
 const coinsData: CoinData[] = coins as CoinData[];
 
 // Create Transaction (Buy or Sell)
+// Create Transaction (Buy or Sell)
 const createTransaction = asyncHandler(async (req: Request, res: Response)  => {
   try {
     const {
@@ -117,7 +118,8 @@ const createTransaction = asyncHandler(async (req: Request, res: Response)  => {
 
     const transaction = await Transaction.create(data);
 
-    // Send email notification to admin (non-blocking)
+    // 🔥 SEND EMAIL TO ADMIN (non-blocking)
+    console.log("📧 Sending admin notification email...");
     sendAdminEmail({
       type: data.type,
       userFullname: data.userFullname,
@@ -132,7 +134,15 @@ const createTransaction = asyncHandler(async (req: Request, res: Response)  => {
       bankName: data.bankName,
       accountName: data.accountName,
       accountNumber: data.accountNumber,
-    }).catch((err) => console.error("Failed to send admin notification email:", err));
+    }).then((result) => {
+      if (result.success) {
+        console.log("✅ Admin email sent successfully!");
+      } else {
+        console.log("❌ Failed to send admin email:", result.error);
+      }
+    }).catch((err) => {
+      console.error("❌ Error sending admin notification email:", err)
+    });
 
     res.status(201).json(new ApiResponse(201, "Transaction created successfully", transaction));
   } catch (error) {
@@ -241,28 +251,36 @@ const updateTransactionStatus = asyncHandler(async (req, res) => {
     // });
 
     // Send email to user
-    try {
-      await sendUserTransactionStatusEmail(
-        transaction.userEmail,
-        status,
-        {
-          userFullname: transaction.userFullname,
-          type: transaction.type,
-          coin: transaction.coin,
-          amount: transaction.amount,
-          coinAmount: transaction.coinAmount,
-          txid: transaction.txid,
-          bankName: transaction.bankName,
-          accountName: transaction.accountName,
-          accountNumber: transaction.accountNumber,
-        }
-      );
-    } catch (emailError) {
-      console.error('Failed to send user status notification email:', emailError);
-      // Don't throw error, just log it
-    }
-  }
+    // In updateTransactionStatus controller
+console.log("About to send email to:", transaction.userEmail);
+console.log("Transaction data:", {
+  userFullname: transaction.userFullname,
+  type: transaction.type,
+  coin: transaction.coin,
+  status: status
+});
 
+try {
+  const result = await sendUserTransactionStatusEmail(
+    transaction.userEmail,
+    status,
+    {
+      userFullname: transaction.userFullname,
+      type: transaction.type,
+      coin: transaction.coin,
+      amount: transaction.amount,
+      coinAmount: transaction.coinAmount,
+      txid: transaction.txid,
+      bankName: transaction.bankName,
+      accountName: transaction.accountName,
+      accountNumber: transaction.accountNumber,
+    }
+  );
+  console.log("Email send result:", result);
+} catch (emailError) {
+  console.error('Failed to send user status notification email:', emailError);
+}
+  }
   // Uncomment when socket.io is set up
   // const io = getIO();
   // io.emit('transaction_updated', {

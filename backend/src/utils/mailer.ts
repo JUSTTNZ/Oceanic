@@ -60,11 +60,15 @@ export const sendAdminEmail = async (transactionData: TransactionEmailData) => {
   try {
     // Create transporter
     const transporter = nodemailer.createTransport({
-      service: "gmail", // or your email service
+      service: "gmail",
       auth: {
-        user: process.env.EMAIL_USER, // your email
-        pass: process.env.EMAIL_PASSWORD, // your app password
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD,
       },
+      // Add this to fix SSL certificate issue
+      tls: {
+        rejectUnauthorized: false
+      }
     });
 
     // Build email content based on transaction type
@@ -110,7 +114,7 @@ export const sendAdminEmail = async (transactionData: TransactionEmailData) => {
     // Send email
     const info = await transporter.sendMail({
       from: process.env.EMAIL_USER,
-      to: process.env.ADMIN_EMAIL, // your admin email
+      to: process.env.ADMIN_EMAIL,
       subject: `New ${transactionData.type.toUpperCase()} Transaction - ${transactionData.coin} - ${transactionData.userFullname}`,
       html: emailContent,
     });
@@ -119,7 +123,6 @@ export const sendAdminEmail = async (transactionData: TransactionEmailData) => {
     return { success: true, messageId: info.messageId };
   } catch (error) {
     console.error("Error sending admin email:", error);
-    // Don't throw error - we don't want email failure to break transaction creation
     return { success: false, error };
   }
 };
@@ -130,12 +133,18 @@ export const sendUserTransactionStatusEmail = async (
   transactionData: any
 ) => {
   try {
+    console.log("Sending email to:", userEmail);
+    
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASSWORD,
       },
+      // Add these options to fix SSL certificate issue
+      tls: {
+        rejectUnauthorized: false  // This allows self-signed certificates
+      }
     });
 
     let emailSubject = "";
@@ -202,10 +211,10 @@ export const sendUserTransactionStatusEmail = async (
       html: emailBody,
     });
 
-    console.log(`Status email sent to user: ${userEmail}`);
+    console.log(`✅ Status email sent successfully to user: ${userEmail}`);
     return { success: true };
   } catch (error) {
-    console.error("Error sending user status email:", error);
+    console.error("❌ Error sending user status email:", error);
     return { success: false, error };
   }
 };
