@@ -58,7 +58,6 @@ interface TransactionEmailData {
 
 export const sendAdminEmail = async (transactionData: TransactionEmailData) => {
   try {
-    // Create transporter
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -70,7 +69,6 @@ export const sendAdminEmail = async (transactionData: TransactionEmailData) => {
       }
     });
 
-    // Build email content with styled HTML
     const emailContent = `
       <!DOCTYPE html>
       <html>
@@ -78,6 +76,9 @@ export const sendAdminEmail = async (transactionData: TransactionEmailData) => {
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
+          * {
+            box-sizing: border-box;
+          }
           body {
             margin: 0;
             padding: 0;
@@ -127,29 +128,38 @@ export const sendAdminEmail = async (transactionData: TransactionEmailData) => {
           }
           .section h2 {
             margin: 0 0 16px 0;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 600;
             color: #93c5fd;
           }
-          .info-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 0;
+          .info-grid {
+            width: 100%;
+            border-collapse: collapse;
+          }
+          .info-grid tr {
             border-bottom: 1px solid rgba(55, 65, 81, 0.3);
           }
-          .info-row:last-child {
+          .info-grid tr:last-child {
             border-bottom: none;
+          }
+          .info-grid td {
+            padding: 12px 0;
+            vertical-align: middle;
           }
           .info-label {
             color: #9ca3af;
             font-size: 14px;
             font-weight: 500;
+            width: 45%;
+            padding-right: 16px;
           }
           .info-value {
             color: #f3f4f6;
             font-size: 14px;
             font-weight: 600;
             text-align: right;
+            width: 55%;
+            word-wrap: break-word;
           }
           .highlight {
             background: linear-gradient(to right, #3b82f6, #2563eb);
@@ -157,17 +167,18 @@ export const sendAdminEmail = async (transactionData: TransactionEmailData) => {
             -webkit-text-fill-color: transparent;
             background-clip: text;
             font-weight: bold;
-            font-size: 20px;
+            font-size: 18px;
           }
           .wallet-address {
             background: rgba(17, 24, 39, 0.5);
             padding: 12px;
             border-radius: 8px;
             font-family: 'Courier New', monospace;
-            font-size: 12px;
+            font-size: 11px;
             color: #93c5fd;
             word-break: break-all;
             margin-top: 8px;
+            line-height: 1.5;
           }
           .footer {
             padding: 24px;
@@ -179,6 +190,7 @@ export const sendAdminEmail = async (transactionData: TransactionEmailData) => {
             margin: 0;
             color: #6b7280;
             font-size: 12px;
+            line-height: 1.6;
           }
           .type-badge {
             display: inline-block;
@@ -187,6 +199,7 @@ export const sendAdminEmail = async (transactionData: TransactionEmailData) => {
             font-size: 12px;
             font-weight: 600;
             text-transform: uppercase;
+            white-space: nowrap;
           }
           .type-buy {
             background: rgba(34, 197, 94, 0.2);
@@ -213,46 +226,50 @@ export const sendAdminEmail = async (transactionData: TransactionEmailData) => {
             <!-- User Information -->
             <div class="section">
               <h2>👤 User Information</h2>
-              <div class="info-row">
-                <span class="info-label">Name</span>
-                <span class="info-value">${transactionData.userFullname}</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">Email</span>
-                <span class="info-value">${transactionData.userEmail}</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">Country</span>
-                <span class="info-value">📍 ${transactionData.country}</span>
-              </div>
+              <table class="info-grid">
+                <tr>
+                  <td class="info-label">Name</td>
+                  <td class="info-value">${transactionData.userFullname}</td>
+                </tr>
+                <tr>
+                  <td class="info-label">Email</td>
+                  <td class="info-value">${transactionData.userEmail}</td>
+                </tr>
+                <tr>
+                  <td class="info-label">Country</td>
+                  <td class="info-value">📍 ${transactionData.country}</td>
+                </tr>
+              </table>
             </div>
 
             <!-- Transaction Details -->
             <div class="section">
               <h2>💰 Transaction Details</h2>
-              <div class="info-row">
-                <span class="info-label">Type</span>
-                <span class="info-value">
-                  <span class="type-badge ${transactionData.type === 'buy' ? 'type-buy' : 'type-sell'}">
-                    ${transactionData.type === 'buy' ? '🔼' : '🔽'} ${transactionData.type.toUpperCase()}
-                  </span>
-                </span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">Coin</span>
-                <span class="info-value highlight">${transactionData.coin.toUpperCase()}</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">USD Amount</span>
-                <span class="info-value" style="color: #86efac;">$${transactionData.amount.toFixed(2)}</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">Coin Amount</span>
-                <span class="info-value">${transactionData.coinAmount} ${transactionData.coin.toUpperCase()}</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">Transaction ID</span>
-                <span class="info-value" style="font-size: 11px; font-family: monospace;">${transactionData.txid.slice(0, 16)}...</span>
+              <table class="info-grid">
+                <tr>
+                  <td class="info-label">Type</td>
+                  <td class="info-value">
+                    <span class="type-badge ${transactionData.type === 'buy' ? 'type-buy' : 'type-sell'}">
+                      ${transactionData.type === 'buy' ? '🔼' : '🔽'} ${transactionData.type.toUpperCase()}
+                    </span>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="info-label">Coin</td>
+                  <td class="info-value highlight">${transactionData.coin.toUpperCase()}</td>
+                </tr>
+                <tr>
+                  <td class="info-label">USD Amount</td>
+                  <td class="info-value" style="color: #86efac;">$${transactionData.amount.toFixed(2)}</td>
+                </tr>
+                <tr>
+                  <td class="info-label">Coin Amount</td>
+                  <td class="info-value">${transactionData.coinAmount} ${transactionData.coin.toUpperCase()}</td>
+                </tr>
+              </table>
+              <div style="margin-top: 12px;">
+                <div style="color: #9ca3af; font-size: 14px; margin-bottom: 4px;">Transaction ID:</div>
+                <div class="wallet-address">${transactionData.txid}</div>
               </div>
             </div>
 
@@ -260,15 +277,15 @@ export const sendAdminEmail = async (transactionData: TransactionEmailData) => {
               <!-- Buy Transaction Details -->
               <div class="section">
                 <h2>🔼 Buy Transaction Details</h2>
-                <div class="info-row">
-                  <span class="info-label">User Wallet Address</span>
+                <div style="margin-bottom: 12px;">
+                  <div style="color: #9ca3af; font-size: 14px; margin-bottom: 4px;">User Wallet Address:</div>
+                  <div class="wallet-address">${transactionData.walletAddressUsed}</div>
                 </div>
-                <div class="wallet-address">${transactionData.walletAddressUsed}</div>
                 ${transactionData.walletAddressSentTo ? `
-                  <div class="info-row" style="margin-top: 16px;">
-                    <span class="info-label">Admin Wallet (Sent To)</span>
+                  <div style="margin-top: 16px;">
+                    <div style="color: #9ca3af; font-size: 14px; margin-bottom: 4px;">Admin Wallet (Sent To):</div>
+                    <div class="wallet-address">${transactionData.walletAddressSentTo}</div>
                   </div>
-                  <div class="wallet-address">${transactionData.walletAddressSentTo}</div>
                 ` : ''}
               </div>
             ` : ""}
@@ -277,23 +294,25 @@ export const sendAdminEmail = async (transactionData: TransactionEmailData) => {
               <!-- Sell Transaction Details -->
               <div class="section">
                 <h2>🔽 Sell Transaction - Bank Details</h2>
-                <div class="info-row">
-                  <span class="info-label">🏦 Bank Name</span>
-                  <span class="info-value">${transactionData.bankName}</span>
-                </div>
-                <div class="info-row">
-                  <span class="info-label">👤 Account Name</span>
-                  <span class="info-value">${transactionData.accountName}</span>
-                </div>
-                <div class="info-row">
-                  <span class="info-label">💳 Account Number</span>
-                  <span class="info-value" style="font-family: monospace; color: #93c5fd;">${transactionData.accountNumber}</span>
-                </div>
+                <table class="info-grid">
+                  <tr>
+                    <td class="info-label">🏦 Bank Name</td>
+                    <td class="info-value">${transactionData.bankName}</td>
+                  </tr>
+                  <tr>
+                    <td class="info-label">👤 Account Name</td>
+                    <td class="info-value">${transactionData.accountName}</td>
+                  </tr>
+                  <tr>
+                    <td class="info-label">💳 Account Number</td>
+                    <td class="info-value" style="font-family: monospace; color: #93c5fd;">${transactionData.accountNumber}</td>
+                  </tr>
+                </table>
                 ${transactionData.walletAddressSentTo ? `
-                  <div class="info-row" style="margin-top: 16px;">
-                    <span class="info-label">Admin Wallet (Received At)</span>
+                  <div style="margin-top: 16px;">
+                    <div style="color: #9ca3af; font-size: 14px; margin-bottom: 4px;">Admin Wallet (Received At):</div>
+                    <div class="wallet-address">${transactionData.walletAddressSentTo}</div>
                   </div>
-                  <div class="wallet-address">${transactionData.walletAddressSentTo}</div>
                 ` : ''}
               </div>
             ` : ""}
@@ -309,7 +328,6 @@ export const sendAdminEmail = async (transactionData: TransactionEmailData) => {
       </html>
     `;
 
-    // Send email
     const info = await transporter.sendMail({
       from: `"Oceanic Charts" <${process.env.EMAIL_USER}>`,
       to: process.env.ADMIN_EMAIL,
@@ -501,8 +519,7 @@ export const sendUserTransactionStatusEmail = async (
           <div class="container">
             <!-- Header -->
             <div class="header">
-              <div class="icon">✅</div>
-              <h1>Transaction Confirmed!</h1>
+              <h1>Transaction Confirmed! ✅</h1>
             </div>
 
             <!-- Content -->
