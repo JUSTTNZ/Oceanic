@@ -1,5 +1,21 @@
 [
   { "coin": "BTC", "network": "Bitcoin", "walletAddress": "1QBbNxYLTAUPNHeQeU6aeEivz6mbVBdiT7" },
   { "coin": "ETH", "network": "Ethereum Mainnet", "walletAddress": "0x4532fe9d370b19dd1bba5fd324e4b022a85a5345" },
-  { "coin": "USDT", "network": "TRC20", "walletAddress": "TGNsXRxzAXs7xh4fBs7sQVjhej9JnKcvfU" }
+  { "coin": "USDT", "network": "TRC20", "walletAddress": "TGNsXRxzAXs7xh4fBs7sQVjhej9JnKcvfU" },
+  { "coin": "BNB", "network": "BEP20", "walletAddress": "0x4532fe9d370b19dd1bba5fd324e4b022a85a5345" },
+  { "coin": "XRP", "network": "XRP", "walletAddress": "rGDreBvnHrX1get7na3J4oowN19ny4GzFn", "memo": "451786069" },
+  { "coin": "USDC", "network": "Solana", "walletAddress": "CNPyBk7Zqvn52qRg1w9CcnbwpkBr8LQ9KLwYUhWMBbQU" },
+  { "coin": "SOL", "network": "Solana", "walletAddress": "CNPyBk7Zqvn52qRg1w9CcnbwpkBr8LQ9KLwYUhWMBbQU" },
+  { "coin": "DOGE", "network": "Dogecoin", "walletAddress": "D8ZR94qAgK4Hgj75Zhs352ztCr1QEtX98P" },
+  { "coin": "ADA", "network": "Cardano", "walletAddress": "Ae2tdPwUPEZ9nvdiZoMJEPXx5Lmwfy1AQrUBmtofAhPSYRgmtm6rAb4WNuR" },
+  { "coin": "AVAX", "network": "Avalanche C-Chain", "walletAddress": "0x4532fe9d370b19dd1bba5fd324e4b022a85a5345" },
+  { "coin": "SUI", "network": "Sui", "walletAddress": "0xab89fe2a83790aad2c8e10f2c95a000895706799bc8f084ace9596230666997c" },
+  { "coin": "LTC", "network": "Litecoin", "walletAddress": "Ld6mqvFbtgug1L8vV5A9MG98YrkT4ezGPF" },
+  { "coin": "SHIB", "network": "BEP20", "walletAddress": "0x4532fe9d370b19dd1bba5fd324e4b022a85a5345" },
+  { "coin": "PI", "network": "Pi Network", "walletAddress": "MDFNWH6ZFJVHJDLBMNOUT35X4EEKQVJAO3ZDL4NL7VQJLC4PJOQFWAAAAAAO4ZYL4SD7O" },
+  { "coin": "JUP", "network": "Solana", "walletAddress": "CNPyBk7Zqvn52qRg1w9CcnbwpkBr8LQ9KLwYUhWMBbQU" },
+  { "coin": "TON", "network": "TON", "walletAddress": "UQANseOk2PMFG9E5z8_BPJ_5s62v8jPjn1YPzyUTcl8i1NS8" },
+  { "coin": "ARB", "network": "Arbitrum One", "walletAddress": "0x4532fe9d370b19dd1bba5fd324e4b022a85a5345" },
+  { "coin": "LINK", "network": "ERC20", "walletAddress": "0x4532fe9d370b19dd1bba5fd324e4b022a85a5345" }
 ]
+
