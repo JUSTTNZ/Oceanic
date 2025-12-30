@@ -64,7 +64,8 @@ export default function Reset() {
         const errorData = await resp.json()
         throw new Error(errorData.message || 'Failed to update password.')
       }
-
+      sessionStorage.removeItem("password_reset_active");
+      sessionStorage.removeItem("magiclink_redirected");
       setSuccess(true)
     } catch (err) {
       const error = err as Error
