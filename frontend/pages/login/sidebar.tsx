@@ -29,6 +29,12 @@ export default function Sidebar({ isOpen, closeSidebar }: SidebarProps) {
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
+    // ✅ Only fetch notifications if user is logged in
+    if (!user || !user.uid) {
+      console.log("No user logged in, skipping notification fetch");
+      return;
+    }
+
     const fetchUnreadCount = async () => {
       try {
         const res = await apiClients.request(
@@ -44,14 +50,17 @@ export default function Sidebar({ isOpen, closeSidebar }: SidebarProps) {
           setUnreadCount(data.data?.unreadCount || 0);
         }
       } catch (err) {
-        console.error('Failed to fetch unread count:', err);
+        // ✅ Gracefully handle errors - don't throw
+        console.log('Could not fetch notifications:', err);
+        // User might not be authenticated, that's okay
       }
     };
 
     fetchUnreadCount();
     const interval = setInterval(fetchUnreadCount, 15000);
     return () => clearInterval(interval);
-  }, []);
+  }, [user]); // ✅ Re-run when user changes
+
   return (
     <>
       <div
@@ -146,10 +155,10 @@ export default function Sidebar({ isOpen, closeSidebar }: SidebarProps) {
                   <Link
                     href="#"
                     onClick={(e) => {
-        e.preventDefault();
-        setShowModal(true);
-        closeSidebar();
-      }}
+                      e.preventDefault();
+                      setShowModal(true);
+                      closeSidebar();
+                    }}
                     className="px-4 py-2 rounded hover:bg-blue-400"
                   >
                     Sign out
@@ -182,10 +191,10 @@ export default function Sidebar({ isOpen, closeSidebar }: SidebarProps) {
           onClick={closeSidebar}
         />
       )}
-                {showModal && (
-                  <LogoutM
-           showModal={showModal}
-            setShowModal={() => setShowModal(false)}
+      {showModal && (
+        <LogoutM
+          showModal={showModal}
+          setShowModal={() => setShowModal(false)}
         />
       )}
     </>
