@@ -40,6 +40,7 @@ export default function AdminPendingPage() {
   const hasFetched = useRef(false);
 
   useEffect(() => {
+    // Prevent multiple fetches in strict mode
     if (hasFetched.current) return;
     hasFetched.current = true;
 
@@ -57,8 +58,9 @@ export default function AdminPendingPage() {
         const pending: Transaction[] = Array.isArray(txJson.data)
           ? txJson.data.filter((tx: Transaction) => tx.status === "pending")
           : [];
-      console.log("Pending transactions fetched:", pending);
-        // Fetch NGN exchange rate
+        console.log("Pending transactions fetched:", pending);
+
+        // Fetch NGN exchange rate (now cached on backend!)
         let baseRate = 1;
         try {
           const rateRes = await apiClients.request(
@@ -69,27 +71,26 @@ export default function AdminPendingPage() {
             const rateJson = await rateRes.json();
             baseRate = rateJson?.data?.conversion_rates?.NGN ?? 1;
           }
-        } catch {
+        } catch (err) {
+          console.error("Failed to fetch exchange rate:", err);
           baseRate = 1;
         }
         setExchangeRate(baseRate);
 
-
- 
         // Calculate USD and NGN amounts
         const adjustedTransactions = pending.map(tx => {
-  
           const coinPriceUsd = tx.coinPriceUsd ?? 0;
           const dollarAmount = tx.type === "sell" ? tx.coinAmount * coinPriceUsd : tx.amount;
-  const adjustedRate = tx.type === "sell" ? baseRate - 70 : baseRate + 70;
-  const nairaAmount = dollarAmount * adjustedRate;
-          // console.log(`Transaction ${tx.txid} (${tx.type}): coin=${tx.coin}, coinAmount=${tx.coinAmount}, coinPriceUsd=${coinPriceUsd}, dollarAmount=${dollarAmount}, nairaAmount=${nairaAmount}, baseRate=${baseRate}`);
-           console.log(
-          `Transaction ${tx.txid} (${tx.type.toUpperCase()}):`,
-          `coin=${tx.coin.toUpperCase()}, coinAmount=${tx.coinAmount},`,
-          `coinPriceUsd=${coinPriceUsd} => dollarAmount=${dollarAmount.toFixed(2)},`,
-          `dollarAmount * baseRate(${baseRate}) => nairaAmount=${nairaAmount.toFixed(2)}`
-        );
+          const adjustedRate = tx.type === "sell" ? baseRate - 70 : baseRate + 70;
+          const nairaAmount = dollarAmount * adjustedRate;
+          
+          console.log(
+            `Transaction ${tx.txid} (${tx.type.toUpperCase()}):`,
+            `coin=${tx.coin.toUpperCase()}, coinAmount=${tx.coinAmount},`,
+            `coinPriceUsd=${coinPriceUsd} => dollarAmount=${dollarAmount.toFixed(2)},`,
+            `dollarAmount * baseRate(${baseRate}) => nairaAmount=${nairaAmount.toFixed(2)}`
+          );
+          
           return {
             ...tx,
             dollarAmount,
@@ -108,7 +109,8 @@ export default function AdminPendingPage() {
     };
 
     fetchTransactionsAndCoins();
-  }, [showToast]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty deps - only fetch once on mount
 
   const handleUpdateStatus = async (txid: string, status: string) => {
     setLoadingConfirm(txid);
@@ -149,9 +151,13 @@ export default function AdminPendingPage() {
         </div>
 
         {loading ? (
-          <p className="text-center py-12">Loading...</p>
+          <div className="flex flex-col items-center justify-center py-20">
+            <div className="animate-spin h-12 w-12 border-4 border-blue-500 border-t-transparent rounded-full mb-4"></div>
+            <p className="text-gray-400 text-lg">Loading pending transactions...</p>
+          </div>
         ) : transactions.length === 0 ? (
-          <div className="text-center py-12">
+          <div className="text-center py-12 bg-gray-800/20 rounded-xl border border-gray-700/30">
+            <div className="text-6xl mb-4">✅</div>
             <h3 className="text-xl font-medium mb-1 text-white">All clear!</h3>
             <p className="text-gray-400">No pending transactions</p>
           </div>
@@ -181,13 +187,12 @@ export default function AdminPendingPage() {
                     Naira Amount: {new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN" }).format(tx.nairaAmount)}
                   </p>
                   <p className="text-xs text-gray-400 mt-1 truncate">Transaction ID: {tx.txid}</p>
-                                    {/* <p className="text-xs text-gray-400 mt-1 truncate">priceusd: {tx.coinPriceUsd}</p> */}
                 </div>
 
                 <button
                   onClick={() => handleUpdateStatus(tx.txid, "confirmed")}
                   disabled={loadingConfirm === tx.txid}
-                  className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 py-3 rounded-lg"
+                  className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 >
                   {loadingConfirm === tx.txid ? (
                     <div className="animate-spin h-5 w-5 border-4 border-white border-t-transparent rounded-full" />
