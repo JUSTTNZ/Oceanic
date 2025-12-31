@@ -46,6 +46,7 @@ export default function AllTransactionsPage() {
   const hasFetched = useRef(false);
 
   useEffect(() => {
+    // Prevent multiple fetches in strict mode
     if (hasFetched.current) return;
     hasFetched.current = true;
 
@@ -53,6 +54,7 @@ export default function AllTransactionsPage() {
       setLoading(true);
 
       try {
+        // Fetch transactions
         const res = await apiClients.request(
           `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction/admin`,
           { method: "GET", credentials: "include" }
@@ -67,7 +69,7 @@ export default function AllTransactionsPage() {
         const json = await res.json();
         const txs: Transaction[] = Array.isArray(json.data) ? json.data : [];
 
-        // Fetch NGN exchange rate
+        // Fetch NGN exchange rate (now cached on backend!)
         let baseRate = 1;
         try {
           const rateRes = await apiClients.request(
@@ -95,7 +97,8 @@ export default function AllTransactionsPage() {
     };
 
     fetchData();
-  }, [showToast]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty deps - only fetch once on mount
 
   const copyToClipboard = (text: string, field: string) => {
     navigator.clipboard.writeText(text);

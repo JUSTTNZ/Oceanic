@@ -159,7 +159,8 @@ const [selectedCountry] = useState<Country>({
     };
   
     fetchData();
-  }, [selectedCountry]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
 
 const walletAddresses = selectedCoin
