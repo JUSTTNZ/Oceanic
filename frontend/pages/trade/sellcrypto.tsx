@@ -97,6 +97,8 @@ const [selectedCountry] = useState<Country>({
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const countryName = selectedCountry.name;
+  const countryCurrency = selectedCountry.currency;
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -161,7 +163,7 @@ const [selectedCountry] = useState<Country>({
   
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [countryName, countryCurrency]);
 
 
 const walletAddresses = selectedCoin
@@ -292,7 +294,7 @@ const handleSubmit = async () => {
     }
     return formatter.format(value);
   };
- const adjustedExchangeRate = exchangeRate - 70;
+ const adjustedExchangeRate = exchangeRate - 40;
 const modalMessages = {
   success: "Transaction successful! We’re just confirming the details, and you’ll receive your funds soon. Thanks for waiting!.",
 
@@ -310,7 +312,7 @@ const modalMessages = {
    }
  if (error){
    return(
-  <ErrorDisplay />
+  <ErrorDisplay message={error} />
    )
  }
 
@@ -383,7 +385,7 @@ const modalMessages = {
           />              
           <div className="pt-4 pb-2 px-4 bg-gray-700/20 rounded-lg border border-gray-600/30">
   <div className="flex items-center justify-between text-sm">
-    <span className="text-gray-300">Oceanic Rate:</span>
+    <span className="text-gray-300">Rate:</span>
     <span className="font-medium text-blue-400">
       $1 = {formatCurrency(adjustedExchangeRate)}
     </span>

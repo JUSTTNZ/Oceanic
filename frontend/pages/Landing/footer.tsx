@@ -7,7 +7,7 @@ export default function Footer() {
       <div className="container mx-auto px-6 flex flex-col items-center text-gray-100 text-sm space-y-4 lg:space-y-0 lg:flex-row lg:justify-between">
         
         <p className="text-center lg:text-left">
-          ©{new Date().getFullYear()} Oceanic. All Rights Reserved.
+          ©{new Date().getFullYear()} Oceanic Charts. All Rights Reserved.
         </p>
 
         <div className="flex flex-wrap justify-center gap-3 text-center">

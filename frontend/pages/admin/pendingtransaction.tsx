@@ -157,7 +157,7 @@ export default function AdminPendingPage() {
           </div>
         ) : transactions.length === 0 ? (
           <div className="text-center py-12 bg-gray-800/20 rounded-xl border border-gray-700/30">
-            <div className="text-6xl mb-4">✅</div>
+            <FaCheck className="text-6xl mb-4 text-green-400" />
             <h3 className="text-xl font-medium mb-1 text-white">All clear!</h3>
             <p className="text-gray-400">No pending transactions</p>
           </div>

@@ -3,6 +3,7 @@ import 'dotenv/config'
 import { Request, Response, NextFunction } from 'express'
 import { createClient, User as SupaUser } from '@supabase/supabase-js'
 import { User } from '../models/user.model.js'
+import { Session } from '../models/session.model.js'
 
 
 declare global {
@@ -10,6 +11,7 @@ declare global {
     interface Request {
       supabaseUser?: SupaUser;
       profile?: import('../models/user.model.js').UserDocument;
+      session?: import('../models/session.model.js').SessionDocument;
     }
   }
 }
@@ -18,6 +20,10 @@ const supabase = createClient(
   process.env.SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
+
+// Session timeout configuration
+const IDLE_TIMEOUT_MINUTES = parseInt(process.env.IDLE_TIMEOUT_MINUTES || '30')
+const ABSOLUTE_TIMEOUT_HOURS = parseInt(process.env.ABSOLUTE_TIMEOUT_HOURS || '8')
 
 export async function requireSupabaseUser(req: Request, res: Response, next: NextFunction) {
   // only log for API routes
@@ -39,7 +45,7 @@ export async function requireSupabaseUser(req: Request, res: Response, next: Nex
 
     req.supabaseUser = data.user
 
-    // (optional) try to load profile; don’t block init if not found
+    // (optional) try to load profile; don't block init if not found
     const profile = await User.findOne({ supabase_user_id: data.user.id })
     if (profile) {
       req.profile = profile
@@ -48,6 +54,51 @@ export async function requireSupabaseUser(req: Request, res: Response, next: Nex
       // console.log('⚠️ No Mongo profile found for this user')
       req.profile = undefined
     }
+
+    // Check/create session for activity tracking
+    let session = await Session.findOne({ userId: data.user.id })
+
+    if (!session) {
+      // Create new session
+      const expiresAt = new Date(Date.now() + ABSOLUTE_TIMEOUT_HOURS * 60 * 60 * 1000)
+      session = await Session.create({
+        userId: data.user.id,
+        lastActivity: new Date(),
+        expiresAt
+      })
+      if (isApi) console.log(`📝 New session created for user ${data.user.id}`)
+    } else {
+      // Check for absolute timeout
+      if (new Date() > session.expiresAt) {
+        // Session expired - delete it and return 401
+        await Session.deleteOne({ _id: session._id })
+        if (isApi) console.warn(`⏰ Absolute timeout for user ${data.user.id}`)
+        return res.status(401).json({
+          message: 'Session expired',
+          reason: 'absolute_timeout'
+        })
+      }
+
+      // Check for idle timeout
+      const idleTimeoutMs = IDLE_TIMEOUT_MINUTES * 60 * 1000
+      const timeSinceLastActivity = Date.now() - session.lastActivity.getTime()
+
+      if (timeSinceLastActivity > idleTimeoutMs) {
+        // Session idle timeout - delete it and return 401
+        await Session.deleteOne({ _id: session._id })
+        if (isApi) console.warn(`😴 Idle timeout for user ${data.user.id} (${Math.round(timeSinceLastActivity / 1000 / 60)} min inactive)`)
+        return res.status(401).json({
+          message: 'Session expired due to inactivity',
+          reason: 'idle_timeout'
+        })
+      }
+
+      // Update last activity timestamp
+      session.lastActivity = new Date()
+      await session.save()
+    }
+
+    req.session = session
 
     next()
   } catch (e) {

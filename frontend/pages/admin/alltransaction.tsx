@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { FaSort, FaSortUp, FaSortDown, FaCopy, FaCheck, FaFilter } from "react-icons/fa";
+import { FaSort, FaSortUp, FaSortDown, FaCopy, FaCheck, FaFilter, FaChartBar, FaArrowUp, FaArrowDown, FaMapMarkerAlt, FaUniversity, FaUser } from "react-icons/fa";
 import { useToast } from "../../hooks/toast";
 import { apiClients } from "@/lib/apiClient";
 
@@ -221,7 +221,7 @@ export default function AllTransactionsPage() {
           </div>
         ) : sortedTransactions.length === 0 ? (
           <div className="text-center py-20 bg-gray-800/20 rounded-xl border border-gray-700/30">
-            <div className="text-6xl mb-4">📊</div>
+            <FaChartBar className="text-6xl mb-4 text-gray-400 mx-auto" />
             <h3 className="text-xl font-medium text-gray-300 mb-2">No transactions found</h3>
             <p className="text-gray-500">Transactions will appear here once they are created.</p>
           </div>
@@ -308,11 +308,11 @@ export default function AllTransactionsPage() {
                         {/* Type */}
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
-                            tx.type === "buy" 
-                              ? "bg-green-500/20 text-green-400 border border-green-500/30" 
+                            tx.type === "buy"
+                              ? "bg-green-500/20 text-green-400 border border-green-500/30"
                               : "bg-orange-500/20 text-orange-400 border border-orange-500/30"
                           }`}>
-                            {tx.type === "buy" ? "🔼" : "🔽"} {tx.type.toUpperCase()}
+                            {tx.type === "buy" ? <FaArrowUp className="mr-1" /> : <FaArrowDown className="mr-1" />} {tx.type.toUpperCase()}
                           </span>
                         </td>
 
@@ -338,7 +338,9 @@ export default function AllTransactionsPage() {
                                 <CopyButton text={emailDisplay} field={`email-${tx.txid}`} />
                               </div>
                               {tx.country && (
-                                <div className="text-xs text-gray-500 mt-0.5">📍 {tx.country}</div>
+                                <div className="text-xs text-gray-500 mt-0.5 flex items-center">
+                                  <FaMapMarkerAlt className="mr-1" /> {tx.country}
+                                </div>
                               )}
                             </div>
                           </div>
@@ -384,10 +386,10 @@ export default function AllTransactionsPage() {
                           ) : (
                             <div className="space-y-1 text-sm">
                               <div className="flex items-center text-gray-300">
-                                🏦 {tx.bankName || "-"}
+                                <FaUniversity className="mr-1" /> {tx.bankName || "-"}
                               </div>
                               <div className="flex items-center text-gray-300">
-                                👤 {tx.accountName || "-"}
+                                <FaUser className="mr-1" /> {tx.accountName || "-"}
                                 {tx.accountName && <CopyButton text={tx.accountName} field={`acc-name-${tx.txid}`} />}
                               </div>
                               <div className="flex items-center">
