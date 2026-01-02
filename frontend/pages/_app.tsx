@@ -13,7 +13,6 @@ import { store, persistor } from "../store";
 import { Analytics } from "@vercel/analytics/react";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { useRouter } from "next/router";
 import { useEffect, useRef } from "react";
 
 import { Toaster } from "react-hot-toast";
@@ -66,7 +65,7 @@ if (typeof window !== "undefined") {
 }
 
 // AppContent component that includes session monitoring
-function AppContent({ Component, pageProps }: AppProps) {
+function AppContent({ Component, pageProps, router }: AppPropsWithRouter) {
   // Initialize session monitoring hooks
   useActivityTracker()
   useSessionMonitor()
@@ -219,7 +218,7 @@ export default function App({ Component, pageProps, router }: AppPropsWithRouter
                   },
                 }}
               />
-              <AppContent Component={Component} pageProps={pageProps} key={router.route} />
+              <AppContent Component={Component} pageProps={pageProps} router={router} key={router.route} />
               <Analytics />
             </motion.div>
           </AnimatePresence>
