@@ -96,9 +96,13 @@ import transactionRouter from '../src/routes/transaction.route.js'
 import notificationRouter from '../src/routes/notification.route.js'
 import bitgetRouter from '../src/routes/webhook.route.js'
 import apiRouter from '../src/routes/coinbankrate.js'
+import authRouter from '../src/routes/auth.route.js'
+import supportRouter from '../src/routes/support.route.js'
 import { errorHandler } from '../src/middlewares/error.middleware.js'
 
 app.get('/', (_, res) => res.send('Welcome to the backend!'))
+app.use('/api/v1/auth', authRouter)
+app.use('/api/v1/support', supportRouter)
 app.use('/api/v1/data', apiRouter)
 app.use('/api/v1/healthCheck', healthCheckRouter)
 app.use('/api/v1/users', userRouter)

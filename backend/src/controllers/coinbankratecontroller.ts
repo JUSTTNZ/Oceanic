@@ -73,7 +73,7 @@ const getExchangeRates = asyncHandler(async (req: Request, res: Response) => {
     // Fetch fresh data
     console.log("🔄 Fetching fresh exchange rates from API...");
     const response = await fetch(
-      "https://v6.exchangerate-api.com/v6/5b6cdce3d58b3bf1330f360e/latest/USD"
+      "https://v6.exchangerate-api.com/v6/eb41461df22b41f2597c7442/latest/USD"
     );
 
     if (!response.ok) {

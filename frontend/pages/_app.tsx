@@ -1,7 +1,12 @@
 // pages/_app.tsx
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
+import { Router } from "next/router";
 import { Inter } from "next/font/google";
+
+type AppPropsWithRouter = AppProps & {
+  router: Router;
+};
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { store, persistor } from "../store";
@@ -12,6 +17,10 @@ import { useRouter } from "next/router";
 import { useEffect, useRef } from "react";
 
 import { Toaster } from "react-hot-toast";
+import { useActivityTracker } from "@/hooks/useActivityTracker";
+import { useSessionMonitor } from "@/hooks/useSessionMonitor";
+import SessionTimeoutWarning from "@/components/SessionTimeoutWarning";
+import NetworkStatusBar from "@/components/NetworkStatusBar";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -56,8 +65,22 @@ if (typeof window !== "undefined") {
   }
 }
 
-export default function App({ Component, pageProps }: AppProps) {
-  const router = useRouter();
+// AppContent component that includes session monitoring
+function AppContent({ Component, pageProps }: AppProps) {
+  // Initialize session monitoring hooks
+  useActivityTracker()
+  useSessionMonitor()
+
+  return (
+    <>
+      <Component {...pageProps} />
+      <SessionTimeoutWarning />
+      <NetworkStatusBar />
+    </>
+  )
+}
+
+export default function App({ Component, pageProps, router }: AppPropsWithRouter) {
   const blockRedirect = useRef(false);
 
   useEffect(() => {
@@ -196,7 +219,7 @@ export default function App({ Component, pageProps }: AppProps) {
                   },
                 }}
               />
-              <Component {...pageProps} key={router.route} />
+              <AppContent Component={Component} pageProps={pageProps} key={router.route} />
               <Analytics />
             </motion.div>
           </AnimatePresence>

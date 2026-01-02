@@ -170,7 +170,7 @@ const getAllTransactions = asyncHandler(async (req, res) => {
       .populate('userId', 'email username fullname')
       .sort({ createdAt: sortOrder });
 
-    // Ensure coinAmount is always present in the response
+    
     const processedTransactions = transactions.map(tx => ({
       ...tx.toObject(),
       coinAmount: tx.coinAmount || 0

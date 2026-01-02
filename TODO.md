@@ -1,12 +1,13 @@
-# TODO: Replace Emojis with Icons in Admin Pages
+# Task: Implement Email Delays and Fast Confirmations
 
-## Tasks
-- [ ] Update imports in `frontend/pages/admin/alltransaction.tsx` to include FaChartBar, FaArrowUp, FaArrowDown, FaMapMarkerAlt, FaUniversity, FaUser
-- [ ] Replace 📊 with <FaChartBar /> in no transactions found section
-- [ ] Replace 🔼 with <FaArrowUp /> in buy type
-- [ ] Replace 🔽 with <FaArrowDown /> in sell type
-- [ ] Replace 📍 with <FaMapMarkerAlt /> in country location
-- [ ] Replace 🏦 with <FaUniversity /> in bank details
-- [ ] Replace 👤 with <FaUser /> in account name
-- [ ] Update imports in `frontend/pages/admin/pendingtransaction.tsx` to include FaCheckCircle
-- [ ] Replace ✅ with <FaCheckCircle /> in all clear section
+## Completed Tasks
+- [x] Delay user confirmation email in support by 5 minutes
+- [x] Verified that transaction confirmation emails are sent fast (synchronously)
+
+## Summary of Changes
+- Modified `backend/src/controllers/support.controller.ts` to delay the user confirmation email by 5 minutes using setTimeout.
+- Transaction confirmation emails are already implemented to send immediately upon admin confirmation.
+
+## Testing
+- Test support form submission to ensure confirmation email is delayed by 5 minutes.
+- Test admin transaction confirmation to ensure email is sent immediately.

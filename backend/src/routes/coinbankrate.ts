@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { requireSupabaseUser } from '../middlewares/supabaseAuth.js'
 import { 
   getExchangeRates, 
   getAllCountries, 
@@ -7,6 +8,9 @@ import {
 } from '../controllers/coinbankratecontroller.js';
 
 const router = Router();
+
+// Apply Supabase user verification to all routes
+router.use(requireSupabaseUser);
 
 // Exchange rates routes
 router.get('/exchange-rates', getExchangeRates);

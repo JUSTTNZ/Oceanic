@@ -25,6 +25,21 @@ export default function LoginPage() {
   const router = useRouter();
   const dispatch = useDispatch();
 
+  // Check for timeout messages from URL params
+  const timeoutReason = router.query.reason as string;
+  const timeoutMessage = getTimeoutMessage(timeoutReason);
+
+  function getTimeoutMessage(reason: string) {
+    switch (reason) {
+      case 'timeout':
+        return 'Your session expired due to inactivity. Please log in again.';
+      case 'expired':
+        return 'Your session has expired. Please log in again.';
+      default:
+        return null;
+    }
+  }
+
   const togglePasswordVisibility = () => setShowPassword(!showPassword);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -259,6 +274,16 @@ const handleGoogleLogin = async () => {
             <p className="text-xs text-gray-400">
               Please check that you are visiting the correct URL
             </p>
+
+            {/* Timeout message */}
+            {timeoutMessage && (
+              <div className="mt-3 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                <p className="text-sm text-yellow-400 text-center">
+                  {timeoutMessage}
+                </p>
+              </div>
+            )}
+
             <div className="inline-flex items-center px-3 py-1 mt-3 bg-gray-800/50 border border-gray-700 rounded-full">
               <svg
                 className="w-3 h-3 mr-2 text-blue-400"
