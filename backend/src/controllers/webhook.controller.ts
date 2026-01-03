@@ -480,19 +480,22 @@ export const getAllDeposits = async (req: Request, res: Response) => {
 
 // Get ALL recent deposits (last 24 hours) - NEW FUNCTION
 export const getAllRecentDeposits = async (req: Request, res: Response) => {
-  const { limit, coins } = req.query;
+  const { limit, coins, days } = req.query;
   
   try {
     const endTime = Date.now();
-    const startTime = endTime - (24 * 60 * 60 * 1000); // Last 24 hours
-    const parsedLimit = limit ? parseInt(limit as string) : 50;
+    // Changed from 24 hours to 90 days (3 months)
+    const daysBack = days ? parseInt(days as string) : 90; // Default 90 days instead of 1
+    const startTime = endTime - (daysBack * 24 * 60 * 60 * 1000); // Last 90 days
+    const parsedLimit = limit ? parseInt(limit as string) : 100; // Increased default limit
     
     // Define which coins to fetch
     const coinsToFetch = coins 
       ? (coins as string).split(',').map(c => c.trim().toLowerCase())
-      : ['btc', 'eth', 'usdt', 'usdc', 'bnb']; // Default common coins
+      : ['btc', 'eth', 'usdt', 'usdc', 'bnb', 'sol', 'xrp', 'ada', 'doge']; // Added more coins
     
-    console.log(`[GetAllRecentDeposits] Fetching recent deposits for coins: ${coinsToFetch.join(', ')}`);
+    console.log(`[GetAllRecentDeposits] Fetching deposits for coins: ${coinsToFetch.join(', ')}`);
+    console.log(`[GetAllRecentDeposits] Last ${daysBack} days: ${new Date(startTime).toISOString()} → ${new Date(endTime).toISOString()}`);
     
     const allDeposits: BitgetDeposit[] = [];
     const fetchErrors: string[] = [];
@@ -504,11 +507,11 @@ export const getAllRecentDeposits = async (req: Request, res: Response) => {
           coinSymbol,
           startTime,
           endTime,
-          Math.ceil(parsedLimit / coinsToFetch.length)
+          Math.ceil(parsedLimit / coinsToFetch.length) * 2 // Increased multiplier for longer period
         )) as BitgetDepositsResponse;
         
         if (depositsResponse.data && Array.isArray(depositsResponse.data)) {
-          console.log(`[GetAllRecentDeposits] Found ${depositsResponse.data.length} recent deposits for ${coinSymbol}`);
+          console.log(`[GetAllRecentDeposits] Found ${depositsResponse.data.length} deposits for ${coinSymbol}`);
           allDeposits.push(...depositsResponse.data);
         }
       } catch (error: any) {
@@ -524,13 +527,14 @@ export const getAllRecentDeposits = async (req: Request, res: Response) => {
     // Take only up to the limit
     const limitedDeposits = allDeposits.slice(0, parsedLimit);
     
-    console.log(`[GetAllRecentDeposits] Total recent deposits found: ${allDeposits.length} (returning ${limitedDeposits.length})`);
+    console.log(`[GetAllRecentDeposits] Total deposits found: ${allDeposits.length} (returning ${limitedDeposits.length})`);
     
     return res.json({
       success: true,
       timeRange: {
         startTime: new Date(startTime).toISOString(),
-        endTime: new Date(endTime).toISOString()
+        endTime: new Date(endTime).toISOString(),
+        days: daysBack
       },
       data: {
         data: limitedDeposits,
