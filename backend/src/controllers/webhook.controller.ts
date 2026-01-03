@@ -393,3 +393,258 @@ export const getRecentDeposits = async (req: Request, res: Response) => {
     });
   }
 };
+// Get ALL deposits across multiple coins (NEW FUNCTION - doesn't require coin)
+export const getAllDeposits = async (req: Request, res: Response) => {
+  const { startTime, endTime, limit, coins } = req.query;
+  
+  // Validate time parameters
+  if (!startTime || !endTime) {
+    return res.status(400).json({
+      success: false,
+      error: 'Missing required parameters: startTime and endTime (in milliseconds)'
+    });
+  }
+  
+  try {
+    const parsedStartTime = parseInt(startTime as string);
+    const parsedEndTime = parseInt(endTime as string);
+    const parsedLimit = limit ? parseInt(limit as string) : 50;
+    
+    // Define which coins to fetch
+    const coinsToFetch = coins 
+      ? (coins as string).split(',').map(c => c.trim().toLowerCase())
+      : ['btc', 'eth', 'usdt', 'usdc', 'bnb', 'sol', 'xrp']; // Default common coins
+    
+    console.log(`[GetAllDeposits] Fetching deposits for coins: ${coinsToFetch.join(', ')}`);
+    console.log(`[GetAllDeposits] Time range: ${new Date(parsedStartTime).toISOString()} → ${new Date(parsedEndTime).toISOString()}`);
+    
+    const allDeposits: BitgetDeposit[] = [];
+    const fetchErrors: string[] = [];
+    
+    // Fetch deposits for each coin
+    for (const coinSymbol of coinsToFetch) {
+      try {
+        const depositsResponse = (await fetchDeposits(
+          coinSymbol,
+          parsedStartTime,
+          parsedEndTime,
+          Math.ceil(parsedLimit / coinsToFetch.length) // Distribute limit
+        )) as BitgetDepositsResponse;
+        
+        if (depositsResponse.data && Array.isArray(depositsResponse.data)) {
+          console.log(`[GetAllDeposits] Found ${depositsResponse.data.length} deposits for ${coinSymbol}`);
+          allDeposits.push(...depositsResponse.data);
+        }
+      } catch (error: any) {
+        const errorMsg = `${coinSymbol}: ${error.message}`;
+        console.warn(`[GetAllDeposits] Failed to fetch ${coinSymbol}:`, error.message);
+        fetchErrors.push(errorMsg);
+      }
+    }
+    
+    // Sort by timestamp (newest first)
+    allDeposits.sort((a, b) => (b.cTime || 0) - (a.cTime || 0));
+    
+    // Take only up to the limit
+    const limitedDeposits = allDeposits.slice(0, parsedLimit);
+    
+    console.log(`[GetAllDeposits] Total deposits found: ${allDeposits.length} (returning ${limitedDeposits.length})`);
+    
+    return res.json({
+      success: true,
+      data: {
+        data: limitedDeposits,
+        metadata: {
+          totalDeposits: allDeposits.length,
+          returnedDeposits: limitedDeposits.length,
+          coinsFetched: coinsToFetch.length,
+          coinsWithErrors: fetchErrors.length,
+          timeRange: {
+            start: new Date(parsedStartTime).toISOString(),
+            end: new Date(parsedEndTime).toISOString()
+          }
+        },
+        errors: fetchErrors.length > 0 ? fetchErrors : undefined
+      }
+    });
+    
+  } catch (error: any) {
+    console.error("[GetAllDeposits] Error:", error);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to fetch all deposits',
+      details: error.message
+    });
+  }
+};
+
+// Get ALL recent deposits (last 24 hours) - NEW FUNCTION
+export const getAllRecentDeposits = async (req: Request, res: Response) => {
+  const { limit, coins } = req.query;
+  
+  try {
+    const endTime = Date.now();
+    const startTime = endTime - (24 * 60 * 60 * 1000); // Last 24 hours
+    const parsedLimit = limit ? parseInt(limit as string) : 50;
+    
+    // Define which coins to fetch
+    const coinsToFetch = coins 
+      ? (coins as string).split(',').map(c => c.trim().toLowerCase())
+      : ['btc', 'eth', 'usdt', 'usdc', 'bnb']; // Default common coins
+    
+    console.log(`[GetAllRecentDeposits] Fetching recent deposits for coins: ${coinsToFetch.join(', ')}`);
+    
+    const allDeposits: BitgetDeposit[] = [];
+    const fetchErrors: string[] = [];
+    
+    // Fetch deposits for each coin
+    for (const coinSymbol of coinsToFetch) {
+      try {
+        const depositsResponse = (await fetchDeposits(
+          coinSymbol,
+          startTime,
+          endTime,
+          Math.ceil(parsedLimit / coinsToFetch.length)
+        )) as BitgetDepositsResponse;
+        
+        if (depositsResponse.data && Array.isArray(depositsResponse.data)) {
+          console.log(`[GetAllRecentDeposits] Found ${depositsResponse.data.length} recent deposits for ${coinSymbol}`);
+          allDeposits.push(...depositsResponse.data);
+        }
+      } catch (error: any) {
+        const errorMsg = `${coinSymbol}: ${error.message}`;
+        console.warn(`[GetAllRecentDeposits] Failed to fetch ${coinSymbol}:`, error.message);
+        fetchErrors.push(errorMsg);
+      }
+    }
+    
+    // Sort by timestamp (newest first)
+    allDeposits.sort((a, b) => (b.cTime || 0) - (a.cTime || 0));
+    
+    // Take only up to the limit
+    const limitedDeposits = allDeposits.slice(0, parsedLimit);
+    
+    console.log(`[GetAllRecentDeposits] Total recent deposits found: ${allDeposits.length} (returning ${limitedDeposits.length})`);
+    
+    return res.json({
+      success: true,
+      timeRange: {
+        startTime: new Date(startTime).toISOString(),
+        endTime: new Date(endTime).toISOString()
+      },
+      data: {
+        data: limitedDeposits,
+        metadata: {
+          totalDeposits: allDeposits.length,
+          returnedDeposits: limitedDeposits.length,
+          coinsFetched: coinsToFetch.length,
+          coinsWithErrors: fetchErrors.length
+        },
+        errors: fetchErrors.length > 0 ? fetchErrors : undefined
+      }
+    });
+    
+  } catch (error: any) {
+    console.error("[GetAllRecentDeposits] Error:", error);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to fetch all recent deposits',
+      details: error.message
+    });
+  }
+};
+
+// Get ALL transaction IDs across all coins - NEW FUNCTION
+export const getAllTransactionIds = async (req: Request, res: Response) => {
+  const { startTime, endTime, limit, coins } = req.query;
+  
+  // Validate time parameters
+  if (!startTime || !endTime) {
+    return res.status(400).json({
+      success: false,
+      error: 'Missing required parameters: startTime and endTime (in milliseconds)'
+    });
+  }
+  
+  try {
+    const parsedStartTime = parseInt(startTime as string);
+    const parsedEndTime = parseInt(endTime as string);
+    const parsedLimit = limit ? parseInt(limit as string) : 100;
+    
+    // Define which coins to fetch
+    const coinsToFetch = coins 
+      ? (coins as string).split(',').map(c => c.trim().toLowerCase())
+      : ['btc', 'eth', 'usdt', 'usdc', 'bnb', 'sol', 'xrp', 'ada', 'doge'];
+    
+    console.log(`[GetAllTransactionIds] Fetching TXIDs for coins: ${coinsToFetch.join(', ')}`);
+    
+    const allTxids: Array<{txid: string, coin: string, amount: string, timestamp: number}> = [];
+    const fetchErrors: string[] = [];
+    
+    // Fetch deposits for each coin
+    for (const coinSymbol of coinsToFetch) {
+      try {
+        const depositsResponse = (await fetchDeposits(
+          coinSymbol,
+          parsedStartTime,
+          parsedEndTime,
+          Math.ceil(parsedLimit / coinsToFetch.length)
+        )) as BitgetDepositsResponse;
+        
+        if (depositsResponse.data && Array.isArray(depositsResponse.data)) {
+          // Extract TXIDs from deposits
+          depositsResponse.data.forEach(deposit => {
+            const txid = deposit.tradeId || deposit.orderId;
+            if (txid) {
+              allTxids.push({
+                txid,
+                coin: deposit.coin,
+                amount: deposit.size,
+                timestamp: deposit.cTime || 0
+              });
+            }
+          });
+        }
+      } catch (error: any) {
+        const errorMsg = `${coinSymbol}: ${error.message}`;
+        console.warn(`[GetAllTransactionIds] Failed to fetch ${coinSymbol}:`, error.message);
+        fetchErrors.push(errorMsg);
+      }
+    }
+    
+    // Sort by timestamp (newest first)
+    allTxids.sort((a, b) => b.timestamp - a.timestamp);
+    
+    // Take only up to the limit
+    const limitedTxids = allTxids.slice(0, parsedLimit);
+    
+    console.log(`[GetAllTransactionIds] Total TXIDs found: ${allTxids.length} (returning ${limitedTxids.length})`);
+    
+    return res.json({
+      success: true,
+      data: {
+        transactionIds: limitedTxids.map(t => t.txid), // Just the TXIDs
+        detailedTransactions: limitedTxids, // Full details
+        metadata: {
+          totalTransactions: allTxids.length,
+          returnedTransactions: limitedTxids.length,
+          coinsFetched: coinsToFetch.length,
+          coinsWithErrors: fetchErrors.length,
+          timeRange: {
+            start: new Date(parsedStartTime).toISOString(),
+            end: new Date(parsedEndTime).toISOString()
+          }
+        },
+        errors: fetchErrors.length > 0 ? fetchErrors : undefined
+      }
+    });
+    
+  } catch (error: any) {
+    console.error("[GetAllTransactionIds] Error:", error);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to fetch all transaction IDs',
+      details: error.message
+    });
+  }
+};
