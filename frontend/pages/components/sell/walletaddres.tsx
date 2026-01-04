@@ -41,10 +41,41 @@ export default function WalletAddressDisplay({
 }: WalletAddressDisplayProps) {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
-  const handleCopy = (address: string, index: number) => {
-    navigator.clipboard.writeText(address);
-    setCopiedIndex(index);
-    setTimeout(() => setCopiedIndex(null), 2000);
+  const handleCopy = async (address: string, index: number) => {
+    try {
+      // Check if clipboard API is available
+      if (!navigator.clipboard) {
+        // Fallback for older browsers
+        const textArea = document.createElement("textarea");
+        textArea.value = address;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        try {
+          document.execCommand('copy');
+          setCopiedIndex(index);
+          setTimeout(() => setCopiedIndex(null), 2000);
+        } catch (err) {
+          console.error('Fallback copy failed:', err);
+          alert('Copy failed. Please copy manually.');
+        }
+        
+        document.body.removeChild(textArea);
+        return;
+      }
+
+      // Modern clipboard API
+      await navigator.clipboard.writeText(address);
+      setCopiedIndex(index);
+      setTimeout(() => setCopiedIndex(null), 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+      // Show user-friendly error
+      alert('Failed to copy. Please copy the address manually.');
+    }
   };
 
   if (!selectedCoin || walletAddresses.length === 0) return null;
@@ -90,8 +121,10 @@ export default function WalletAddressDisplay({
             </div>
             <button 
               onClick={() => handleCopy(addr.address, index)}
-              className="ml-2 p-1 rounded-md hover:bg-gray-800 transition-colors"
+              className="ml-2 p-1 rounded-md hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={status !== 'pending'}
+              type="button"
+              aria-label={copiedIndex === index ? "Copied!" : "Copy address"}
             >
               {copiedIndex === index ? (
                 <CheckIcon className="h-4 w-4 text-green-500" />
