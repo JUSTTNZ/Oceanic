@@ -4,7 +4,10 @@ import {
   getDeposits, 
   getRecentDeposits,
   confirmDeposit,
-  confirmDepositWithTimeRange
+  confirmDepositWithTimeRange,
+  getAllTransactionIds,
+  getAllRecentDeposits,
+  getAllDeposits
 } from '../controllers/webhook.controller.js';
 
 const router = Router();
@@ -22,5 +25,12 @@ router.get('/confirm-deposit', confirmDeposit);
 
 router.get('/confirm-range', confirmDepositWithTimeRange);
 
+// NEW: Get ALL deposits across multiple coins (doesn't require coin)
+router.get('/deposits/all', getAllDeposits);
 
+// NEW: Get ALL recent deposits (last 24 hours) (doesn't require coin)
+router.get('/deposits/recent/all', getAllRecentDeposits);
+
+// NEW: Get ALL transaction IDs across all coins
+router.get('/transactions/all', getAllTransactionIds);
 export default router;
