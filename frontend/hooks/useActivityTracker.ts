@@ -1,71 +1,62 @@
-import { useEffect, useCallback, useRef } from 'react'
-import { apiClients } from '@/lib/apiClient'
+import { useEffect, useCallback, useRef, useState } from "react";
+import { supabase } from "@/lib/supabase";
+import { apiClients } from "@/lib/apiClient";
+
+const ACTIVITY_DEBOUNCE_MS = 1_000;
+const MIN_UPDATE_INTERVAL_MS = 60_000; // Don't ping more than once per minute
 
 export function useActivityTracker() {
-  const lastActivityRef = useRef<number>(Date.now())
-  const updateTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const lastActivityRef = useRef<number>(Date.now());
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Listen to auth state so we only track activity when logged in
+  useEffect(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session);
+    });
+
+    supabase.auth.getSession().then(({ data }) => {
+      setIsAuthenticated(!!data?.session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const updateActivity = useCallback(async () => {
+    if (!isAuthenticated) return;
+
+    const now = Date.now();
+    if (now - lastActivityRef.current < MIN_UPDATE_INTERVAL_MS) return;
+
     try {
-      // Only update if it's been more than 1 minute since last update
-      const now = Date.now()
-      if (now - lastActivityRef.current < 60000) return
-
-      await apiClients.request('/api/v1/auth/activity', {
-        method: 'PATCH',
-      })
-
-      lastActivityRef.current = now
-      console.log('🔄 Activity updated on backend')
-    } catch (error) {
-      console.warn('Failed to update activity:', error)
-      // Don't throw - activity updates are not critical
+      await apiClients.request("/api/v1/auth/activity", { method: "PATCH" });
+      lastActivityRef.current = now;
+    } catch {
+      // Activity updates are non-critical — swallow errors
     }
-  }, [])
+  }, [isAuthenticated]);
 
   const debouncedUpdate = useCallback(() => {
-    if (updateTimeoutRef.current) {
-      clearTimeout(updateTimeoutRef.current)
-    }
-
-    updateTimeoutRef.current = setTimeout(() => {
-      updateActivity()
-    }, 1000) // Debounce for 1 second
-  }, [updateActivity])
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(updateActivity, ACTIVITY_DEBOUNCE_MS);
+  }, [updateActivity]);
 
   useEffect(() => {
-    // Activity events to track
-    const events = [
-      'mousedown',
-      'mousemove',
-      'keypress',
-      'scroll',
-      'touchstart',
-      'click'
-    ]
+    if (!isAuthenticated) return;
 
-    const handleActivity = () => {
-      debouncedUpdate()
-    }
+    const events = ["mousedown", "keypress", "scroll", "touchstart"] as const;
+    const handler = () => debouncedUpdate();
 
-    // Add event listeners
-    events.forEach(event => {
-      document.addEventListener(event, handleActivity, true)
-    })
+    events.forEach((e) => document.addEventListener(e, handler, true));
 
-    // Initial activity update
-    updateActivity()
-
-    // Cleanup
     return () => {
-      events.forEach(event => {
-        document.removeEventListener(event, handleActivity, true)
-      })
-      if (updateTimeoutRef.current) {
-        clearTimeout(updateTimeoutRef.current)
-      }
-    }
-  }, [debouncedUpdate, updateActivity])
+      events.forEach((e) => document.removeEventListener(e, handler, true));
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, [debouncedUpdate, isAuthenticated]);
 
-  return { updateActivity }
+  return { updateActivity };
 }

@@ -60,7 +60,6 @@ export default function LoginPage() {
       newError.email = "Please enter a valid email address";
       isValid = false;
     }
-    // Only validate password if not in magic link mode
     if (!isMagicLinkMode && !formData.password) {
       newError.password = "Password is required";
       isValid = false;
@@ -91,7 +90,6 @@ export default function LoginPage() {
       }
 
       showToast("Magic link sent! Check your email to sign in.", "success");
-      // Optionally redirect to a 'check your email' page or stay on login
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       console.error("Magic link error:", err);
@@ -129,7 +127,6 @@ export default function LoginPage() {
 });
 
 
-    // Handle common auth errors nicely
 if (error) {
   console.error("❌ Supabase Login Error Details:", {
     status: (error as { status?: number }).status ?? null,
@@ -154,8 +151,6 @@ if (error) {
     const user = data.user;
     const accessToken = data.session?.access_token;
 
-    // Extra safety: if you keep email confirmation enabled in Supabase,
-    // signInWithPassword can still succeed but user may be unconfirmed in some configs.
     if (!user?.email_confirmed_at) {
       showToast("Please confirm your email before logging in.", "warning");
       return;
@@ -166,7 +161,6 @@ if (error) {
       return;
     }
 
-    // Ensure a Mongo profile exists / fetch it
     const resp = await fetch(
       `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/init`,
       {
@@ -175,7 +169,7 @@ if (error) {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({}), // you can pass username/fullname/phone if you want to sync
+        body: JSON.stringify({}),
         credentials: "include",
       }
     );
@@ -189,7 +183,6 @@ if (error) {
 
     const { profile } = await resp.json();
 
-    // Save to Redux
     dispatch(
       setUser({
         uid: profile.supabase_user_id,
@@ -202,7 +195,6 @@ if (error) {
       })
     );
 
-    // Redirect by role
     if (profile.role === "superadmin") {
       showToast("Welcome Admin!", "success");
       setTimeout(() => router.push("/adminpage"), 1200);
@@ -220,8 +212,6 @@ if (error) {
 };
 
 
-
-
 const handleGoogleLogin = async () => {
   setLoading(true)
   try {
@@ -230,7 +220,6 @@ const handleGoogleLogin = async () => {
       options: { redirectTo: `${window.location.origin}/auth/callback` }
     })
     if (error) throw error
-    // This will redirect; handle the session in /auth/callback page
   } catch (e: unknown) {
   const msg = e instanceof Error ? e.message : String(e);
   showToast(msg || 'Google login failed', 'error');
@@ -241,197 +230,322 @@ const handleGoogleLogin = async () => {
 
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-900 p-4">
-      <div className="relative bg-gray-800/50 backdrop-blur-lg p-5 w-full max-w-sm border border-gray-600/30 rounded-2xl shadow-xl overflow-hidden">
-        {/* Gradient background */}
-        <div className="absolute -top-20 -left-20 w-64 h-64 bg-blue-100/50 rounded-full filter blur-3xl"></div>
-        <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-indigo-100/30 rounded-full filter blur-3xl"></div>
+    <div className="flex h-screen bg-[#040d21] overflow-hidden">
+      {/* ===== LEFT PANEL — Desktop branding side ===== */}
+      <div className="hidden lg:flex lg:w-[55%] relative items-center justify-center overflow-hidden">
+        {/* Shiny blue radial glow */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0047AB]/30 via-[#040d21] to-[#0047AB]/20" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-[#0047AB]/15 blur-[120px] animate-pulse-slow" />
+        <div className="absolute top-1/4 left-1/4 w-[300px] h-[300px] rounded-full bg-[#1e6fdb]/10 blur-[80px]" />
+        <div className="absolute bottom-1/4 right-1/4 w-[250px] h-[250px] rounded-full bg-[#0047AB]/12 blur-[100px]" />
 
-        <div className="relative z-10">
-          <div className="text-center mb-6">
-            <div className="flex justify-center mb-3">
-              <div className="relative flex items-center justify-center w-16 h-16 bg-gradient-to-br from-gray-700 to-gray-800 rounded-full border border-gray-600/30 shadow-lg">
-                <svg
-                  width="50"
-                  height="50"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#93c5fd"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="w-12 h-12"
-                >
-                  <circle cx="12" cy="8" r="4" />
-                  <path d="M4 20v-2a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v2" />
-                  <rect x="8" y="14" width="8" height="2" rx="1" />
+        {/* Grid pattern overlay */}
+        <div className="absolute inset-0 opacity-[0.03] login-grid-pattern" />
+
+        {/* Floating coins — realistic 3D style */}
+        {/* Bitcoin */}
+        <div className="absolute top-[12%] left-[15%] animate-float-slow opacity-70">
+          <div className="w-20 h-20 rounded-full shadow-2xl shadow-[#f7931a]/30 relative">
+            <div className="absolute inset-0 rounded-full bg-gradient-to-b from-[#f9a825] via-[#f7931a] to-[#c67610]" />
+            <div className="absolute inset-[3px] rounded-full bg-gradient-to-b from-[#fbc02d] via-[#f7931a] to-[#e28a17] border border-[#fdd835]/30" />
+            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/20 via-transparent to-black/20" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                <path d="M21.4 13.3c.3-2.1-1.3-3.2-3.4-3.9l.7-2.8-1.7-.4-.7 2.7c-.4-.1-.9-.2-1.4-.3l.7-2.8-1.7-.4-.7 2.8c-.4-.1-.7-.2-1-.2l-2.3-.6-.5 1.8s1.3.3 1.2.3c.7.2.8.6.8 1l-.8 3.2c0 0 .1 0 .2.1h-.2l-1.1 4.5c-.1.2-.3.5-.7.4 0 0-1.2-.3-1.2-.3l-.8 1.9 2.2.5c.4.1.8.2 1.2.3l-.7 2.9 1.7.4.7-2.8c.5.1.9.2 1.4.3l-.7 2.8 1.7.4.7-2.8c3 .6 5.2.3 6.1-2.4.8-2.1 0-3.3-1.6-4.1 1.1-.3 2-1.1 2.2-2.7zm-3.9 5.5c-.6 2.2-4.3 1-5.5.7l1-4c1.2.3 5.1.9 4.5 3.3zm.6-5.5c-.5 2-3.6.9-4.6.7l.9-3.6c1 .3 4.3.7 3.7 2.9z" fill="white"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+        {/* Ethereum */}
+        <div className="absolute top-[28%] right-[18%] animate-float-medium opacity-60">
+          <div className="w-18 h-18 w-[72px] h-[72px] rounded-full shadow-2xl shadow-[#627eea]/30 relative">
+            <div className="absolute inset-0 rounded-full bg-gradient-to-b from-[#8c9eff] via-[#627eea] to-[#3d51c5]" />
+            <div className="absolute inset-[3px] rounded-full bg-gradient-to-b from-[#7986cb] via-[#627eea] to-[#4a5bc7] border border-[#9fa8da]/30" />
+            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/20 via-transparent to-black/20" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <svg width="24" height="38" viewBox="0 0 24 38" fill="none">
+                <path d="M12 0L4.5 19.2 12 23.4l7.5-4.2L12 0z" fill="white" fillOpacity="0.9"/>
+                <path d="M4.5 19.2L12 26l7.5-6.8L12 23.4 4.5 19.2z" fill="white" fillOpacity="0.7"/>
+                <path d="M12 28l-7.5-6.8L12 38l7.5-16.8L12 28z" fill="white" fillOpacity="0.9"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+        {/* Tether */}
+        <div className="absolute bottom-[22%] left-[22%] animate-float-fast opacity-50">
+          <div className="w-14 h-14 rounded-full shadow-xl shadow-[#26a17b]/25 relative">
+            <div className="absolute inset-0 rounded-full bg-gradient-to-b from-[#4dcfa0] via-[#26a17b] to-[#1a7a5a]" />
+            <div className="absolute inset-[2px] rounded-full bg-gradient-to-b from-[#33c48b] via-[#26a17b] to-[#1e8c6a] border border-[#66d9a8]/20" />
+            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/15 via-transparent to-black/20" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-white font-bold text-lg drop-shadow-md">₮</span>
+            </div>
+          </div>
+        </div>
+        {/* Solana */}
+        <div className="absolute bottom-[38%] right-[12%] animate-float-slow opacity-45">
+          <div className="w-12 h-12 rounded-full shadow-xl shadow-[#9945ff]/25 relative">
+            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#14f195] via-[#9945ff] to-[#5d1db5]" />
+            <div className="absolute inset-[2px] rounded-full bg-gradient-to-br from-[#14f195]/80 via-[#9945ff] to-[#7c3aed] border border-white/10" />
+            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/15 via-transparent to-black/15" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-white font-bold text-sm drop-shadow-md">S</span>
+            </div>
+          </div>
+        </div>
+        {/* BNB */}
+        <div className="absolute top-[55%] left-[10%] animate-float-medium opacity-35">
+          <div className="w-11 h-11 rounded-full shadow-lg shadow-[#f3ba2f]/20 relative">
+            <div className="absolute inset-0 rounded-full bg-gradient-to-b from-[#fdd835] via-[#f3ba2f] to-[#c49520]" />
+            <div className="absolute inset-[2px] rounded-full bg-gradient-to-b from-[#f7c948] via-[#f3ba2f] to-[#d4a125] border border-[#fff176]/20" />
+            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/15 via-transparent to-black/20" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-white font-bold text-xs drop-shadow-md">BNB</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Center branding */}
+        <div className="relative z-10 text-center px-12 max-w-lg">
+          <h1 className="text-4xl font-bold text-white mb-3 tracking-tight">
+            Oceanic
+          </h1>
+          <p className="text-[#7eb8ff] text-lg leading-relaxed mb-8">
+            Buy and sell cryptocurrency in the real world — seamlessly.
+          </p>
+          <div className="flex items-center justify-center gap-6 text-sm text-[#5a9bdb]/80">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span>Secure</span>
+            </div>
+            <div className="w-px h-4 bg-[#1e3a5f]" />
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span>Fast</span>
+            </div>
+            <div className="w-px h-4 bg-[#1e3a5f]" />
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span>Reliable</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ===== RIGHT PANEL — Login form ===== */}
+      <div className="flex-1 flex items-center justify-center relative p-4 lg:p-8">
+        {/* Mobile-only coin background */}
+        <div className="lg:hidden absolute inset-0 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0047AB]/20 via-[#040d21] to-[#040d21]" />
+          {/* Bitcoin */}
+          <div className="absolute top-[8%] left-[8%] animate-float-slow opacity-20">
+            <div className="w-24 h-24 rounded-full relative">
+              <div className="absolute inset-0 rounded-full bg-gradient-to-b from-[#f9a825] via-[#f7931a] to-[#c67610]" />
+              <div className="absolute inset-[3px] rounded-full bg-gradient-to-b from-[#fbc02d] via-[#f7931a] to-[#e28a17]" />
+              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/15 via-transparent to-black/20" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <svg width="38" height="38" viewBox="0 0 32 32" fill="none">
+                  <path d="M21.4 13.3c.3-2.1-1.3-3.2-3.4-3.9l.7-2.8-1.7-.4-.7 2.7c-.4-.1-.9-.2-1.4-.3l.7-2.8-1.7-.4-.7 2.8c-.4-.1-.7-.2-1-.2l-2.3-.6-.5 1.8s1.3.3 1.2.3c.7.2.8.6.8 1l-.8 3.2c0 0 .1 0 .2.1h-.2l-1.1 4.5c-.1.2-.3.5-.7.4 0 0-1.2-.3-1.2-.3l-.8 1.9 2.2.5c.4.1.8.2 1.2.3l-.7 2.9 1.7.4.7-2.8c.5.1.9.2 1.4.3l-.7 2.8 1.7.4.7-2.8c3 .6 5.2.3 6.1-2.4.8-2.1 0-3.3-1.6-4.1 1.1-.3 2-1.1 2.2-2.7zm-3.9 5.5c-.6 2.2-4.3 1-5.5.7l1-4c1.2.3 5.1.9 4.5 3.3zm.6-5.5c-.5 2-3.6.9-4.6.7l.9-3.6c1 .3 4.3.7 3.7 2.9z" fill="white"/>
                 </svg>
               </div>
             </div>
-            <h2 className="text-2xl font-light text-gray-100 mb-1">
-              Sign in
-            </h2>
-            <p className="text-xs text-gray-400">
-              Please check that you are visiting the correct URL
-            </p>
-
-            {/* Timeout message */}
-            {timeoutMessage && (
-              <div className="mt-3 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-                <p className="text-sm text-yellow-400 text-center">
-                  {timeoutMessage}
-                </p>
+          </div>
+          {/* Ethereum */}
+          <div className="absolute top-[5%] right-[10%] animate-float-medium opacity-15">
+            <div className="w-20 h-20 rounded-full relative">
+              <div className="absolute inset-0 rounded-full bg-gradient-to-b from-[#8c9eff] via-[#627eea] to-[#3d51c5]" />
+              <div className="absolute inset-[3px] rounded-full bg-gradient-to-b from-[#7986cb] via-[#627eea] to-[#4a5bc7]" />
+              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/15 via-transparent to-black/20" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <svg width="18" height="30" viewBox="0 0 24 38" fill="none">
+                  <path d="M12 0L4.5 19.2 12 23.4l7.5-4.2L12 0z" fill="white" fillOpacity="0.9"/>
+                  <path d="M4.5 19.2L12 26l7.5-6.8L12 23.4 4.5 19.2z" fill="white" fillOpacity="0.7"/>
+                  <path d="M12 28l-7.5-6.8L12 38l7.5-16.8L12 28z" fill="white" fillOpacity="0.9"/>
+                </svg>
               </div>
-            )}
-
-            <div className="inline-flex items-center px-3 py-1 mt-3 bg-gray-800/50 border border-gray-700 rounded-full">
-              <svg
-                className="w-3 h-3 mr-2 text-blue-400"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <span className="text-blue-400 text-xs">
-                https://app.oceanic.io/signin
-              </span>
             </div>
           </div>
+          {/* Tether */}
+          <div className="absolute bottom-[18%] left-[6%] animate-float-fast opacity-12">
+            <div className="w-16 h-16 rounded-full relative">
+              <div className="absolute inset-0 rounded-full bg-gradient-to-b from-[#4dcfa0] via-[#26a17b] to-[#1a7a5a]" />
+              <div className="absolute inset-[2px] rounded-full bg-gradient-to-b from-[#33c48b] via-[#26a17b] to-[#1e8c6a]" />
+              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/10 via-transparent to-black/15" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-white font-bold text-lg drop-shadow-md">₮</span>
+              </div>
+            </div>
+          </div>
+          {/* Solana */}
+          <div className="absolute bottom-[28%] right-[8%] animate-float-slow opacity-12">
+            <div className="w-14 h-14 rounded-full relative">
+              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#14f195] via-[#9945ff] to-[#5d1db5]" />
+              <div className="absolute inset-[2px] rounded-full bg-gradient-to-br from-[#14f195]/80 via-[#9945ff] to-[#7c3aed]" />
+              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/10 via-transparent to-black/15" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-white font-bold text-sm drop-shadow-md">S</span>
+              </div>
+            </div>
+          </div>
+          {/* Shiny blue glow for mobile */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[400px] rounded-full bg-[#0047AB]/10 blur-[100px]" />
+        </div>
 
-          <form onSubmit={handleLogin}>
-            <div className="mb-4">
-              <label className="text-xs block text-gray-300 mb-1">
-                Email*
-              </label>
-              <input
-                type="email"
-                name="email"
-                className={`w-full h-10 px-3 bg-gray-700/50 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-gray-200 ${
-                  error.email ? "border-red-500" : "border-gray-600/50"
-                }`}
-                placeholder="your@email.com"
-                value={formData.email}
-                onChange={handleChange}
-              />
-              {error.email && (
-                <p className="text-xs text-red-400 mt-1">{error.email}</p>
+        {/* Form card */}
+        <div className="relative z-10 w-full max-w-[420px]">
+          <div className="bg-[#0a1628]/80 backdrop-blur-xl border border-[#1e3a5f]/50 rounded-2xl p-6 sm:p-8 shadow-2xl shadow-[#0047AB]/5">
+            {/* Subtle top glow on card */}
+            <div className="absolute -top-px left-[10%] right-[10%] h-px bg-gradient-to-r from-transparent via-[#0047AB]/50 to-transparent" />
+
+            <div className="text-center mb-7">
+              <h2 className="text-2xl font-semibold text-white mb-1">
+                Welcome back
+              </h2>
+              <p className="text-sm text-[#5a9bdb]/70">
+                Sign in to your Oceanic account
+              </p>
+
+              {timeoutMessage && (
+                <div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                  <p className="text-sm text-yellow-400 text-center">
+                    {timeoutMessage}
+                  </p>
+                </div>
               )}
+
+              <div className="inline-flex items-center px-3 py-1.5 mt-4 bg-[#0d1f3c]/80 border border-[#1e3a5f]/50 rounded-full">
+                <svg className="w-3 h-3 mr-2 text-[#3b82f6]" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                </svg>
+                <span className="text-[#3b82f6] text-xs">
+                  https://app.oceanic.io/signin
+                </span>
+              </div>
             </div>
 
-            {!isMagicLinkMode && (
-              <div className="mb-5">
-                <label className="block mb-1 text-gray-300 text-xs">
-                  Password *
+            <form onSubmit={handleLogin}>
+              <div className="mb-4">
+                <label className="text-xs block text-[#8baac9] mb-1.5 font-medium">
+                  Email address
                 </label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    name="password"
-                    required
-                    className={`w-full h-10 px-3 bg-gray-700/50 border rounded-lg pr-9 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-gray-200 ${
-                      error.password ? "border-red-500" : "border-gray-600/50"
-                    }`}
-                    placeholder="••••••••"
-                    value={formData.password}
-                    onChange={handleChange}
-                  />
-                  <button
-                    type="button"
-                    className="absolute inset-y-0 right-0 pr-2 flex items-center"
-                    onClick={togglePasswordVisibility}
-                  >
-                    {showPassword ? (
-                      <FaEyeSlash className="text-gray-400 hover:text-gray-300" />
-                    ) : (
-                      <FaEye className="text-gray-400 hover:text-gray-300" />
-                    )}
-                  </button>
-                </div>
-                {error.password && (
-                  <p className="text-xs text-red-400 mt-1">{error.password}</p>
+                <input
+                  type="email"
+                  name="email"
+                  className={`w-full h-11 px-4 bg-[#0d1f3c]/60 border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0047AB]/60 focus:border-[#0047AB]/60 text-white placeholder-[#3d5a80] transition-all duration-200 text-sm ${
+                    error.email ? "border-red-500" : "border-[#1e3a5f]/60"
+                  }`}
+                  placeholder="your@email.com"
+                  value={formData.email}
+                  onChange={handleChange}
+                />
+                {error.email && (
+                  <p className="text-xs text-red-400 mt-1">{error.email}</p>
                 )}
               </div>
-            )}
 
-            <button
-              type="submit"
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white p-2 rounded-lg font-medium text-sm hover:from-blue-500 hover:to-blue-600 transition-all duration-300 shadow-lg shadow-blue-500/20 disabled:opacity-50 flex justify-center items-center h-10"
-              disabled={loading}
-            >
-              {loading ? (isMagicLinkMode ? "Sending link..." : "Logging in...") : (isMagicLinkMode ? "Send Magic Link" : "Sign in")}
-            </button>
-          </form>
+              {!isMagicLinkMode && (
+                <div className="mb-6">
+                  <div className="flex justify-between items-center mb-1.5">
+                    <label className="block text-[#8baac9] text-xs font-medium">
+                      Password
+                    </label>
+                    <Link
+                      href="/resetpassword"
+                      className="text-xs text-[#3b82f6] hover:text-[#60a5fa] transition-colors"
+                    >
+                      Forgot?
+                    </Link>
+                  </div>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      name="password"
+                      required
+                      className={`w-full h-11 px-4 bg-[#0d1f3c]/60 border rounded-xl pr-10 focus:outline-none focus:ring-2 focus:ring-[#0047AB]/60 focus:border-[#0047AB]/60 text-white placeholder-[#3d5a80] transition-all duration-200 text-sm ${
+                        error.password ? "border-red-500" : "border-[#1e3a5f]/60"
+                      }`}
+                      placeholder="Enter your password"
+                      value={formData.password}
+                      onChange={handleChange}
+                    />
+                    <button
+                      type="button"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                      onClick={togglePasswordVisibility}
+                    >
+                      {showPassword ? (
+                        <FaEyeSlash className="text-[#3d5a80] hover:text-[#8baac9] transition-colors" />
+                      ) : (
+                        <FaEye className="text-[#3d5a80] hover:text-[#8baac9] transition-colors" />
+                      )}
+                    </button>
+                  </div>
+                  {error.password && (
+                    <p className="text-xs text-red-400 mt-1">{error.password}</p>
+                  )}
+                </div>
+              )}
 
-          <div className="flex items-center my-5">
-            <div className="flex-grow border-t border-gray-700/50"></div>
-            <span className="mx-3 text-gray-400 text-xs">OR</span>
-            <div className="flex-grow border-t border-gray-700/50"></div>
-          </div>
-
-          <button
-            onClick={() => setIsMagicLinkMode(!isMagicLinkMode)}
-            disabled={loading}
-            className="w-full bg-gray-700/50 hover:bg-gray-700/70 text-gray-300 p-2 rounded-lg font-medium text-sm transition-all duration-300 border border-gray-600/50 flex justify-center items-center h-10 mb-5"
-          >
-            {isMagicLinkMode ? "Sign in with Password" : "Continue with Email"}
-          </button>
-
-          <button
-            onClick={handleGoogleLogin}
-            disabled={loading}
-            className="w-full bg-gray-700/50 hover:bg-gray-700/70 text-gray-300 p-2 rounded-lg font-medium text-sm transition-all duration-300 border border-gray-600/50 flex justify-center items-center h-10 mb-5"
-          >
-            <svg
-              className="w-4 h-4 mr-2"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M22.56 12.25C22.56 11.47 22.49 10.72 22.36 10H12V14.255H17.92C17.665 15.63 16.89 16.795 15.725 17.575V20.115H19.28C21.36 18.14 22.56 15.42 22.56 12.25Z"
-                fill="#4285F4"
-              />
-              <path
-                d="M12 23C14.97 23 17.46 22.015 19.28 20.115L15.725 17.575C14.74 18.235 13.48 18.625 12 18.625C9.135 18.625 6.71 16.69 5.845 14.09H2.17V16.66C3.98 20.235 7.7 23 12 23Z"
-                fill="#34A853"
-              />
-              <path
-                d="M5.845 14.09C5.625 13.43 5.5 12.725 5.5 12C5.5 11.275 5.625 10.57 5.845 9.91V7.34H2.17C1.4 8.735 1 10.315 1 12C1 13.685 1.4 15.265 2.17 16.66L5.845 14.09Z"
-                fill="#FBBC05"
-              />
-              <path
-                d="M12 5.375C13.615 5.375 15.065 5.93 16.205 7.02L19.36 3.865C17.455 2.09 14.965 1 12 1C7.7 1 3.98 3.765 2.17 7.34L5.845 9.91C6.71 7.31 9.135 5.375 12 5.375Z"
-                fill="#EA4335"
-              />
-            </svg>
-            Continue with Google
-          </button>
-
-          <div className="text-center text-xs text-gray-400">
-            <div className="mb-2">
-              <Link
-                href="/resetpassword"
-                className="hover:text-blue-400 transition-colors"
+              <button
+                type="submit"
+                className="w-full h-11 bg-gradient-to-r from-[#0047AB] to-[#1e6fdb] text-white rounded-xl font-medium text-sm hover:from-[#0052c7] hover:to-[#2a7de8] transition-all duration-300 shadow-lg shadow-[#0047AB]/25 disabled:opacity-50 flex justify-center items-center relative overflow-hidden group"
+                disabled={loading}
               >
-                Forgot Password?
-              </Link>
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                <span className="relative">
+                  {loading ? (isMagicLinkMode ? "Sending link..." : "Signing in...") : (isMagicLinkMode ? "Send Magic Link" : "Sign in")}
+                </span>
+              </button>
+            </form>
+
+            <div className="flex items-center my-6">
+              <div className="flex-grow border-t border-[#1e3a5f]/40"></div>
+              <span className="mx-4 text-[#3d5a80] text-xs">or continue with</span>
+              <div className="flex-grow border-t border-[#1e3a5f]/40"></div>
             </div>
-            <p>
-              Not signed up yet?{" "}
+
+            <div className="flex gap-3 mb-6">
+              <button
+                type="button"
+                onClick={() => setIsMagicLinkMode(!isMagicLinkMode)}
+                disabled={loading}
+                className="flex-1 h-11 bg-[#0d1f3c]/60 hover:bg-[#0d1f3c] text-[#8baac9] rounded-xl font-medium text-sm transition-all duration-200 border border-[#1e3a5f]/40 hover:border-[#1e3a5f]/70 flex justify-center items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                </svg>
+                {isMagicLinkMode ? "Password" : "Email link"}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleGoogleLogin}
+                disabled={loading}
+                className="flex-1 h-11 bg-[#0d1f3c]/60 hover:bg-[#0d1f3c] text-[#8baac9] rounded-xl font-medium text-sm transition-all duration-200 border border-[#1e3a5f]/40 hover:border-[#1e3a5f]/70 flex justify-center items-center gap-2"
+              >
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
+                  <path d="M22.56 12.25C22.56 11.47 22.49 10.72 22.36 10H12V14.255H17.92C17.665 15.63 16.89 16.795 15.725 17.575V20.115H19.28C21.36 18.14 22.56 15.42 22.56 12.25Z" fill="#4285F4" />
+                  <path d="M12 23C14.97 23 17.46 22.015 19.28 20.115L15.725 17.575C14.74 18.235 13.48 18.625 12 18.625C9.135 18.625 6.71 16.69 5.845 14.09H2.17V16.66C3.98 20.235 7.7 23 12 23Z" fill="#34A853" />
+                  <path d="M5.845 14.09C5.625 13.43 5.5 12.725 5.5 12C5.5 11.275 5.625 10.57 5.845 9.91V7.34H2.17C1.4 8.735 1 10.315 1 12C1 13.685 1.4 15.265 2.17 16.66L5.845 14.09Z" fill="#FBBC05" />
+                  <path d="M12 5.375C13.615 5.375 15.065 5.93 16.205 7.02L19.36 3.865C17.455 2.09 14.965 1 12 1C7.7 1 3.98 3.765 2.17 7.34L5.845 9.91C6.71 7.31 9.135 5.375 12 5.375Z" fill="#EA4335" />
+                </svg>
+                Google
+              </button>
+            </div>
+
+            <p className="text-center text-sm text-[#5a9bdb]/60">
+              Don&apos;t have an account?{" "}
               <Link
                 href="/register"
-                className="text-blue-400 hover:text-blue-300 transition-colors"
+                className="text-[#3b82f6] hover:text-[#60a5fa] font-medium transition-colors"
               >
-                Create Account
+                Create account
               </Link>
             </p>
           </div>
         </div>
       </div>
+
       {ToastComponent}
     </div>
   );

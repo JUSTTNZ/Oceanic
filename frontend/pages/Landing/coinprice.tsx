@@ -3,9 +3,11 @@
 import Image from "next/image";
 import { useState } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import green from '../../public/Images/greentrend.png'
 import red from '../../public/Images/redtrend.png'
-interface Coin  {
+
+interface Coin {
   id: string;
   name: string;
   symbol: string;
@@ -14,7 +16,8 @@ interface Coin  {
   sparkline_in_7d: {
     price: number[];
   };
-};
+}
+
 interface CoinLiveProps {
   coins: Coin[];
 }
@@ -31,7 +34,6 @@ export default function CoinLive({ coins }: CoinLiveProps) {
     coin.symbol.toLowerCase().includes(search.toLowerCase())
   ) : [];
 
-  // Custom filtering based on selected category
   const categoryCoins = (() => {
     if (activeCategory === "Top Gainers") {
       return [...filteredCoins].sort((a, b) => {
@@ -47,123 +49,139 @@ export default function CoinLive({ coins }: CoinLiveProps) {
         return changeA - changeB;
       });
     }
-    // Simulate "Popular" based on coin ID or fallback to all coins
     return filteredCoins.slice(0, 50);
   })();
 
   const visibleCoins = showAll ? categoryCoins : categoryCoins.slice(0, 10);
 
   return (
-    <div className="p-4 bg-[#0f0c29]   text-white font-grotesk">
-      {/* Category Tabs */}
-      <div className="flex space-x-4 overflow-x-auto scrollbar-hide mb-4">
-        {categories.map((cat) => (
-          <button
-            key={cat}
-            onClick={() => setActiveCategory(cat)}
-            className={`pb-2 font-bold whitespace-nowrap ${
-              activeCategory === cat ? "border-b-2 border-[#0047AB] text-[#0047AB]" : "text-gray-400"
-            }`}
-          >
-            {cat}
-          </button>
-        ))}
-      </div>
+    <section className="py-14 sm:py-16 md:py-20 font-grotesk">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        {/* Section Header */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          viewport={{ once: true }}
+          className="text-center mb-8 sm:mb-10"
+        >
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-3">
+            Live Market Prices
+          </h2>
+          <p className="text-gray-400 text-sm sm:text-base md:text-lg max-w-xl mx-auto px-2">
+            Track real-time prices across 100+ cryptocurrencies
+          </p>
+        </motion.div>
 
-      {/* Search Bar */}
-      <div className="mb-4">
-        <input
-          type="text"
-          placeholder="Search Coin"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-[#1c1c3b]   border border-gray-600 px-3 py-2 rounded md:placeholder-gray-400 placeholder-gray-500 text-white  focus:outline-none"
-        />
-      </div>
-
-      {/* Desktop Table */}
-      <div className="hidden md:block">
-        <div className="grid grid-cols-7 py-3 border-b border-gray-700 font-semibold uppercase text-sm">
-          <div>No</div>
-          <div className="col-span-2">Name</div>
-          <div>Last Price</div>
-          <div>Change</div>
-          <div>Market Stats</div>
-          <div></div>
+        {/* Pill-style Category Tabs */}
+        <div className="flex justify-center mb-6 sm:mb-8">
+          <div className="inline-flex bg-white/5 border border-white/10 rounded-full p-1 gap-0.5 sm:gap-1">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setActiveCategory(cat)}
+                className={`px-3 sm:px-5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer whitespace-nowrap ${
+                  activeCategory === cat
+                    ? "bg-[#0047AB] text-white shadow-lg shadow-[#0047AB]/20"
+                    : "text-gray-400 hover:text-white hover:bg-white/5"
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {visibleCoins.map((coin, index) => {
-          const trendUp = (coin.sparkline_in_7d.price.at(-1) ?? 0) >= (coin.sparkline_in_7d.price[0] ?? 0);
-          const change = (((coin.sparkline_in_7d.price.at(-1) ?? 0) - (coin.sparkline_in_7d.price[0] ?? 0)) / (coin.sparkline_in_7d.price[0] ?? 1)) * 100;
+        {/* Search Bar */}
+        <div className="mb-5 sm:mb-6 max-w-sm sm:max-w-md mx-auto">
+          <input
+            type="text"
+            placeholder="Search coin..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full bg-white/5 border border-white/10 px-4 py-2.5 sm:py-3 rounded-xl placeholder-gray-500 text-white text-sm focus:outline-none focus:border-[#3b82f6]/50 transition-colors"
+          />
+        </div>
 
-          return (
-            <div key={coin.id} className="grid grid-cols-7 py-4 items-center border-b border-gray-700 text-sm">
-              <div>{index + 1}</div>
-              <div className="flex items-center space-x-2 col-span-2">
-                <Image src={coin.image} alt={coin.name} width={24} height={24} />
-                <span>{coin.name} ({coin.symbol.toUpperCase()})</span>
-              </div>
-              <div>${coin.current_price.toLocaleString()}</div>
-              <div className={trendUp ? "text-green-400" : "text-red-400"}>{change.toFixed(2)}%</div>
-              <div>
-                <Image
-                  src={trendUp ? green : red}
-                  alt="trend"
-                  width={60}
-                  height={20}
-                />
-              </div>
-              <div>
-                <Link href={`/coin/${coin.id}`}>
-                  <button className="bg-[#0047AB] text-white py-1 px-3 rounded hover:bg-blue-600">
-                    Trade
-                  </button>
-                </Link>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+        {/* Desktop Table - Glass Card */}
+        <div className="hidden md:block rounded-2xl bg-white/[0.03] border border-white/[0.08] overflow-hidden">
+          <div className="grid grid-cols-7 py-3.5 px-6 border-b border-white/[0.08] font-semibold uppercase text-xs text-gray-500 tracking-wider">
+            <div>#</div>
+            <div className="col-span-2">Name</div>
+            <div>Last Price</div>
+            <div>Change</div>
+            <div>Market Stats</div>
+            <div></div>
+          </div>
 
-      {/* Small Screen Card */}
-      <div className="block md:hidden space-y-3">
-        {visibleCoins.map((coin) => {
-          const trendUp = (coin.sparkline_in_7d.price.at(-1) ?? 0) >= (coin.sparkline_in_7d.price[0] ?? 0);
-          // Removed unused 'change' variable
+          {visibleCoins.map((coin, index) => {
+            const trendUp = (coin.sparkline_in_7d.price.at(-1) ?? 0) >= (coin.sparkline_in_7d.price[0] ?? 0);
+            const change = (((coin.sparkline_in_7d.price.at(-1) ?? 0) - (coin.sparkline_in_7d.price[0] ?? 0)) / (coin.sparkline_in_7d.price[0] ?? 1)) * 100;
 
-          return (
-            <div key={coin.id} className="flex justify-between items-center border border-gray-900 rounded-lg p-3 bg-[#1c1c3b] text-white">
-              <div className="flex items-center space-x-2">
-                <Image src={coin.image} alt={coin.name} width={30} height={30} />
+            return (
+              <div
+                key={coin.id}
+                className="grid grid-cols-7 py-3.5 px-6 items-center border-b border-white/5 text-sm hover:bg-white/[0.03] transition-colors"
+              >
+                <div className="text-gray-500">{index + 1}</div>
+                <div className="flex items-center space-x-3 col-span-2">
+                  <Image src={coin.image} alt={coin.name} width={28} height={28} className="rounded-full" />
+                  <span className="text-white font-medium">
+                    {coin.name} <span className="text-gray-500">({coin.symbol.toUpperCase()})</span>
+                  </span>
+                </div>
+                <div className="text-white">${coin.current_price.toLocaleString()}</div>
+                <div className={trendUp ? "text-green-400" : "text-red-400"}>{change.toFixed(2)}%</div>
                 <div>
-                  <div className="font-bold text-sm">{coin.symbol.toUpperCase()}</div>
-                  <div className="text-xs text-gray-500">{coin.name}</div>
+                  <Image src={trendUp ? green : red} alt="trend" width={60} height={20} />
+                </div>
+                <div>
+                  <Link href={`/coin/${coin.id}`}>
+                    <button className="bg-[#0047AB] hover:bg-[#3b82f6] text-white py-1.5 px-4 rounded-lg text-xs font-medium transition-colors cursor-pointer">
+                      Trade
+                    </button>
+                  </Link>
                 </div>
               </div>
+            );
+          })}
+        </div>
 
-              <div className="text-right text-xs flex flex-col items-end">
-                <div className="text-white font-semibold">USDT ${coin.current_price.toFixed(4)}</div>
-                <Image
-           src={trendUp ? green : red}
-                  alt="trend"
-                  width={50}
-                  height={15}
-                />
-              </div>
-            </div>
-          );
-        })}
-      </div>
+        {/* Mobile Cards */}
+        <div className="block md:hidden space-y-2.5">
+          {visibleCoins.map((coin) => {
+            const trendUp = (coin.sparkline_in_7d.price.at(-1) ?? 0) >= (coin.sparkline_in_7d.price[0] ?? 0);
 
-      {/* Toggle Button */}
-      <div className="mt-4 text-center">
-        <button
-          onClick={() => setShowAll(!showAll)}
-          className="text-[#0047AB] font-semibold hover:underline text-sm"
-        >
-          {showAll ? "Show Less" : "See All Coins →"}
-        </button>
+            return (
+              <Link key={coin.id} href={`/coin/${coin.id}`}>
+                <div className="flex justify-between items-center rounded-xl p-3.5 bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.07] transition-colors cursor-pointer">
+                  <div className="flex items-center space-x-3 min-w-0">
+                    <Image src={coin.image} alt={coin.name} width={30} height={30} className="rounded-full shrink-0" />
+                    <div className="min-w-0">
+                      <div className="font-semibold text-sm text-white">{coin.symbol.toUpperCase()}</div>
+                      <div className="text-xs text-gray-500 truncate">{coin.name}</div>
+                    </div>
+                  </div>
+                  <div className="text-right flex flex-col items-end gap-0.5 shrink-0 ml-3">
+                    <div className="text-white font-semibold text-sm">${coin.current_price.toLocaleString()}</div>
+                    <Image src={trendUp ? green : red} alt="trend" width={48} height={14} />
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+
+        {/* Toggle Button */}
+        <div className="mt-6 sm:mt-8 text-center">
+          <button
+            onClick={() => setShowAll(!showAll)}
+            className="text-[#3b82f6] hover:text-white font-semibold text-sm transition-colors cursor-pointer px-4 py-2 rounded-lg hover:bg-white/5"
+          >
+            {showAll ? "Show Less" : "See All Coins \u2192"}
+          </button>
+        </div>
       </div>
-    </div>
+    </section>
   );
 }

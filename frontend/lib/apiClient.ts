@@ -12,17 +12,25 @@ async function getAccessToken(): Promise<string | null> {
   return data?.session?.access_token ?? null;
 }
 
+// Track if a redirect is already in progress to prevent duplicate redirects
+let isRedirecting = false;
+
 export const apiClients = {
   async request(input: string, init: RequestInitLike = {}) {
-    // allow unauthenticated calls by passing { skipAuth: true }
     const headers = new Headers(init.headers || {});
+
     if (!init.skipAuth) {
       const token = await getAccessToken();
       if (token) {
         headers.set("Authorization", `Bearer ${token}`);
       } else {
-        // No token ->  throw so caller can route to /login
-        throw new Error("No access token");
+        // No token — return a synthetic 401 response instead of throwing.
+        // This lets callers handle it gracefully (e.g. session monitor
+        // simply stops polling) rather than crashing with an unhandled error.
+        return new Response(JSON.stringify({ error: "No access token" }), {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        });
       }
     }
 
@@ -38,21 +46,19 @@ export const apiClients = {
     });
 
     // Global 401 interceptor for session timeouts
-    if (response.status === 401) {
+    if (response.status === 401 && !isRedirecting) {
       try {
         const errorData = await response.clone().json();
         const reason = errorData?.reason;
 
-        if (reason === 'idle_timeout' || reason === 'absolute_timeout') {
-          console.warn(`🚪 Session timeout detected: ${reason}`);
-          // Sign out and redirect to login with reason
+        if (reason === "idle_timeout" || reason === "absolute_timeout") {
+          isRedirecting = true;
           await supabase.auth.signOut();
-          window.location.href = `/login?reason=${reason === 'idle_timeout' ? 'timeout' : 'expired'}`;
-          return response; // Return original response to prevent further processing
+          window.location.href = `/login?reason=${reason === "idle_timeout" ? "timeout" : "expired"}`;
+          return response;
         }
-      } catch (e) {
-        // If we can't parse the error, continue with normal flow
-        console.warn('Could not parse 401 error response:', e);
+      } catch {
+        // If we can't parse the error body, continue with normal flow
       }
     }
 

@@ -1,26 +1,29 @@
-import React from 'react'
-import { useSessionMonitor } from '@/hooks/useSessionMonitor'
+import React from "react";
+import type { SessionState } from "@/hooks/useSessionMonitor";
 
-export default function SessionTimeoutWarning() {
-  const { sessionState, stayLoggedIn } = useSessionMonitor()
+interface Props {
+  sessionState: SessionState;
+  stayLoggedIn: () => void;
+}
 
-  if (!sessionState.isWarning) return null
+export default function SessionTimeoutWarning({ sessionState, stayLoggedIn }: Props) {
+  if (!sessionState.isWarning) return null;
 
   const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${mins}:${secs.toString().padStart(2, '0')}`
-  }
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
 
   const getMessage = () => {
-    if (sessionState.reason === 'idle_timeout') {
-      return 'Your session will expire due to inactivity.'
+    if (sessionState.reason === "idle_timeout") {
+      return "Your session will expire due to inactivity.";
     }
-    if (sessionState.reason === 'absolute_timeout') {
-      return 'Your session has reached the maximum duration.'
+    if (sessionState.reason === "absolute_timeout") {
+      return "Your session has reached the maximum duration.";
     }
-    return 'Your session is about to expire.'
-  }
+    return "Your session is about to expire.";
+  };
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -45,16 +48,12 @@ export default function SessionTimeoutWarning() {
             <h3 className="text-xl font-semibold text-white mb-2">
               Session Timeout Warning
             </h3>
-            <p className="text-gray-300 mb-4">
-              {getMessage()}
-            </p>
+            <p className="text-gray-300 mb-4">{getMessage()}</p>
             <div className="bg-gray-700 rounded-lg p-4 mb-6">
               <div className="text-2xl font-mono font-bold text-yellow-400">
                 {formatTime(sessionState.countdown)}
               </div>
-              <div className="text-sm text-gray-400 mt-1">
-                Time remaining
-              </div>
+              <div className="text-sm text-gray-400 mt-1">Time remaining</div>
             </div>
           </div>
 
@@ -66,7 +65,7 @@ export default function SessionTimeoutWarning() {
               Stay Logged In
             </button>
             <button
-              onClick={() => window.location.href = '/login?reason=expired'}
+              onClick={() => (window.location.href = "/login?reason=expired")}
               className="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
             >
               Logout Now
@@ -75,5 +74,5 @@ export default function SessionTimeoutWarning() {
         </div>
       </div>
     </div>
-  )
+  );
 }
