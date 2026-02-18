@@ -1,6 +1,17 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { persistReducer, persistStore, createTransform } from "redux-persist";
-import storage from "redux-persist/lib/storage";
+import { persistReducer, persistStore, createTransform, FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER } from "redux-persist";
+import createWebStorage from "redux-persist/lib/storage/createWebStorage";
+
+// SSR-safe storage: returns a noop storage on the server
+const createNoopStorage = () => ({
+  getItem() { return Promise.resolve(null); },
+  setItem(_key, value) { return Promise.resolve(value); },
+  removeItem() { return Promise.resolve(); },
+});
+
+const storage = typeof window !== "undefined"
+  ? createWebStorage("local")
+  : createNoopStorage();
 
 // Set expiration time in milliseconds (1 hour)
 const EXPIRE_AFTER = 60 * 60 * 1000; // 1 hour = 3600000 ms
@@ -64,6 +75,12 @@ const persistedReducer = persistReducer(persistConfig, reducer);
 
 export const store = configureStore({
   reducer: persistedReducer,
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+      },
+    }),
 });
 
 export const persistor = persistStore(store);
