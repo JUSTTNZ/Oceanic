@@ -1,13 +1,50 @@
-import { useEffect, useCallback, useRef } from 'react'
+import { useEffect, useCallback, useRef, useState } from 'react'
+import { useRouter } from 'next/router'
+import { supabase } from '@/lib/supabase'
 import { apiClients } from '@/lib/apiClient'
 
+const PUBLIC_ROUTES = [
+  '/',
+  '/login',
+  '/register',
+  '/resetpassword',
+  '/auth/callback',
+  '/auth/reset',
+  '/Landing',
+]
+
+function isPublicRoute(pathname: string): boolean {
+  return PUBLIC_ROUTES.some(
+    (route) => pathname === route || pathname.startsWith(route + '/')
+  )
+}
+
 export function useActivityTracker() {
+  const router = useRouter()
   const lastActivityRef = useRef<number>(Date.now())
   const updateTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+
+  // Check auth state on mount and listen for changes
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data } = await supabase.auth.getSession()
+      setIsAuthenticated(!!data?.session)
+    }
+    checkAuth()
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
 
   const updateActivity = useCallback(async () => {
+    // Skip if not authenticated or on a public route
+    if (!isAuthenticated || isPublicRoute(router.pathname)) return
+
     try {
-      // Only update if it's been more than 1 minute since last update
       const now = Date.now()
       if (now - lastActivityRef.current < 60000) return
 
@@ -16,12 +53,10 @@ export function useActivityTracker() {
       })
 
       lastActivityRef.current = now
-      console.log('🔄 Activity updated on backend')
     } catch (error) {
       console.warn('Failed to update activity:', error)
-      // Don't throw - activity updates are not critical
     }
-  }, [])
+  }, [isAuthenticated, router.pathname])
 
   const debouncedUpdate = useCallback(() => {
     if (updateTimeoutRef.current) {
@@ -30,11 +65,13 @@ export function useActivityTracker() {
 
     updateTimeoutRef.current = setTimeout(() => {
       updateActivity()
-    }, 1000) // Debounce for 1 second
+    }, 1000)
   }, [updateActivity])
 
   useEffect(() => {
-    // Activity events to track
+    // Don't attach listeners if not authenticated or on public route
+    if (!isAuthenticated || isPublicRoute(router.pathname)) return
+
     const events = [
       'mousedown',
       'mousemove',
@@ -48,7 +85,6 @@ export function useActivityTracker() {
       debouncedUpdate()
     }
 
-    // Add event listeners
     events.forEach(event => {
       document.addEventListener(event, handleActivity, true)
     })
@@ -56,7 +92,6 @@ export function useActivityTracker() {
     // Initial activity update
     updateActivity()
 
-    // Cleanup
     return () => {
       events.forEach(event => {
         document.removeEventListener(event, handleActivity, true)
@@ -65,7 +100,7 @@ export function useActivityTracker() {
         clearTimeout(updateTimeoutRef.current)
       }
     }
-  }, [debouncedUpdate, updateActivity])
+  }, [debouncedUpdate, updateActivity, isAuthenticated, router.pathname])
 
   return { updateActivity }
 }

@@ -12,6 +12,22 @@ interface SessionState {
 const WARNING_TIME_MINUTES = 2
 const CHECK_INTERVAL_MS = 60000 // Check every 1 minute
 
+const PUBLIC_ROUTES = [
+  '/',
+  '/login',
+  '/register',
+  '/resetpassword',
+  '/auth/callback',
+  '/auth/reset',
+  '/Landing',
+]
+
+function isPublicRoute(pathname: string): boolean {
+  return PUBLIC_ROUTES.some(
+    (route) => pathname === route || pathname.startsWith(route + '/')
+  )
+}
+
 export function useSessionMonitor() {
   const router = useRouter()
   const [sessionState, setSessionState] = useState<SessionState>({
@@ -21,17 +37,20 @@ export function useSessionMonitor() {
   })
 
   const checkSession = useCallback(async () => {
-    try {
-      const { data: session } = await supabase.auth.getSession()
+    // Skip session checks on public routes
+    if (isPublicRoute(router.pathname)) return
 
-      if (!session?.session) {
-        // No session - redirect to login
-        console.log('🚪 No session found, redirecting to login')
+    try {
+      const { data: sessionData } = await supabase.auth.getSession()
+
+      if (!sessionData?.session) {
+        // No session on a protected route - redirect to login
+        console.log('No session found, redirecting to login')
         router.push('/login?reason=expired')
         return
       }
 
-      // Test API call to check if session is still valid
+      // Test API call to check if backend session is still valid
       const response = await apiClients.request('/api/v1/users/current', {
         method: 'GET'
       })
@@ -48,19 +67,16 @@ export function useSessionMonitor() {
     } catch (error: any) {
       console.warn('Session check failed:', error)
 
-      // Check if it's a timeout error
       if (error?.message?.includes('401') || error?.status === 401) {
         const reason = error?.reason || 'idle_timeout'
 
         if (reason === 'idle_timeout' || reason === 'absolute_timeout') {
-          // Start warning countdown
           setSessionState({
             isWarning: true,
             countdown: WARNING_TIME_MINUTES * 60,
             reason: reason as 'idle_timeout' | 'absolute_timeout'
           })
         } else {
-          // Other auth error - redirect immediately
           router.push('/login?reason=expired')
         }
       }
@@ -74,7 +90,6 @@ export function useSessionMonitor() {
     const interval = setInterval(() => {
       setSessionState(prev => {
         if (prev.countdown <= 1) {
-          // Countdown reached zero - logout
           supabase.auth.signOut()
           router.push('/login?reason=expired')
           return prev
@@ -89,16 +104,15 @@ export function useSessionMonitor() {
     return () => clearInterval(interval)
   }, [sessionState.isWarning, router])
 
-  // Session check effect
+  // Session check effect - only on protected routes
   useEffect(() => {
-    // Initial check
+    if (isPublicRoute(router.pathname)) return
+
     checkSession()
 
-    // Set up periodic checks
     const interval = setInterval(checkSession, CHECK_INTERVAL_MS)
-
     return () => clearInterval(interval)
-  }, [checkSession])
+  }, [checkSession, router.pathname])
 
   // Stay logged in function
   const stayLoggedIn = useCallback(async () => {
@@ -107,17 +121,15 @@ export function useSessionMonitor() {
         method: 'PATCH'
       })
 
-      // Reset warning state
       setSessionState({
         isWarning: false,
         countdown: WARNING_TIME_MINUTES * 60,
         reason: null
       })
 
-      console.log('✅ Stayed logged in, session refreshed')
+      console.log('Session refreshed successfully')
     } catch (error) {
       console.error('Failed to stay logged in:', error)
-      // If refresh fails, logout
       supabase.auth.signOut()
       router.push('/login?reason=expired')
     }
