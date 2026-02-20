@@ -56,10 +56,24 @@ export async function requireSupabaseUser(req: Request, res: Response, next: Nex
     }
 
     // Check/create session for activity tracking
+    // Supabase token is already validated above, so the user is authenticated.
+    // The MongoDB session is only for activity tracking — if it's missing or
+    // expired we simply create a fresh one instead of rejecting the request.
     let session = await Session.findOne({ userId: data.user.id })
 
-    if (!session) {
-      // Create new session
+    const needsNewSession =
+      !session ||
+      new Date() > session.expiresAt ||
+      (Date.now() - session.lastActivity.getTime()) > IDLE_TIMEOUT_MINUTES * 60 * 1000
+
+    if (needsNewSession) {
+      // Clean up stale session if one exists
+      if (session) {
+        await Session.deleteOne({ _id: session._id })
+        if (isApi) console.log(`♻️ Expired session cleaned up for user ${data.user.id}`)
+      }
+
+      // Create a fresh session
       const expiresAt = new Date(Date.now() + ABSOLUTE_TIMEOUT_HOURS * 60 * 60 * 1000)
       session = await Session.create({
         userId: data.user.id,
@@ -68,32 +82,7 @@ export async function requireSupabaseUser(req: Request, res: Response, next: Nex
       })
       if (isApi) console.log(`📝 New session created for user ${data.user.id}`)
     } else {
-      // Check for absolute timeout
-      if (new Date() > session.expiresAt) {
-        // Session expired - delete it and return 401
-        await Session.deleteOne({ _id: session._id })
-        if (isApi) console.warn(`⏰ Absolute timeout for user ${data.user.id}`)
-        return res.status(401).json({
-          message: 'Session expired',
-          reason: 'absolute_timeout'
-        })
-      }
-
-      // Check for idle timeout
-      const idleTimeoutMs = IDLE_TIMEOUT_MINUTES * 60 * 1000
-      const timeSinceLastActivity = Date.now() - session.lastActivity.getTime()
-
-      if (timeSinceLastActivity > idleTimeoutMs) {
-        // Session idle timeout - delete it and return 401
-        await Session.deleteOne({ _id: session._id })
-        if (isApi) console.warn(`😴 Idle timeout for user ${data.user.id} (${Math.round(timeSinceLastActivity / 1000 / 60)} min inactive)`)
-        return res.status(401).json({
-          message: 'Session expired due to inactivity',
-          reason: 'idle_timeout'
-        })
-      }
-
-      // Update last activity timestamp
+      // Session is still valid — update last activity
       session.lastActivity = new Date()
       await session.save()
     }
