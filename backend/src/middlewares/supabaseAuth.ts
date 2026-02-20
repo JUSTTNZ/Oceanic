@@ -83,11 +83,11 @@ export async function requireSupabaseUser(req: Request, res: Response, next: Nex
       if (isApi) console.log(`📝 New session created for user ${data.user.id}`)
     } else {
       // Session is still valid — update last activity
-      session.lastActivity = new Date()
-      await session.save()
+      session!.lastActivity = new Date()
+      await session!.save()
     }
 
-    req.session = session
+    req.session = session ?? undefined
 
     next()
   } catch (e) {
